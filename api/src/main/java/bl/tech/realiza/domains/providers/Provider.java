@@ -1,9 +1,13 @@
 package bl.tech.realiza.domains.providers;
 
+import bl.tech.realiza.domains.auditLogs.dashboard.DocumentStatusHistory;
 import bl.tech.realiza.domains.auditLogs.enterprise.AuditLogProvider;
+import bl.tech.realiza.domains.clients.Branch;
 import bl.tech.realiza.domains.services.FileDocument;
 import bl.tech.realiza.domains.services.ItemManagement;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
@@ -51,6 +55,10 @@ public abstract class Provider {
     @JsonIgnore
     @OneToMany(mappedBy = "idRecord", cascade = CascadeType.REMOVE)
     private List<AuditLogProvider> auditLogProviders;
+
+    @OneToMany(mappedBy = "provider", cascade = CascadeType.REMOVE)
+    @JsonBackReference
+    private List<DocumentStatusHistory> histories;
 
     @OneToOne
     private FileDocument logo;

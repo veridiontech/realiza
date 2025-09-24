@@ -2,10 +2,14 @@ package bl.tech.realiza.gateways.controllers.impl.dashboard;
 
 import bl.tech.realiza.gateways.controllers.interfaces.dashboard.DashboardController;
 import bl.tech.realiza.gateways.requests.dashboard.DashboardFiltersRequestDto;
+import bl.tech.realiza.gateways.requests.dashboard.history.DocumentHistoryRequest;
 import bl.tech.realiza.gateways.responses.dashboard.*;
+import bl.tech.realiza.gateways.responses.dashboard.history.DocumentStatusHistoryResponse;
 import bl.tech.realiza.services.dashboard.DashboardService;
+import bl.tech.realiza.usecases.interfaces.auditLogs.DocumentStatusHistoryService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -15,7 +19,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.YearMonth;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
@@ -24,6 +30,7 @@ import java.util.List;
 public class DashboardControllerImpl implements DashboardController {
 
     private final DashboardService dashboardService;
+    private final DocumentStatusHistoryService documentStatusHistoryService;
 
     @GetMapping("/home/{branchId}")
     @ResponseStatus(HttpStatus.OK)
@@ -87,5 +94,13 @@ public class DashboardControllerImpl implements DashboardController {
     @Override
     public ResponseEntity<DashboardFiltersResponse> getFiltersInfo(@PathVariable String clientId) {
         return ResponseEntity.ok(dashboardService.getFiltersInfo(clientId));
+    }
+
+    @PostMapping("/{id}/history")
+    @ResponseStatus(HttpStatus.OK)
+    @Operation(description = "Busca histórico de aderência, total de documentos e conformidade por mês")
+    @Override
+    public ResponseEntity<Map<YearMonth, DocumentStatusHistoryResponse>> getHistory(@PathVariable String id, @Valid @RequestBody DocumentHistoryRequest request) {
+        return ResponseEntity.ok(documentStatusHistoryService.findAllByDateAndId(id, request));
     }
 }

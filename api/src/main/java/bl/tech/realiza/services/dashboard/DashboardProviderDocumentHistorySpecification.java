@@ -1,8 +1,12 @@
 package bl.tech.realiza.services.dashboard;
 
+import bl.tech.realiza.domains.auditLogs.dashboard.DocumentStatusHistory;
 import bl.tech.realiza.domains.clients.Branch;
 import bl.tech.realiza.domains.clients.Client;
-import bl.tech.realiza.domains.contract.*;
+import bl.tech.realiza.domains.contract.ContractDocument;
+import bl.tech.realiza.domains.contract.ContractEmployee;
+import bl.tech.realiza.domains.contract.ContractProviderSubcontractor;
+import bl.tech.realiza.domains.contract.ContractProviderSupplier;
 import bl.tech.realiza.domains.documents.Document;
 import bl.tech.realiza.domains.documents.employee.DocumentEmployee;
 import bl.tech.realiza.domains.documents.matrix.DocumentMatrix;
@@ -25,11 +29,12 @@ import org.springframework.data.jpa.domain.Specification;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.YearMonth;
 import java.util.ArrayList;
 import java.util.List;
 
-public class DashboardProviderSpecification {
-    public static Specification<Provider> byClientId(String clientId) {
+public class DashboardProviderDocumentHistorySpecification {
+    public static Specification<DocumentStatusHistory> byClientId(String clientId) {
         return (root, query, criteriaBuilder) -> {
             if (clientId == null || clientId.isEmpty()) {
                 return criteriaBuilder.conjunction();
@@ -37,17 +42,21 @@ public class DashboardProviderSpecification {
             assert query != null;
             query.distinct(true);
 
-            Root<ProviderSupplier> supplierRoot = criteriaBuilder.treat(root, ProviderSupplier.class);
-            Root<ProviderSubcontractor> subcontractorRoot = criteriaBuilder.treat(root, ProviderSubcontractor.class);
+            Join<DocumentStatusHistory, Provider> providerJoin = root
+                    .join("provider", JoinType.LEFT);
 
-            Join<ProviderSupplier, ContractProviderSupplier> contractSupplierJoin = supplierRoot.join("contractsSupplier", JoinType.LEFT);
+            Join<ProviderSupplier, ContractProviderSupplier> contractSupplierJoin = criteriaBuilder
+                    .treat(providerJoin, ProviderSupplier.class)
+                    .join("contractsSupplier", JoinType.LEFT);
             Join<ContractProviderSupplier, Branch> branchSupplierJoin = contractSupplierJoin.join("branch", JoinType.LEFT);
             Join<Branch, Client> branchClientSupplierJoin = branchSupplierJoin.join("client", JoinType.LEFT);
 
             Predicate supplierClientPredicate = criteriaBuilder
                     .equal(branchClientSupplierJoin.get("idClient"), clientId);
 
-            Join<ProviderSubcontractor, ContractProviderSubcontractor> contractSubcontractorJoin = subcontractorRoot.join("contractsSubcontractor", JoinType.LEFT);
+            Join<ProviderSubcontractor, ContractProviderSubcontractor> contractSubcontractorJoin = criteriaBuilder
+                    .treat(providerJoin, ProviderSubcontractor.class)
+                    .join("contractsSubcontractor", JoinType.LEFT);
             Join<ContractProviderSubcontractor, ContractProviderSupplier> contractSubToSupplierJoin = contractSubcontractorJoin.join("contractProviderSupplier", JoinType.LEFT);
             Join<ContractProviderSupplier, Branch> branchSubcontractorJoin = contractSubToSupplierJoin.join("branch", JoinType.LEFT);
             Join<Branch, Client> branchClientSubcontractorJoin = branchSubcontractorJoin.join("client", JoinType.LEFT);
@@ -59,28 +68,30 @@ public class DashboardProviderSpecification {
         };
     }
 
-    public static Specification<Provider> byBranchIds(List<String> branchIds) {
+    public static Specification<DocumentStatusHistory> byBranchIds(List<String> branchIds) {
         return (root, query, criteriaBuilder) -> {
             if (branchIds == null || branchIds.isEmpty()) {
-                return criteriaBuilder.conjunction(); // Retorna uma condição "true" se a lista for vazia
+                return criteriaBuilder.conjunction();
             }
             assert query != null;
             query.distinct(true);
 
-            Root<ProviderSupplier> supplierRoot = criteriaBuilder.treat(root, ProviderSupplier.class);
-            Root<ProviderSubcontractor> subcontractorRoot = criteriaBuilder.treat(root, ProviderSubcontractor.class);
+            Join<DocumentStatusHistory, Provider> providerJoin = root
+                    .join("provider", JoinType.LEFT);
 
-            Join<ProviderSupplier, ContractProviderSupplier> contractSupplierJoin = supplierRoot.join("contractsSupplier", JoinType.LEFT);
+            Join<ProviderSupplier, ContractProviderSupplier> contractSupplierJoin = criteriaBuilder
+                    .treat(providerJoin, ProviderSupplier.class)
+                    .join("contractsSupplier", JoinType.LEFT);
             Join<ContractProviderSupplier, Branch> branchSupplierJoin = contractSupplierJoin.join("branch", JoinType.LEFT);
-
             Predicate supplierBranchPredicate = branchSupplierJoin
                     .get("idBranch")
                     .in(branchIds);
 
-            Join<ProviderSubcontractor, ContractProviderSubcontractor> contractSubcontractorJoin = subcontractorRoot.join("contractsSubcontractor", JoinType.LEFT);
+            Join<ProviderSubcontractor, ContractProviderSubcontractor> contractSubcontractorJoin = criteriaBuilder
+                    .treat(providerJoin, ProviderSubcontractor.class)
+                    .join("contractsSubcontractor", JoinType.LEFT);
             Join<ContractProviderSubcontractor, ContractProviderSupplier> contractSubToSupplierJoin = contractSubcontractorJoin.join("contractProviderSupplier", JoinType.LEFT);
             Join<ContractProviderSupplier, Branch> branchSubcontractorJoin = contractSubToSupplierJoin.join("branch", JoinType.LEFT);
-
             Predicate subcontractorBranchPredicate = branchSubcontractorJoin
                     .get("idBranch")
                     .in(branchIds);
@@ -89,18 +100,18 @@ public class DashboardProviderSpecification {
         };
     }
 
-    public static Specification<Provider> byProviderIds(List<String> providerIds) {
+    public static Specification<DocumentStatusHistory> byProviderIds(List<String> providerIds) {
         return (root, query, criteriaBuilder) -> {
             if (providerIds == null || providerIds.isEmpty()) {
                 return criteriaBuilder.conjunction();
             }
             assert query != null;
             query.distinct(true);
-            return root.get("idProvider").in(providerIds);
+            return root.join("provider").get("idProvider").in(providerIds);
         };
     }
 
-    public static Specification<Provider> byDocumentTypes(List<String> documentTypes) {
+    public static Specification<DocumentStatusHistory> byDocumentTypes(List<String> documentTypes) {
         return (root, query, criteriaBuilder) -> {
             if (documentTypes == null || documentTypes.isEmpty()) {
                 return criteriaBuilder.conjunction();
@@ -108,16 +119,21 @@ public class DashboardProviderSpecification {
             assert query != null;
             query.distinct(true);
 
-            Root<ProviderSupplier> supplierRoot = criteriaBuilder.treat(root, ProviderSupplier.class);
-            Join<ProviderSupplier, ContractProviderSupplier> contractSupplierJoin = supplierRoot.join("contractsSupplier", JoinType.LEFT);
+            Join<DocumentStatusHistory, Provider> providerJoin = root
+                    .join("provider", JoinType.LEFT);
+
+            Join<ProviderSupplier, ContractProviderSupplier> contractSupplierJoin = criteriaBuilder
+                    .treat(providerJoin, ProviderSupplier.class)
+                    .join("contractsSupplier", JoinType.LEFT);
             Join<ContractProviderSupplier, ContractDocument> contractSupplierDocumentJoin = contractSupplierJoin.join("contractDocuments", JoinType.LEFT);
             Join<ContractDocument, Document> documentSupplierJoin = contractSupplierDocumentJoin.join("document", JoinType.LEFT);
             Predicate supplierPredicate = documentSupplierJoin
                     .get("type")
                     .in(documentTypes);
 
-            Root<ProviderSubcontractor> subcontractorRoot = criteriaBuilder.treat(root, ProviderSubcontractor.class);
-            Join<ProviderSubcontractor, ContractProviderSubcontractor> contractSubcontractorJoin = subcontractorRoot.join("contractsSubcontractor", JoinType.LEFT);
+            Join<ProviderSubcontractor, ContractProviderSubcontractor> contractSubcontractorJoin = criteriaBuilder
+                    .treat(providerJoin, ProviderSubcontractor.class)
+                    .join("contractsSubcontractor", JoinType.LEFT);
             Join<ContractProviderSubcontractor, ContractDocument> contractSubcontractorDocumentJoin = contractSubcontractorJoin.join("contractDocuments", JoinType.LEFT);
             Join<ContractDocument, Document> documentSubcontractorJoin = contractSubcontractorDocumentJoin.join("document", JoinType.LEFT);
             Predicate subcontractorPredicate = documentSubcontractorJoin
@@ -128,7 +144,7 @@ public class DashboardProviderSpecification {
         };
     }
 
-    public static Specification<Provider> byResponsibleIds(List<String> responsibleIds) {
+    public static Specification<DocumentStatusHistory> byResponsibleIds(List<String> responsibleIds) {
         return (root, query, criteriaBuilder) -> {
             if (responsibleIds == null || responsibleIds.isEmpty()) {
                 return criteriaBuilder.conjunction();
@@ -136,15 +152,20 @@ public class DashboardProviderSpecification {
             assert query != null;
             query.distinct(true);
 
-            Root<ProviderSupplier> supplierRoot = criteriaBuilder.treat(root, ProviderSupplier.class);
-            Join<ProviderSupplier, ContractProviderSupplier> contractSupplierJoin = supplierRoot.join("contractsSupplier", JoinType.LEFT);
+            Join<DocumentStatusHistory, Provider> providerJoin = root
+                    .join("provider", JoinType.LEFT);
+
+            Join<ProviderSupplier, ContractProviderSupplier> contractSupplierJoin = criteriaBuilder
+                    .treat(providerJoin, ProviderSupplier.class)
+                    .join("contractsSupplier", JoinType.LEFT);
             Join<ContractProviderSupplier, User> userSupplierJoin = contractSupplierJoin.join("responsible", JoinType.LEFT);
             Predicate supplierPredicate = userSupplierJoin
                     .get("idUser")
                     .in(responsibleIds);
 
-            Root<ProviderSubcontractor> subcontractorRoot = criteriaBuilder.treat(root, ProviderSubcontractor.class);
-            Join<ProviderSubcontractor, ContractProviderSubcontractor> contractSubcontractorJoin = subcontractorRoot.join("contractsSubcontractor", JoinType.LEFT);
+            Join<ProviderSubcontractor, ContractProviderSubcontractor> contractSubcontractorJoin = criteriaBuilder
+                    .treat(providerJoin, ProviderSubcontractor.class)
+                    .join("contractsSubcontractor", JoinType.LEFT);
             Join<ContractProviderSubcontractor, User> userSubcontractorJoin = contractSubcontractorJoin.join("responsible", JoinType.LEFT);
             Predicate subcontractorPredicate = userSubcontractorJoin
                     .get("idUser")
@@ -154,7 +175,7 @@ public class DashboardProviderSpecification {
         };
     }
 
-    public static Specification<Provider> byContractStatus(List<ContractStatusEnum> status) {
+    public static Specification<DocumentStatusHistory> byContractStatus(List<ContractStatusEnum> status) {
         return (root, query, criteriaBuilder) -> {
             List<ContractStatusEnum> finalActiveContract = new ArrayList<>();
             if (status == null || status.isEmpty()) {
@@ -165,14 +186,19 @@ public class DashboardProviderSpecification {
             assert query != null;
             query.distinct(true);
 
-            Root<ProviderSupplier> supplierRoot = criteriaBuilder.treat(root, ProviderSupplier.class);
-            Join<ProviderSupplier, ContractProviderSupplier> contractSupplierJoin = supplierRoot.join("contractsSupplier", JoinType.LEFT);
+            Join<DocumentStatusHistory, Provider> providerJoin = root
+                    .join("provider", JoinType.LEFT);
+
+            Join<ProviderSupplier, ContractProviderSupplier> contractSupplierJoin = criteriaBuilder
+                    .treat(providerJoin, ProviderSupplier.class)
+                    .join("contractsSupplier", JoinType.LEFT);
             Predicate supplierPredicate = contractSupplierJoin
                     .get("status")
                     .in(finalActiveContract);
 
-            Root<ProviderSubcontractor> subcontractorRoot = criteriaBuilder.treat(root, ProviderSubcontractor.class);
-            Join<ProviderSubcontractor, ContractProviderSubcontractor> contractSubcontractorJoin = subcontractorRoot.join("contractsSubcontractor", JoinType.LEFT);
+            Join<ProviderSubcontractor, ContractProviderSubcontractor> contractSubcontractorJoin = criteriaBuilder
+                    .treat(providerJoin, ProviderSubcontractor.class)
+                    .join("contractsSubcontractor", JoinType.LEFT);
             Predicate subcontractorPredicate = contractSubcontractorJoin
                     .get("status")
                     .in(finalActiveContract);
@@ -181,7 +207,7 @@ public class DashboardProviderSpecification {
         };
     }
 
-    public static Specification<Provider> byDocumentStatuses(List<Document.Status> statuses) {
+    public static Specification<DocumentStatusHistory> byDocumentStatuses(List<Document.Status> statuses) {
         return (root, query, criteriaBuilder) -> {
             if (statuses == null || statuses.isEmpty()) {
                 return criteriaBuilder.conjunction();
@@ -189,16 +215,21 @@ public class DashboardProviderSpecification {
             assert query != null;
             query.distinct(true);
 
-            Root<ProviderSupplier> supplierRoot = criteriaBuilder.treat(root, ProviderSupplier.class);
-            Join<ProviderSupplier, ContractProviderSupplier> contractSupplierJoin = supplierRoot.join("contractsSupplier", JoinType.LEFT);
+            Join<DocumentStatusHistory, Provider> providerJoin = root
+                    .join("provider", JoinType.LEFT);
+
+            Join<ProviderSupplier, ContractProviderSupplier> contractSupplierJoin = criteriaBuilder
+                    .treat(providerJoin, ProviderSupplier.class)
+                    .join("contractsSupplier", JoinType.LEFT);
             Join<ContractProviderSupplier, ContractDocument> contractSupplierDocumentJoin = contractSupplierJoin.join("contractDocuments", JoinType.LEFT);
             Join<ContractDocument, Document> documentSupplierJoin = contractSupplierDocumentJoin.join("document", JoinType.LEFT);
             Predicate supplierPredicate = documentSupplierJoin
                     .get("status")
                     .in(statuses);
 
-            Root<ProviderSubcontractor> subcontractorRoot = criteriaBuilder.treat(root, ProviderSubcontractor.class);
-            Join<ProviderSubcontractor, ContractProviderSubcontractor> contractSubcontractorJoin = subcontractorRoot.join("contractsSubcontractor", JoinType.LEFT);
+            Join<ProviderSubcontractor, ContractProviderSubcontractor> contractSubcontractorJoin = criteriaBuilder
+                    .treat(providerJoin, ProviderSubcontractor.class)
+                    .join("contractsSubcontractor", JoinType.LEFT);
             Join<ContractProviderSubcontractor, ContractDocument> contractSubcontractorDocumentJoin = contractSubcontractorJoin.join("contractDocuments", JoinType.LEFT);
             Join<ContractDocument, Document> documentSubcontractorJoin = contractSubcontractorDocumentJoin.join("document", JoinType.LEFT);
             Predicate subcontractorPredicate = documentSubcontractorJoin
@@ -209,7 +240,7 @@ public class DashboardProviderSpecification {
         };
     }
 
-    public static Specification<Provider> byDocumentTitles(List<String> titles) {
+    public static Specification<DocumentStatusHistory> byDocumentTitles(List<String> titles) {
         return (root, query, criteriaBuilder) -> {
             if (titles == null || titles.isEmpty()) {
                 return criteriaBuilder.conjunction();
@@ -217,8 +248,12 @@ public class DashboardProviderSpecification {
             assert query != null;
             query.distinct(true);
 
-            Root<ProviderSupplier> supplierRoot = criteriaBuilder.treat(root, ProviderSupplier.class);
-            Join<ProviderSupplier, ContractProviderSupplier> contractSupplierJoin = supplierRoot.join("contractsSupplier", JoinType.LEFT);
+            Join<DocumentStatusHistory, Provider> providerJoin = root
+                    .join("provider", JoinType.LEFT);
+
+            Join<ProviderSupplier, ContractProviderSupplier> contractSupplierJoin = criteriaBuilder
+                    .treat(providerJoin, ProviderSupplier.class)
+                    .join("contractsSupplier", JoinType.LEFT);
             Join<ContractProviderSupplier, ContractDocument> contractSupplierDocumentJoin = contractSupplierJoin.join("contractDocuments", JoinType.LEFT);
             Join<ContractDocument, Document> documentSupplierJoin = contractSupplierDocumentJoin.join("document", JoinType.LEFT);
             Join<Document, DocumentMatrix> documentMatrixSupplierJoin = documentSupplierJoin.join("documentMatrix", JoinType.LEFT);
@@ -226,8 +261,9 @@ public class DashboardProviderSpecification {
                     .get("name")
                     .in(titles);
 
-            Root<ProviderSubcontractor> subcontractorRoot = criteriaBuilder.treat(root, ProviderSubcontractor.class);
-            Join<ProviderSubcontractor, ContractProviderSubcontractor> contractSubcontractorJoin = subcontractorRoot.join("contractsSubcontractor", JoinType.LEFT);
+            Join<ProviderSubcontractor, ContractProviderSubcontractor> contractSubcontractorJoin = criteriaBuilder
+                    .treat(providerJoin, ProviderSubcontractor.class)
+                    .join("contractsSubcontractor", JoinType.LEFT);
             Join<ContractProviderSubcontractor, ContractDocument> contractSubcontractorDocumentJoin = contractSubcontractorJoin.join("contractDocuments", JoinType.LEFT);
             Join<ContractDocument, Document> documentSubcontractorJoin = contractSubcontractorDocumentJoin.join("document", JoinType.LEFT);
             Join<Document, DocumentMatrix> documentMatrixSubcontractorJoin = documentSubcontractorJoin.join("documentMatrix", JoinType.LEFT);
@@ -239,7 +275,7 @@ public class DashboardProviderSpecification {
         };
     }
 
-    public static Specification<Provider> byProviderCnpjs(List<String> providerCnpjs) {
+    public static Specification<DocumentStatusHistory> byProviderCnpjs(List<String> providerCnpjs) {
         return (root, query, criteriaBuilder) -> {
             if (providerCnpjs == null || providerCnpjs.isEmpty()) {
                 return criteriaBuilder.conjunction();
@@ -247,11 +283,11 @@ public class DashboardProviderSpecification {
             assert query != null;
             query.distinct(true);
 
-            return root.get("cnpj").in(providerCnpjs);
+            return root.join("provider").get("cnpj").in(providerCnpjs);
         };
     }
 
-    public static Specification<Provider> byContractIds(List<String> contractIds) {
+    public static Specification<DocumentStatusHistory> byContractIds(List<String> contractIds) {
         return (root, query, criteriaBuilder) -> {
             if (contractIds == null || contractIds.isEmpty()) {
                 return criteriaBuilder.conjunction();
@@ -259,14 +295,19 @@ public class DashboardProviderSpecification {
             assert query != null;
             query.distinct(true);
 
-            Root<ProviderSupplier> supplierRoot = criteriaBuilder.treat(root, ProviderSupplier.class);
-            Join<ProviderSupplier, ContractProviderSupplier> contractSupplierJoin = supplierRoot.join("contractsSupplier", JoinType.LEFT);
+            Join<DocumentStatusHistory, Provider> providerJoin = root
+                    .join("provider", JoinType.LEFT);
+
+            Join<ProviderSupplier, ContractProviderSupplier> contractSupplierJoin = criteriaBuilder
+                    .treat(providerJoin, ProviderSupplier.class)
+                    .join("contractsSupplier", JoinType.LEFT);
             Predicate supplierPredicate = contractSupplierJoin
                     .get("idContract")
                     .in(contractIds);
 
-            Root<ProviderSubcontractor> subcontractorRoot = criteriaBuilder.treat(root, ProviderSubcontractor.class);
-            Join<ProviderSubcontractor, ContractProviderSubcontractor> contractSubcontractorJoin = subcontractorRoot.join("contractsSubcontractor", JoinType.LEFT);
+            Join<ProviderSubcontractor, ContractProviderSubcontractor> contractSubcontractorJoin = criteriaBuilder
+                    .treat(providerJoin, ProviderSubcontractor.class)
+                    .join("contractsSubcontractor", JoinType.LEFT);
             Predicate subcontractorPredicate = contractSubcontractorJoin
                     .get("idContract")
                     .in(contractIds);
@@ -275,7 +316,7 @@ public class DashboardProviderSpecification {
         };
     }
 
-    public static Specification<Provider> byEmployeeIds(List<String> employeeIds) {
+    public static Specification<DocumentStatusHistory> byEmployeeIds(List<String> employeeIds) {
         return (root, query, criteriaBuilder) -> {
             if (employeeIds == null || employeeIds.isEmpty()) {
                 return criteriaBuilder.conjunction();
@@ -283,16 +324,21 @@ public class DashboardProviderSpecification {
             assert query != null;
             query.distinct(true);
 
-            Root<ProviderSupplier> supplierRoot = criteriaBuilder.treat(root, ProviderSupplier.class);
-            Join<ProviderSupplier, ContractProviderSupplier> contractSupplierJoin = supplierRoot.join("contractsSupplier", JoinType.LEFT);
+            Join<DocumentStatusHistory, Provider> providerJoin = root
+                    .join("provider", JoinType.LEFT);
+
+            Join<ProviderSupplier, ContractProviderSupplier> contractSupplierJoin = criteriaBuilder
+                    .treat(providerJoin, ProviderSupplier.class)
+                    .join("contractsSupplier", JoinType.LEFT);
             Join<ContractProviderSupplier, ContractEmployee> contractSupplierEmployeeJoin = contractSupplierJoin.join("employeeContracts", JoinType.LEFT);
             Join<ContractEmployee, Employee> employeeSupplierJoin = contractSupplierEmployeeJoin.join("employee", JoinType.LEFT);
             Predicate supplierPredicate = employeeSupplierJoin
                     .get("idEmployee")
                     .in(employeeIds);
 
-            Root<ProviderSubcontractor> subcontractorRoot = criteriaBuilder.treat(root, ProviderSubcontractor.class);
-            Join<ProviderSubcontractor, ContractProviderSubcontractor> contractSubcontractorJoin = subcontractorRoot.join("contractsSubcontractor", JoinType.LEFT);
+            Join<ProviderSubcontractor, ContractProviderSubcontractor> contractSubcontractorJoin = criteriaBuilder
+                    .treat(providerJoin, ProviderSubcontractor.class)
+                    .join("contractsSubcontractor", JoinType.LEFT);
             Join<ContractProviderSubcontractor, ContractEmployee> contractSubcontractorEmployeeJoin = contractSubcontractorJoin.join("employeeContracts", JoinType.LEFT);
             Join<ContractEmployee, Employee> employeeSubcontractorJoin = contractSubcontractorEmployeeJoin.join("employee", JoinType.LEFT);
             Predicate subcontractorPredicate = employeeSubcontractorJoin
@@ -303,7 +349,7 @@ public class DashboardProviderSpecification {
         };
     }
 
-    public static Specification<Provider> byEmployeeCpfs(List<String> employeeCpfs) {
+    public static Specification<DocumentStatusHistory> byEmployeeCpfs(List<String> employeeCpfs) {
         return (root, query, criteriaBuilder) -> {
             if (employeeCpfs == null || employeeCpfs.isEmpty()) {
                 return criteriaBuilder.conjunction();
@@ -311,8 +357,12 @@ public class DashboardProviderSpecification {
             assert query != null;
             query.distinct(true);
 
-            Root<ProviderSupplier> supplierRoot = criteriaBuilder.treat(root, ProviderSupplier.class);
-            Join<ProviderSupplier, ContractProviderSupplier> contractSupplierJoin = supplierRoot.join("contractsSupplier", JoinType.LEFT);
+            Join<DocumentStatusHistory, Provider> providerJoin = root
+                    .join("provider", JoinType.LEFT);
+
+            Join<ProviderSupplier, ContractProviderSupplier> contractSupplierJoin = criteriaBuilder
+                    .treat(providerJoin, ProviderSupplier.class)
+                    .join("contractsSupplier", JoinType.LEFT);
             Join<ContractProviderSupplier, ContractEmployee> contractSupplierEmployeeJoin = contractSupplierJoin.join("employeeContracts", JoinType.LEFT);
             Join<ContractEmployee, Employee> employeeSupplierJoin = contractSupplierEmployeeJoin.join("employee", JoinType.LEFT);
             Predicate supplierPredicate = criteriaBuilder
@@ -320,8 +370,9 @@ public class DashboardProviderSpecification {
                     .get("cpf")
                     .in(employeeCpfs);
 
-            Root<ProviderSubcontractor> subcontractorRoot = criteriaBuilder.treat(root, ProviderSubcontractor.class);
-            Join<ProviderSubcontractor, ContractProviderSubcontractor> contractSubcontractorJoin = subcontractorRoot.join("contractsSubcontractor", JoinType.LEFT);
+            Join<ProviderSubcontractor, ContractProviderSubcontractor> contractSubcontractorJoin = criteriaBuilder
+                    .treat(providerJoin, ProviderSubcontractor.class)
+                    .join("contractsSubcontractor", JoinType.LEFT);
             Join<ContractProviderSubcontractor, ContractEmployee> contractSubcontractorEmployeeJoin = contractSubcontractorJoin.join("employeeContracts", JoinType.LEFT);
             Join<ContractEmployee, Employee> employeeSubcontractorJoin = contractSubcontractorEmployeeJoin.join("employee", JoinType.LEFT);
             Predicate subcontractorPredicate = criteriaBuilder
@@ -333,7 +384,7 @@ public class DashboardProviderSpecification {
         };
     }
 
-    public static Specification<Provider> byEmployeeSituations(List<Employee.Situation> employeeSituations) {
+    public static Specification<DocumentStatusHistory> byEmployeeSituations(List<Employee.Situation> employeeSituations) {
         return (root, query, criteriaBuilder) -> {
             if (employeeSituations == null || employeeSituations.isEmpty()) {
                 return criteriaBuilder.conjunction();
@@ -341,16 +392,21 @@ public class DashboardProviderSpecification {
             assert query != null;
             query.distinct(true);
 
-            Root<ProviderSupplier> supplierRoot = criteriaBuilder.treat(root, ProviderSupplier.class);
-            Join<ProviderSupplier, ContractProviderSupplier> contractSupplierJoin = supplierRoot.join("contractsSupplier", JoinType.LEFT);
+            Join<DocumentStatusHistory, Provider> providerJoin = root
+                    .join("provider", JoinType.LEFT);
+
+            Join<ProviderSupplier, ContractProviderSupplier> contractSupplierJoin = criteriaBuilder
+                    .treat(providerJoin, ProviderSupplier.class)
+                    .join("contractsSupplier", JoinType.LEFT);
             Join<ContractProviderSupplier, ContractEmployee> contractSupplierEmployeeJoin = contractSupplierJoin.join("employeeContracts", JoinType.LEFT);
             Join<ContractEmployee, Employee> employeeSupplierJoin = contractSupplierEmployeeJoin.join("employee", JoinType.LEFT);
             Predicate supplierPredicate = employeeSupplierJoin
                     .get("situation")
                     .in(employeeSituations);
 
-            Root<ProviderSubcontractor> subcontractorRoot = criteriaBuilder.treat(root, ProviderSubcontractor.class);
-            Join<ProviderSubcontractor, ContractProviderSubcontractor> contractSubcontractorJoin = subcontractorRoot.join("contractsSubcontractor", JoinType.LEFT);
+            Join<ProviderSubcontractor, ContractProviderSubcontractor> contractSubcontractorJoin = criteriaBuilder
+                    .treat(providerJoin, ProviderSubcontractor.class)
+                    .join("contractsSubcontractor", JoinType.LEFT);
             Join<ContractProviderSubcontractor, ContractEmployee> contractSubcontractorEmployeeJoin = contractSubcontractorJoin.join("employeeContracts", JoinType.LEFT);
             Join<ContractEmployee, Employee> employeeSubcontractorJoin = contractSubcontractorEmployeeJoin.join("employee", JoinType.LEFT);
             Predicate subcontractorPredicate = employeeSubcontractorJoin
@@ -361,7 +417,7 @@ public class DashboardProviderSpecification {
         };
     }
 
-    public static Specification<Provider> byDoesBlock(List<Boolean> doesBlockList) {
+    public static Specification<DocumentStatusHistory> byDoesBlock(List<Boolean> doesBlockList) {
         return (root, query, criteriaBuilder) -> {
             if (doesBlockList == null || doesBlockList.isEmpty()) {
                 return criteriaBuilder.conjunction();
@@ -369,8 +425,12 @@ public class DashboardProviderSpecification {
             assert query != null;
             query.distinct(true);
 
-            Root<ProviderSupplier> supplierRoot = criteriaBuilder.treat(root, ProviderSupplier.class);
-            Join<ProviderSupplier, ContractProviderSupplier> contractSupplierJoin = supplierRoot.join("contractsSupplier", JoinType.LEFT);
+            Join<DocumentStatusHistory, Provider> providerJoin = root
+                    .join("provider", JoinType.LEFT);
+
+            Join<ProviderSupplier, ContractProviderSupplier> contractSupplierJoin = criteriaBuilder
+                    .treat(providerJoin, ProviderSupplier.class)
+                    .join("contractsSupplier", JoinType.LEFT);
             Join<ContractProviderSupplier, ContractDocument> contractSupplierDocumentJoin = contractSupplierJoin.join("contractDocuments", JoinType.LEFT);
             Join<ContractDocument, Document> documentSupplierJoin = contractSupplierDocumentJoin.join("document", JoinType.LEFT);
             Predicate supplierPredicate = criteriaBuilder
@@ -383,8 +443,9 @@ public class DashboardProviderSpecification {
                     .get("doesBLock")
                     .in(doesBlockList);
 
-            Root<ProviderSubcontractor> subcontractorRoot = criteriaBuilder.treat(root, ProviderSubcontractor.class);
-            Join<ProviderSubcontractor, ContractProviderSubcontractor> contractSubcontractorJoin = subcontractorRoot.join("contractsSubcontractor", JoinType.LEFT);
+            Join<ProviderSubcontractor, ContractProviderSubcontractor> contractSubcontractorJoin = criteriaBuilder
+                    .treat(providerJoin, ProviderSubcontractor.class)
+                    .join("contractsSubcontractor", JoinType.LEFT);
             Join<ContractProviderSubcontractor, ContractDocument> contractSubcontractorDocumentJoin = contractSubcontractorJoin.join("contractDocuments", JoinType.LEFT);
             Join<ContractDocument, Document> documentSubcontractorJoin = contractSubcontractorDocumentJoin.join("document", JoinType.LEFT);
             Predicate subcontractorPredicate = criteriaBuilder
@@ -401,7 +462,7 @@ public class DashboardProviderSpecification {
         };
     }
 
-    public static Specification<Provider> byValidities(List<DocumentValidityEnum> validity) {
+    public static Specification<DocumentStatusHistory> byValidities(List<DocumentValidityEnum> validity) {
         return (root, query, criteriaBuilder) -> {
             if (validity == null || validity.isEmpty()) {
                 return criteriaBuilder.conjunction();
@@ -409,16 +470,21 @@ public class DashboardProviderSpecification {
             assert query != null;
             query.distinct(true);
 
-            Root<ProviderSupplier> supplierRoot = criteriaBuilder.treat(root, ProviderSupplier.class);
-            Join<ProviderSupplier, ContractProviderSupplier> contractSupplierJoin = supplierRoot.join("contractsSupplier", JoinType.LEFT);
+            Join<DocumentStatusHistory, Provider> providerJoin = root
+                    .join("provider", JoinType.LEFT);
+
+            Join<ProviderSupplier, ContractProviderSupplier> contractSupplierJoin = criteriaBuilder
+                    .treat(providerJoin, ProviderSupplier.class)
+                    .join("contractsSupplier", JoinType.LEFT);
             Join<ContractProviderSupplier, ContractDocument> contractSupplierDocumentJoin = contractSupplierJoin.join("contractDocuments", JoinType.LEFT);
             Join<ContractDocument, Document> documentSupplierJoin = contractSupplierDocumentJoin.join("document", JoinType.LEFT);
             Predicate supplierPredicate = documentSupplierJoin
                     .get("validity")
                     .in(validity);
 
-            Root<ProviderSubcontractor> subcontractorRoot = criteriaBuilder.treat(root, ProviderSubcontractor.class);
-            Join<ProviderSubcontractor, ContractProviderSubcontractor> contractSubcontractorJoin = subcontractorRoot.join("contractsSubcontractor", JoinType.LEFT);
+            Join<ProviderSubcontractor, ContractProviderSubcontractor> contractSubcontractorJoin = criteriaBuilder
+                    .treat(providerJoin, ProviderSubcontractor.class)
+                    .join("contractsSubcontractor", JoinType.LEFT);
             Join<ContractProviderSubcontractor, ContractDocument> contractSubcontractorDocumentJoin = contractSubcontractorJoin.join("contractDocuments", JoinType.LEFT);
             Join<ContractDocument, Document> documentSubcontractorJoin = contractSubcontractorDocumentJoin.join("document", JoinType.LEFT);
             Predicate subcontractorPredicate = documentSubcontractorJoin
@@ -429,7 +495,7 @@ public class DashboardProviderSpecification {
         };
     }
 
-    public static Specification<Provider> byUploadDates(List<LocalDate> uploadDates) {
+    public static Specification<DocumentStatusHistory> byUploadDates(List<LocalDate> uploadDates) {
         return (root, query, criteriaBuilder) -> {
             if (uploadDates == null || uploadDates.isEmpty()) {
                 return criteriaBuilder.conjunction();
@@ -450,15 +516,20 @@ public class DashboardProviderSpecification {
                 return criteriaBuilder.conjunction();
             }
 
-            Root<ProviderSupplier> supplierRoot = criteriaBuilder.treat(root, ProviderSupplier.class);
-            Join<ProviderSupplier, ContractProviderSupplier> contractSupplierJoin = supplierRoot.join("contractsSupplier", JoinType.LEFT);
+            Join<DocumentStatusHistory, Provider> providerJoin = root
+                    .join("provider", JoinType.LEFT);
+
+            Join<ProviderSupplier, ContractProviderSupplier> contractSupplierJoin = criteriaBuilder
+                    .treat(providerJoin, ProviderSupplier.class)
+                    .join("contractsSupplier", JoinType.LEFT);
             Join<ContractProviderSupplier, ContractDocument> contractSupplierDocumentJoin = contractSupplierJoin.join("contractDocuments", JoinType.LEFT);
             Join<ContractDocument, Document> documentSupplierJoin = contractSupplierDocumentJoin.join("document", JoinType.LEFT);
             Predicate supplierPredicate = criteriaBuilder
                     .between(documentSupplierJoin.get("versionDate"), startDate, endDate);
 
-            Root<ProviderSubcontractor> subcontractorRoot = criteriaBuilder.treat(root, ProviderSubcontractor.class);
-            Join<ProviderSubcontractor, ContractProviderSubcontractor> contractSubcontractorJoin = subcontractorRoot.join("contractsSubcontractor", JoinType.LEFT);
+            Join<ProviderSubcontractor, ContractProviderSubcontractor> contractSubcontractorJoin = criteriaBuilder
+                    .treat(providerJoin, ProviderSubcontractor.class)
+                    .join("contractsSubcontractor", JoinType.LEFT);
             Join<ContractProviderSubcontractor, ContractDocument> contractSubcontractorDocumentJoin = contractSubcontractorJoin.join("contractDocuments", JoinType.LEFT);
             Join<ContractDocument, Document> documentSubcontractorJoin = contractSubcontractorDocumentJoin.join("document", JoinType.LEFT);
             Predicate subcontractorPredicate = criteriaBuilder
@@ -468,14 +539,19 @@ public class DashboardProviderSpecification {
         };
     }
 
-    public static Specification<Provider> byIsActive(Boolean isActive) {
+    public static Specification<DocumentStatusHistory> byIsActive(Boolean isActive) {
         return (root, query, criteriaBuilder) -> {
             if (isActive == null) {
                 return criteriaBuilder.conjunction();
             }
             assert query != null;
             query.distinct(true);
-            return criteriaBuilder.equal(root.get("isActive"), isActive);
+            return criteriaBuilder.equal(root.join("provider").get("isActive"), isActive);
         };
+    }
+
+    public static Specification<DocumentStatusHistory> byHistoryPeriodBetween(YearMonth start, YearMonth end) {
+        return (root, query, criteriaBuilder) ->
+                criteriaBuilder.between(root.get("historyPeriod"), start, end);
     }
 }

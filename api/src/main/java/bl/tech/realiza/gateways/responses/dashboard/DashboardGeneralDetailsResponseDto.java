@@ -16,6 +16,11 @@ public class DashboardGeneralDetailsResponseDto {
     private Long contractQuantity;
     private Long allocatedEmployeeQuantity;
     private Double conformity;
+    private Long totalDocuments;
+    private Long adherent;
+    private Long conforming;
+    private Long nonAdherent;
+    private Long nonConforming;
     private List<TypeStatus> documentStatus;
     private List<Exemption> documentExemption;
     private List<Pending> pendingRanking;
@@ -56,5 +61,6 @@ public class DashboardGeneralDetailsResponseDto {
         private Double conformity;
         private Integer nonConformingDocumentQuantity;
         private RiskLevel conformityLevel;
+        private Long employeeQuantity;
     }
 }

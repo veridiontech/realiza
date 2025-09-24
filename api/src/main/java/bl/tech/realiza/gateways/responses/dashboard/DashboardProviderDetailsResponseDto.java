@@ -20,6 +20,7 @@ public class DashboardProviderDetailsResponseDto {
     private Double adherence;
     private Double conformity;
     private Conformity conformityRange;
+    private Long employeeQuantity;
 
     public enum Conformity {
         RISKY,
