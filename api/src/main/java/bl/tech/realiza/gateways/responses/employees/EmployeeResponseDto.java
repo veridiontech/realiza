@@ -4,12 +4,15 @@ import bl.tech.realiza.domains.documents.matrix.DocumentMatrix;
 import bl.tech.realiza.domains.employees.Employee;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Builder;
-import lombok.Data;
+import lombok.*;
 
 import java.sql.Date;
 import java.util.List;
 
-@Data
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 @Builder
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 public class EmployeeResponseDto {
@@ -67,7 +70,10 @@ public class EmployeeResponseDto {
     // supplier
     private String supplier;
 
-    @Data
+    @Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
     @Builder
     public static class ContractDto {
         private String idContract;

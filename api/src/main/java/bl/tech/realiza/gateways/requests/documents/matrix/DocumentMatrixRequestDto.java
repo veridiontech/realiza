@@ -1,9 +1,12 @@
 package bl.tech.realiza.gateways.requests.documents.matrix;
 
 import bl.tech.realiza.domains.documents.matrix.DocumentMatrix;
-import lombok.Data;
+import lombok.*;
 
-@Data
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class DocumentMatrixRequestDto {
     private String name;
     private String type;

@@ -10,10 +10,11 @@ import lombok.experimental.SuperBuilder;
 import java.time.LocalDateTime;
 
 @EqualsAndHashCode(callSuper = true)
-@Data
-@SuperBuilder
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@SuperBuilder
 @Entity
 @DiscriminatorValue("SUBCONTRACTOR")
 public class DocumentProviderSubcontractor extends Document {

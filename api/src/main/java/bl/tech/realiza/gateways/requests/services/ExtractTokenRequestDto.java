@@ -1,8 +1,11 @@
 package bl.tech.realiza.gateways.requests.services;
 
-import lombok.Data;
+import lombok.*;
 
-@Data
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class ExtractTokenRequestDto {
     private String token;
 }

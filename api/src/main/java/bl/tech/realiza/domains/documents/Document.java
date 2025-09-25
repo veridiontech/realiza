@@ -17,10 +17,11 @@ import java.time.temporal.WeekFields;
 import java.util.List;
 import java.util.Locale;
 
-@Data
-@SuperBuilder
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@SuperBuilder
 @Entity
 @Inheritance(strategy = InheritanceType.JOINED)
 @DiscriminatorColumn(name = "documentation_type", discriminatorType = DiscriminatorType.STRING)

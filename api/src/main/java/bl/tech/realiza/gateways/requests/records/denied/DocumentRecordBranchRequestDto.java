@@ -2,9 +2,12 @@ package bl.tech.realiza.gateways.requests.records.denied;
 
 import bl.tech.realiza.domains.documents.Document;
 import jakarta.validation.constraints.NotEmpty;
-import lombok.Data;
+import lombok.*;
 
-@Data
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class DocumentRecordBranchRequestDto {
     @NotEmpty
     private Document.Status status;

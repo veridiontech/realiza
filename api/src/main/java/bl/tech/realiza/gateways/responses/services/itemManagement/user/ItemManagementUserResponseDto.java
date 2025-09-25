@@ -3,11 +3,14 @@ package bl.tech.realiza.gateways.responses.services.itemManagement.user;
 import bl.tech.realiza.domains.services.ItemManagement;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Builder;
-import lombok.Data;
+import lombok.*;
 
 import java.time.LocalDateTime;
 
-@Data
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 @Builder
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 public class ItemManagementUserResponseDto {

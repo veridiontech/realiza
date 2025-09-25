@@ -4,13 +4,13 @@ import bl.tech.realiza.gateways.responses.clients.controlPanel.activity.Activity
 import bl.tech.realiza.gateways.responses.clients.controlPanel.document.DocumentTypeControlPanelResponseDto;
 import bl.tech.realiza.gateways.responses.clients.controlPanel.service.ServiceTypeRiskControlPanelResponseDto;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
+import lombok.*;
 
 import java.util.List;
 
-@Data
+@Getter
+@Setter
+@NoArgsConstructor
 @Builder
 @AllArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_EMPTY)

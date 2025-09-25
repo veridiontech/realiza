@@ -13,10 +13,11 @@ import lombok.*;
 import java.time.LocalDateTime;
 import java.util.List;
 
-@Data
-@Builder
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 @Entity
 public class BranchSnapshot {
     @EmbeddedId

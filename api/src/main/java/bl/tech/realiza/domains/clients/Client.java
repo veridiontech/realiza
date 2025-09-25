@@ -16,11 +16,12 @@ import org.hibernate.annotations.OnDeleteAction;
 import java.time.LocalDateTime;
 import java.util.List;
 
-@Data
-@ToString(exclude = {"branches"})
-@Builder
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@ToString(exclude = {"branches"})
+@Builder
 @Entity
 public class Client {
     @Id

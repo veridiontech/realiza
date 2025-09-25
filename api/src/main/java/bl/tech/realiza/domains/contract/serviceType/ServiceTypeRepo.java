@@ -7,9 +7,10 @@ import lombok.experimental.SuperBuilder;
 import java.time.LocalDateTime;
 
 @EqualsAndHashCode(callSuper = true)
-@Data
+@Getter
+@Setter
+@NoArgsConstructor
 @SuperBuilder
-@AllArgsConstructor
 @Entity
 @Inheritance(strategy = InheritanceType.JOINED)
 @DiscriminatorValue("REPOSITORY")

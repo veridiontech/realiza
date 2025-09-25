@@ -2,12 +2,15 @@ package bl.tech.realiza.gateways.requests.contracts;
 
 import bl.tech.realiza.domains.contract.Contract;
 import bl.tech.realiza.domains.documents.Document;
-import lombok.Data;
+import lombok.*;
 
 import java.sql.Date;
 import java.util.List;
 
-@Data
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class ContractAndSupplierCreateRequestDto {
     // contract
     private String serviceDuration;

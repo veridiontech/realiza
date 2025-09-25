@@ -7,10 +7,11 @@ import lombok.*;
 import lombok.experimental.SuperBuilder;
 
 @EqualsAndHashCode(callSuper = true)
-@Data
-@SuperBuilder
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@SuperBuilder
 @Entity
 @Inheritance(strategy = InheritanceType.JOINED)
 @DiscriminatorValue("SUBCONTRACTOR")

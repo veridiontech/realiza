@@ -1,9 +1,11 @@
 package bl.tech.realiza.gateways.responses.users.profile;
 
-import lombok.Builder;
-import lombok.Data;
+import lombok.*;
 
-@Data
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 @Builder
 public class ProfileNameResponseDto {
     private String id;

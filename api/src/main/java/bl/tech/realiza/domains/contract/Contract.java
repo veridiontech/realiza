@@ -12,10 +12,7 @@ import bl.tech.realiza.domains.user.User;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import lombok.experimental.SuperBuilder;
 
 import java.sql.Date;
@@ -24,16 +21,20 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-@Data
+@Getter
+@Setter
 @SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
+@ToString(exclude = {"employeeContracts", "contractDocuments", "userAccess"})
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @Entity
 @Inheritance(strategy = InheritanceType.JOINED)
 @DiscriminatorColumn(name = "contract_type")
 public abstract class Contract {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
+    @EqualsAndHashCode.Include // <-- E esta linha
     private String idContract;
     private String serviceDuration;
     private String serviceName;

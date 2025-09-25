@@ -8,10 +8,7 @@ import bl.tech.realiza.domains.employees.Employee;
 import bl.tech.realiza.domains.user.UserClient;
 import bl.tech.realiza.domains.user.UserProviderSubcontractor;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
@@ -19,7 +16,8 @@ import org.hibernate.annotations.OnDeleteAction;
 import java.util.List;
 
 @EqualsAndHashCode(callSuper = true)
-@Data
+@Getter
+@Setter
 @SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor

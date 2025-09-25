@@ -1,12 +1,14 @@
 package bl.tech.realiza.gateways.responses.users.profile;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import lombok.Builder;
-import lombok.Data;
+import lombok.*;
 
 import java.util.List;
 
-@Data
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 @Builder
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 public class ProfileResponseDto {
@@ -18,7 +20,10 @@ public class ProfileResponseDto {
     private List<ProfileBranchResponseDto> branches;
     private List<ProfileContractResponseDto> contracts;
 
-    @Data
+    @Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
     @Builder
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
     public static class ProfileBranchResponseDto {
@@ -26,7 +31,10 @@ public class ProfileResponseDto {
         private String name;
     }
 
-    @Data
+    @Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
     @Builder
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
     public static class ProfileContractResponseDto {

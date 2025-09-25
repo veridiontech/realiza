@@ -5,10 +5,11 @@ import lombok.*;
 
 import java.time.LocalDateTime;
 
-@Data
-@Builder
-@AllArgsConstructor
+@Getter
+@Setter
 @NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class DocumentIAValidationResponse {
     private String documentType;
     private String reason;

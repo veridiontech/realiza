@@ -1,11 +1,14 @@
 package bl.tech.realiza.gateways.requests.users;
 
 import bl.tech.realiza.domains.user.User;
-import lombok.Data;
+import lombok.*;
 
 import java.util.List;
 
-@Data
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class UserClientRequestDto {
     private String cpf;
     private String description;

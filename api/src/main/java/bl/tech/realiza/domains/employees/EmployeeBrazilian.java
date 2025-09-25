@@ -2,7 +2,7 @@ package bl.tech.realiza.domains.employees;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.*;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
@@ -11,10 +11,11 @@ import org.hibernate.validator.constraints.br.CPF;
 import java.sql.Date;
 
 @EqualsAndHashCode(callSuper = true)
-@Data
-@SuperBuilder
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@SuperBuilder
 @Entity
 @DiscriminatorValue("BRAZILIAN")
 @Table(uniqueConstraints = @UniqueConstraint(columnNames = "cpf"))

@@ -1,9 +1,11 @@
 package bl.tech.realiza.gateways.responses.ultragaz;
 
-import lombok.Builder;
-import lombok.Data;
+import lombok.*;
 
-@Data
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 @Builder
 public class CenterResponseDto {
     private String idCenter;

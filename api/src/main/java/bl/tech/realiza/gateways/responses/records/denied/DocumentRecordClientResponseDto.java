@@ -2,10 +2,12 @@ package bl.tech.realiza.gateways.responses.records.denied;
 
 import bl.tech.realiza.domains.documents.Document;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import lombok.Builder;
-import lombok.Data;
+import lombok.*;
 
-@Data
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 @Builder
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 public class DocumentRecordClientResponseDto {

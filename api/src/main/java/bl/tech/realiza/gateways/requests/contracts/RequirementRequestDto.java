@@ -1,9 +1,12 @@
 package bl.tech.realiza.gateways.requests.contracts;
 
 import jakarta.validation.constraints.NotEmpty;
-import lombok.Data;
+import lombok.*;
 
-@Data
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class RequirementRequestDto {
     private String title;
 }

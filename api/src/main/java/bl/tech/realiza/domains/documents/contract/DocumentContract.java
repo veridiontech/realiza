@@ -4,14 +4,12 @@ import bl.tech.realiza.domains.clients.Branch;
 import bl.tech.realiza.domains.contract.Contract;
 import bl.tech.realiza.domains.documents.Document;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import lombok.experimental.SuperBuilder;
 
 @EqualsAndHashCode(callSuper = true)
-@Data
+@Getter
+@Setter
 @SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor

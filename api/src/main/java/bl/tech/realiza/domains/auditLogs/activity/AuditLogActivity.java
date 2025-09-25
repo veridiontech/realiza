@@ -8,16 +8,17 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.*;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
 @EqualsAndHashCode(callSuper = true)
-@Data
-@SuperBuilder
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@SuperBuilder
 @Entity
 @DiscriminatorValue("ACTIVITY")
 public class AuditLogActivity extends AuditLog {

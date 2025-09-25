@@ -1,9 +1,12 @@
 package bl.tech.realiza.gateways.responses.services;
 
 import lombok.Builder;
-import lombok.Data;
+import lombok.*;
 
-@Data
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 @Builder
 public class LoginResponseDto {
     private String token;

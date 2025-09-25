@@ -1,11 +1,14 @@
 package bl.tech.realiza.gateways.requests.documents.client;
 
 import bl.tech.realiza.domains.documents.Document;
-import lombok.Data;
+import lombok.*;
 
 import java.sql.Date;
 
-@Data
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class DocumentClientRequestDto {
     private String title;
     private String risk;

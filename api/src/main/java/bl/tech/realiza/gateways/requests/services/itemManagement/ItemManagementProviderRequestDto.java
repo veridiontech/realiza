@@ -2,9 +2,12 @@ package bl.tech.realiza.gateways.requests.services.itemManagement;
 
 import bl.tech.realiza.domains.services.ItemManagement;
 import lombok.Builder;
-import lombok.Data;
+import lombok.*;
 
-@Data
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 @Builder
 public class ItemManagementProviderRequestDto {
     private ItemManagement.SolicitationType solicitationType;

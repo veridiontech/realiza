@@ -3,9 +3,12 @@ package bl.tech.realiza.gateways.requests.enterprises;
 import bl.tech.realiza.domains.providers.Provider;
 import bl.tech.realiza.domains.user.User;
 import jakarta.validation.constraints.NotEmpty;
-import lombok.Data;
+import lombok.*;
 
-@Data
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class EnterpriseAndUserRequestDto {
     private String cnpj;
     private String tradeName;

@@ -1,10 +1,13 @@
 package bl.tech.realiza.gateways.requests.contracts;
 
-import lombok.Data;
+import lombok.*;
 
 import java.util.List;
 
-@Data
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class EmployeeToContractRequestDto {
     private List<String> employees;
 }

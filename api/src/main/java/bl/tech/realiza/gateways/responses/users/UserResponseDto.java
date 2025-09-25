@@ -4,12 +4,14 @@ import bl.tech.realiza.domains.user.User;
 import bl.tech.realiza.gateways.responses.clients.branches.BranchResponseDto;
 import bl.tech.realiza.gateways.responses.providers.ProviderResponseDto;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import lombok.Builder;
-import lombok.Data;
+import lombok.*;
 
 import java.util.List;
 
-@Data
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 @Builder
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 public class UserResponseDto {

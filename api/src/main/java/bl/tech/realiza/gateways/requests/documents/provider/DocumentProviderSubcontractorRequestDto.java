@@ -3,11 +3,14 @@ package bl.tech.realiza.gateways.requests.documents.provider;
 import bl.tech.realiza.domains.documents.Document;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
-import lombok.Data;
+import lombok.*;
 
 import java.sql.Date;
 
-@Data
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class DocumentProviderSubcontractorRequestDto {
     private String title;
     private String risk;

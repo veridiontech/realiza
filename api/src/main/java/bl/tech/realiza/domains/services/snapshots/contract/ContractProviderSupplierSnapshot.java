@@ -11,10 +11,11 @@ import lombok.experimental.SuperBuilder;
 import java.util.List;
 
 @EqualsAndHashCode(callSuper = true)
-@Data
-@SuperBuilder
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@SuperBuilder
 @Entity
 @Inheritance(strategy = InheritanceType.JOINED)
 @DiscriminatorValue("SUPPLIER")

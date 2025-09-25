@@ -1,12 +1,15 @@
 package bl.tech.realiza.gateways.requests.employees;
 
 import bl.tech.realiza.domains.employees.Employee;
-import lombok.Data;
+import lombok.*;
 
 import java.sql.Date;
 import java.util.List;
 
-@Data
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class EmployeeForeignerRequestDto {
     private String pis;
     private Employee.MaritalStatus maritalStatus;

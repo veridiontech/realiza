@@ -4,11 +4,14 @@ import bl.tech.realiza.domains.providers.Provider;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
-import lombok.Data;
+import lombok.*;
 
 import java.util.Date;
 
-@Data
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 @Builder
 public class EmailEnterpriseInviteRequestDto {
     @NotEmpty

@@ -3,12 +3,15 @@ package bl.tech.realiza.gateways.requests.users;
 import bl.tech.realiza.domains.user.User;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
-import lombok.Data;
+import lombok.*;
 import org.hibernate.validator.constraints.br.CPF;
 
 import java.util.List;
 
-@Data
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class UserCreateRequestDto {
     @NotEmpty @CPF
     private String cpf;

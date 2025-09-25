@@ -11,10 +11,7 @@ import bl.tech.realiza.domains.providers.ProviderSupplier;
 import bl.tech.realiza.domains.services.FileDocument;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import lombok.experimental.SuperBuilder;
 import org.hibernate.validator.constraints.br.CPF;
 
@@ -24,16 +21,20 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-@Data
-@SuperBuilder
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@SuperBuilder
+@ToString(exclude = {"contractEmployees", "documentEmployees"})
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @Entity
 @Inheritance(strategy = InheritanceType.JOINED)
 @DiscriminatorColumn(name = "employee_type")
 public abstract class Employee {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
+    @EqualsAndHashCode.Include
     private String idEmployee;
     private String pis;
     private MaritalStatus maritalStatus;

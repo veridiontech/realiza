@@ -2,16 +2,14 @@ package bl.tech.realiza.domains.services.snapshots.ids;
 
 import bl.tech.realiza.domains.enums.SnapshotFrequencyEnum;
 import jakarta.persistence.Embeddable;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.io.Serializable;
 import java.util.Date;
 
 @Embeddable
-@Data
+@Getter
+@Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor

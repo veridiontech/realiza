@@ -1,13 +1,16 @@
 package bl.tech.realiza.gateways.requests.employees;
 
 import bl.tech.realiza.domains.employees.Employee;
-import lombok.Data;
+import lombok.*;
 import org.hibernate.validator.constraints.br.CPF;
 
 import java.sql.Date;
 import java.util.List;
 
-@Data
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class EmployeeBrazilianRequestDto {
     private String pis;
     private Employee.MaritalStatus maritalStatus;

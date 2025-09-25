@@ -4,16 +4,17 @@ import bl.tech.realiza.domains.contract.activity.Activity;
 import bl.tech.realiza.domains.contract.serviceType.ServiceType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
+import lombok.*;
 import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 import java.util.List;
 
-@Data
-@Builder
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class SetupMessage implements Serializable {
     private String type;
     private String clientId;

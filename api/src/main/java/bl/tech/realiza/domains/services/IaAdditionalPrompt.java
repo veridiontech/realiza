@@ -4,13 +4,14 @@ import bl.tech.realiza.domains.documents.matrix.DocumentMatrix;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
+import lombok.*;
 import lombok.NoArgsConstructor;
 
-@Data
-@Builder
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 @Entity
 public class IaAdditionalPrompt {
     @Id

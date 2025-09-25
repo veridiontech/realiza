@@ -1,10 +1,13 @@
 package bl.tech.realiza.gateways.requests.users.security;
 
-import lombok.Data;
+import lombok.*;
 
 import java.util.List;
 
-@Data
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class ProfileRequestDto {
     private String name;
     private String description;
@@ -14,7 +17,10 @@ public class ProfileRequestDto {
     private ContractRequest contract;
     private Boolean reception;
 
-    @Data
+    @Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
     public static class DashboardRequest {
         private Boolean general;
         private Boolean provider;
@@ -22,21 +28,30 @@ public class ProfileRequestDto {
         private Boolean documentDetail;
     }
 
-    @Data
+    @Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
     public static class ContractRequest {
         private Boolean finish;
         private Boolean suspend;
         private Boolean create;
     }
 
-    @Data
+    @Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
     public static class DocumentRequest {
         private DocumentType view;
         private DocumentType upload;
         private DocumentType exempt;
     }
 
-    @Data
+    @Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
     public static class DocumentType {
         private Boolean laboral;
         private Boolean workplaceSafety;
