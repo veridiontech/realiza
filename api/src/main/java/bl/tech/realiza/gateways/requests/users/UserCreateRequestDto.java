@@ -4,12 +4,13 @@ import bl.tech.realiza.domains.user.User;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
+import org.hibernate.validator.constraints.br.CPF;
 
 import java.util.List;
 
 @Data
 public class UserCreateRequestDto {
-    @NotEmpty
+    @NotEmpty @CPF
     private String cpf;
     private String description;
     private String position;

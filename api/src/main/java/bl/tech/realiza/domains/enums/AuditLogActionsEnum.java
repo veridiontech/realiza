@@ -15,5 +15,6 @@ public enum AuditLogActionsEnum {
     STATUS_CHANGE,
     ACTIVATE,
     LOGIN,
-    LOGOUT
+    LOGOUT,
+    SUSPEND
 }
