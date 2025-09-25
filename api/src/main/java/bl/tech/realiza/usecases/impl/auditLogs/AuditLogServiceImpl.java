@@ -81,7 +81,13 @@ public class AuditLogServiceImpl implements AuditLogService {
     private final ActivityRepository activityRepository;
 
     @Override
-    public void createAuditLog(String id, AuditLogTypeEnum typeEnum, String description, String justification, String notes, AuditLogActionsEnum action, String userResponsibleId) {
+    public void createAuditLog(String id,
+                               AuditLogTypeEnum typeEnum,
+                               String description,
+                               String justification,
+                               String notes,
+                               AuditLogActionsEnum action,
+                               String userResponsibleId) {
         User userResponsible = userRepository.findById(userResponsibleId)
                 .orElseThrow(() ->  new NotFoundException("User not found"));
         switch (typeEnum) {

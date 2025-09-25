@@ -10,8 +10,13 @@ import org.springframework.transaction.annotation.Transactional;
 
 public interface AuditLogService {
     @Transactional
-    @Async
-    void createAuditLog(String id, AuditLogTypeEnum typeEnum, String description, String justification, String notes, AuditLogActionsEnum action, String userResponsibleId);
+    void createAuditLog(String id,
+                        AuditLogTypeEnum typeEnum,
+                        String description,
+                        String justification,
+                        String notes,
+                        AuditLogActionsEnum action,
+                        String userResponsibleId);
 
     Page<AuditLogResponseDto> getAuditLogs(String id, AuditLogActionsEnum action, AuditLogTypeEnum auditLogTypeEnum, String userId, Pageable pageable);
 }

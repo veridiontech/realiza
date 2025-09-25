@@ -1025,6 +1025,7 @@ public class DashboardService {
         Double conformity = null;
         long totalDocuments = documentRepository.count(documentSpecifications);
         long conformityTrue = documentRepository.count(documentSpecifications.and(DashboardDocumentSpecification.byConformingIsTrue()));
+        long adherenceTrue = documentRepository.count(documentSpecifications.and(DashboardDocumentSpecification.byAdherenceIsTrue()));
 
         conformity = totalDocuments > 0
                 ? new BigDecimal(conformityTrue * 100.0 / totalDocuments).setScale(2, RoundingMode.HALF_UP).doubleValue() : 0;
@@ -1161,6 +1162,11 @@ public class DashboardService {
                 .contractQuantity(contractQuantity)
                 .allocatedEmployeeQuantity(allocatedEmployeeQuantity)
                 .conformity(conformity)
+                .totalDocuments(totalDocuments)
+                .adherent(adherenceTrue)
+                .nonAdherent(totalDocuments - adherenceTrue)
+                .conforming(conformityTrue)
+                .nonConforming(totalDocuments - conformityTrue)
                 .documentStatus(documentStatus)
                 .documentExemption(documentExemption)
                 .pendingRanking(pendingRanking)
@@ -1183,20 +1189,10 @@ public class DashboardService {
         List<DashboardProviderDetailsResponseDto> responseDtos = new ArrayList<>();
         Double adherenceProvider = null;
         Double conformityProvider = null;
-        long adherenceProviderValues = 0;
-        long conformityProviderValues = 0;
-        List<String> documentTypes = new ArrayList<>();
         List<ContractStatusEnum> activeContract = new ArrayList<>();
-        List<Status> statuses = new ArrayList<>();
         if (filters != null) {
-            documentTypes = filters.getDocumentTypes() != null
-                    ? filters.getDocumentTypes()
-                    : new ArrayList<>();
             activeContract = filters.getActiveContract() != null
                     ? filters.getActiveContract()
-                    : new ArrayList<>();
-            statuses = filters.getStatuses() != null
-                    ? filters.getStatuses()
                     : new ArrayList<>();
         }
         if (activeContract.isEmpty()) {
@@ -1242,6 +1238,8 @@ public class DashboardService {
                 conformityRange = DashboardProviderDetailsResponseDto.Conformity.OK;
             }
 
+            Long employeeQuantity = employeeRepository.countAllBySupplier_IdProvider(providerSupplier.getIdProvider());
+
             responseDtos.add(
                     DashboardProviderDetailsResponseDto.builder()
                             .corporateName(providerSupplier.getCorporateName())
@@ -1254,6 +1252,7 @@ public class DashboardService {
                             .adherence(adherenceProvider)
                             .conformity(conformityProvider)
                             .conformityRange(conformityRange)
+                            .employeeQuantity(employeeQuantity)
                             .build()
             );
         }
@@ -1293,6 +1292,8 @@ public class DashboardService {
                 conformityRange = DashboardProviderDetailsResponseDto.Conformity.OK;
             }
 
+            Long employeeQuantity = employeeRepository.countAllBySubcontract_IdProvider(providerSubcontractor.getIdProvider());
+
             responseDtos.add(
                     DashboardProviderDetailsResponseDto.builder()
                             .corporateName(providerSubcontractor.getCorporateName())
@@ -1305,6 +1306,7 @@ public class DashboardService {
                             .adherence(adherenceProvider)
                             .conformity(conformityProvider)
                             .conformityRange(conformityRange)
+                            .employeeQuantity(employeeQuantity)
                             .build()
             );
         }
@@ -1485,7 +1487,6 @@ public class DashboardService {
             employeePosition = documentEmployee.getEmployee().getPosition().getTitle();
             employeeCbo = documentEmployee.getEmployee().getCbo().getTitle();
         }
-
 
         return DashboardDocumentDetailsResponseDto.builder()
                 .branchName(branchName)
