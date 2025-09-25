@@ -1,8 +1,11 @@
 package bl.tech.realiza.gateways.requests.ultragaz;
 
-import lombok.Data;
+import lombok.*;
 
-@Data
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class CenterRequestDto {
     private String idCenter;
     private String name;

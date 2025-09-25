@@ -1,12 +1,15 @@
 package bl.tech.realiza.gateways.requests.contracts;
 
 import bl.tech.realiza.domains.contract.Contract;
-import lombok.Data;
+import lombok.*;
 
 import java.sql.Date;
 import java.util.List;
 
-@Data
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class ContractSupplierPostRequestDto {
     // contract
     private String serviceName;
@@ -24,7 +27,10 @@ public class ContractSupplierPostRequestDto {
     private String idBranch;
     private ProviderDatas providerDatas;
 
-    @Data
+    @Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
     public static class ProviderDatas {
         private String corporateName;
         private String email;

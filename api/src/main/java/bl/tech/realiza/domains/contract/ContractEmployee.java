@@ -7,10 +7,12 @@ import lombok.*;
 
 import java.time.LocalDateTime;
 
-@Data
+@Getter
+@Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@ToString(exclude = {"contract", "employee"})
 @Entity
 @Table(
         name = "CONTRACT_EMPLOYEE",

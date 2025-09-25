@@ -3,16 +3,17 @@ package bl.tech.realiza.services.queue.replication;
 import bl.tech.realiza.domains.enums.RiskEnum;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
+import lombok.*;
 import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 import java.util.List;
 
-@Data
-@Builder
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class ReplicationMessage implements Serializable {
     private String type;
     private List<String> branchIds;

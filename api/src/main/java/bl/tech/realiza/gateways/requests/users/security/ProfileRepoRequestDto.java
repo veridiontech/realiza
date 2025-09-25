@@ -1,8 +1,11 @@
 package bl.tech.realiza.gateways.requests.users.security;
 
-import lombok.Data;
+import lombok.*;
 
-@Data
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class ProfileRepoRequestDto {
     private String name;
     private String description;

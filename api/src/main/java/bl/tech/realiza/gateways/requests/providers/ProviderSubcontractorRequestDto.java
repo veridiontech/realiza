@@ -1,10 +1,13 @@
 package bl.tech.realiza.gateways.requests.providers;
 
-import lombok.Data;
+import lombok.*;
 
 import java.util.List;
 
-@Data
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class ProviderSubcontractorRequestDto {
     private String cnpj;
     private String tradeName;

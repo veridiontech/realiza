@@ -4,11 +4,14 @@ import bl.tech.realiza.domains.documents.Document;
 import bl.tech.realiza.domains.enums.RiskLevel;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Builder;
-import lombok.Data;
+import lombok.*;
 
 import java.util.List;
 
-@Data
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 @Builder
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 public class DashboardGeneralDetailsResponseDto {
@@ -25,7 +28,10 @@ public class DashboardGeneralDetailsResponseDto {
     private List<Exemption> documentExemption;
     private List<Pending> pendingRanking;
 
-    @Data
+    @Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
     @Builder
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
     public static class TypeStatus {
@@ -33,7 +39,10 @@ public class DashboardGeneralDetailsResponseDto {
         private List<Status> status;
     }
 
-    @Data
+    @Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
     @Builder
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
     public static class Status {
@@ -41,7 +50,10 @@ public class DashboardGeneralDetailsResponseDto {
         private Integer quantity;
     }
 
-    @Data
+    @Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
     @Builder
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
     public static class Exemption {
@@ -49,7 +61,10 @@ public class DashboardGeneralDetailsResponseDto {
         private Integer quantity;
     }
 
-    @Data
+    @Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
     @Builder
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
     public static class Pending {

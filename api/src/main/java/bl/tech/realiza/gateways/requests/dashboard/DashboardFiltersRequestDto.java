@@ -4,12 +4,15 @@ import bl.tech.realiza.domains.documents.Document;
 import bl.tech.realiza.domains.employees.Employee;
 import bl.tech.realiza.domains.enums.ContractStatusEnum;
 import bl.tech.realiza.domains.enums.DocumentValidityEnum;
-import lombok.Data;
+import lombok.*;
 
 import java.time.LocalDate;
 import java.util.List;
 
-@Data
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class DashboardFiltersRequestDto {
     private List<String> branchIds;
     private List<String> providerIds;

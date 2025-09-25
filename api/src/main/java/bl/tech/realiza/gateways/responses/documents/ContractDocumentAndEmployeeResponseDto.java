@@ -3,12 +3,15 @@ package bl.tech.realiza.gateways.responses.documents;
 import bl.tech.realiza.domains.documents.Document.Status;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Builder;
-import lombok.Data;
+import lombok.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
-@Data
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 @Builder
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 public class ContractDocumentAndEmployeeResponseDto {
@@ -17,7 +20,10 @@ public class ContractDocumentAndEmployeeResponseDto {
     private List<DocumentDto> employeeDocuments;
     private List<EmployeeDto> employeeDtos;
 
-    @Data
+    @Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
     @Builder
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
     public static class DocumentDto {
@@ -34,7 +40,10 @@ public class ContractDocumentAndEmployeeResponseDto {
         private LocalDateTime lastCheck;
     }
 
-    @Data
+    @Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
     @Builder
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
     public static class EmployeeDto {

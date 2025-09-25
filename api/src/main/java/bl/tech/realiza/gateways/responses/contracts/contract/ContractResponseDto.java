@@ -4,12 +4,15 @@ import bl.tech.realiza.domains.contract.Contract;
 import bl.tech.realiza.domains.enums.ContractStatusEnum;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Builder;
-import lombok.Data;
+import lombok.*;
 
 import java.sql.Date;
 import java.util.List;
 
-@Data
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 @Builder
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 public class ContractResponseDto {

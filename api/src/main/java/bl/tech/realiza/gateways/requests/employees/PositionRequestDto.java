@@ -1,8 +1,12 @@
 package bl.tech.realiza.gateways.requests.employees;
 
-import lombok.Data;
+import lombok.*;
 
-@Data
+
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class PositionRequestDto {
     public String title;
 }

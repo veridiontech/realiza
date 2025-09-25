@@ -2,11 +2,14 @@ package bl.tech.realiza.gateways.requests.contracts.activity;
 
 import bl.tech.realiza.domains.contract.activity.Activity;
 import bl.tech.realiza.domains.enums.RiskEnum;
-import lombok.Data;
+import lombok.*;
 
 import java.util.List;
 
-@Data
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class ActivityRequestDto {
     private String title;
     private RiskEnum risk;

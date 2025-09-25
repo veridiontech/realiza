@@ -2,13 +2,16 @@ package bl.tech.realiza.gateways.responses.contracts.contract;
 
 import bl.tech.realiza.domains.contract.Contract;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import lombok.Builder;
-import lombok.Data;
+import lombok.*;
+
 
 import java.sql.Date;
 import java.util.List;
 
-@Data
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 @Builder
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 public class ContractSupplierResponseDto {

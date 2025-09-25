@@ -1,9 +1,12 @@
 package bl.tech.realiza.gateways.requests.users;
 
 import bl.tech.realiza.domains.user.User;
-import lombok.Data;
+import lombok.*;
 
-@Data
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class UserManagerRequestDto {
     private String cpf;
     private String description;

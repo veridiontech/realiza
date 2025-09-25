@@ -3,11 +3,14 @@ package bl.tech.realiza.gateways.responses.services.itemManagement.user;
 import bl.tech.realiza.domains.services.ItemManagement;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Builder;
-import lombok.Data;
+import lombok.*;
 
 import java.time.LocalDateTime;
 
-@Data
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 @Builder
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 public class ItemManagementUserDetailsResponseDto {
@@ -20,7 +23,10 @@ public class ItemManagementUserDetailsResponseDto {
     private Requester requester;
     private NewUser newUser;
 
-    @Data
+    @Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
     @Builder
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
     public static class Client {
@@ -28,7 +34,10 @@ public class ItemManagementUserDetailsResponseDto {
         private String tradeName;
     }
 
-    @Data
+    @Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
     @Builder
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
     public static class NewUser {
@@ -37,7 +46,10 @@ public class ItemManagementUserDetailsResponseDto {
         private String email;
     }
 
-    @Data
+    @Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
     @Builder
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
     public static class Requester {

@@ -2,11 +2,14 @@ package bl.tech.realiza.gateways.responses.dashboard;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Builder;
-import lombok.Data;
+import lombok.*;
 
 import java.util.List;
 
-@Data
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 @Builder
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 public class DashboardDetailsResponseDto {
@@ -14,7 +17,10 @@ public class DashboardDetailsResponseDto {
     private List<Exemption> documentExemption;
     private List<Pending> pendingRanking;
 
-    @Data
+    @Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
     @Builder
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
     public static class TypeStatus {
@@ -22,7 +28,10 @@ public class DashboardDetailsResponseDto {
         private List<Status> status;
     }
 
-    @Data
+    @Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
     @Builder
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
     public static class Status {
@@ -30,7 +39,10 @@ public class DashboardDetailsResponseDto {
         private Integer quantity;
     }
 
-    @Data
+    @Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
     @Builder
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
     public static class Exemption {
@@ -38,7 +50,10 @@ public class DashboardDetailsResponseDto {
         private Integer quantity;
     }
 
-    @Data
+    @Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
     @Builder
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
     public static class Pending {

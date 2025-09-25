@@ -1,12 +1,14 @@
 package bl.tech.realiza.gateways.requests.clients.branch;
 
 import jakarta.validation.constraints.NotEmpty;
-import lombok.Builder;
-import lombok.Data;
+import lombok.*;
 
 import java.util.List;
 
-@Data
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 @Builder
 public class BranchCreateRequestDto {
     @NotEmpty

@@ -1,11 +1,14 @@
 package bl.tech.realiza.gateways.requests.clients.branch;
 
 import jakarta.validation.constraints.NotEmpty;
-import lombok.Data;
+import lombok.*;
 
 import java.util.List;
 
-@Data
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class BranchUpdateRequestDto {
     private String name;
     private String cnpj;

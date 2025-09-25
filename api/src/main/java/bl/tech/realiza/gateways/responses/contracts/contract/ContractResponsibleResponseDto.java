@@ -2,18 +2,24 @@ package bl.tech.realiza.gateways.responses.contracts.contract;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Builder;
-import lombok.Data;
+import lombok.*;
 
 import java.util.List;
 
-@Data
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 @Builder
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 public class ContractResponsibleResponseDto {
     private List<ContractResponsibleInfosResponseDto> contracts;
     private List<ResponsibleResponseDto> responsibleList;
 
-    @Data
+    @Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
     @Builder
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
     public static class ContractResponsibleInfosResponseDto {
@@ -23,7 +29,10 @@ public class ContractResponsibleResponseDto {
         private String responsibleFullName;
     }
 
-    @Data
+    @Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
     @Builder
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
     public static class ResponsibleResponseDto {

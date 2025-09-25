@@ -3,9 +3,12 @@ package bl.tech.realiza.gateways.responses.enterprises;
 import bl.tech.realiza.domains.user.User;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Builder;
-import lombok.Data;
+import lombok.*;
 
-@Data
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 @Builder
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 public class EnterpriseAndUserResponseDto {

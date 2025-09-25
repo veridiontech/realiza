@@ -4,9 +4,12 @@ import bl.tech.realiza.domains.documents.Document.Status;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Builder;
-import lombok.Data;
+import lombok.*;
 
-@Data
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 @Builder
 public class DocumentStatusChangeRequestDto {
     @NotNull
