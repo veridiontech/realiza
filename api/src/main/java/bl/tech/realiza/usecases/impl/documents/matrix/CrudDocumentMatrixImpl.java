@@ -2,9 +2,11 @@ package bl.tech.realiza.usecases.impl.documents.matrix;
 
 import bl.tech.realiza.domains.documents.matrix.DocumentMatrix;
 import bl.tech.realiza.domains.documents.matrix.DocumentMatrixGroup;
+import bl.tech.realiza.domains.services.IaAdditionalPrompt;
 import bl.tech.realiza.exceptions.BadRequestException;
 import bl.tech.realiza.gateways.repositories.documents.matrix.DocumentMatrixGroupRepository;
 import bl.tech.realiza.gateways.repositories.documents.matrix.DocumentMatrixRepository;
+import bl.tech.realiza.gateways.repositories.services.IaAdditionalPromptRepository;
 import bl.tech.realiza.gateways.requests.documents.matrix.DocumentMatrixRequestDto;
 import bl.tech.realiza.gateways.responses.documents.DocumentMatrixResponseDto;
 import bl.tech.realiza.services.queue.replication.ReplicationMessage;
@@ -30,6 +32,7 @@ public class CrudDocumentMatrixImpl implements CrudDocumentMatrix {
 //    private final DocumentMatrixSubgroupRepository documentMatrixSubgroupRepository;
     private final ReplicationQueueProducer replicationQueueProducer;
     private final DocumentMatrixGroupRepository documentMatrixGroupRepository;
+    private final IaAdditionalPromptRepository iaAdditionalPromptRepository;
 
     @Override
     public DocumentMatrixResponseDto save(DocumentMatrixRequestDto documentMatrixRequestDto) {
@@ -53,6 +56,10 @@ public class CrudDocumentMatrixImpl implements CrudDocumentMatrix {
                 .fixedValidityAt(parseDayMonth(documentMatrixRequestDto.getFixedValidityAt()))
                 .group(documentMatrixGroup)
 //                .subGroup(documentMatrixSubgroup)
+                .build());
+
+        iaAdditionalPromptRepository.save(IaAdditionalPrompt.builder()
+                        .documentMatrix(savedDocumentMatrix)
                 .build());
 
         replicationQueueProducer.send(ReplicationMessage.builder()
