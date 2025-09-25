@@ -217,7 +217,7 @@ public class CrudContractImpl implements CrudContract {
                         .orElse(null);
                 if (userResponsible != null) {
                     auditLogService.createAuditLog(
-                            employee.getIdEmployee(),
+                            contract.getIdContract(),
                             CONTRACT,
                             userResponsible.getFullName() + " alocou colaborador "
                                     + employee.getFullName()
