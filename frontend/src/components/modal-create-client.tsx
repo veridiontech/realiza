@@ -74,8 +74,6 @@ const createClienteFormSchema = z.object({
   city: z.string().nonempty("Cidade é obrigatória"),
   address: z.string().nonempty("Endereço é obrigatório"),
   number: z.string().nonempty("Número é obrigatório"),
-  // Campo para os IDs das atividades adicionado
-  activityIds: z.array(z.string()).optional().default([]),
 });
 
 type CreateClientFormSchema = z.infer<typeof createClienteFormSchema> & {
@@ -93,8 +91,8 @@ export function ModalCreateCliente() {
   const { addClient, setClient } = useClient();
   
   // Novos estados para atividades
-  const [activities, setActivities] = useState<Activity[]>([]);
-  const [isLoadingActivities, setIsLoadingActivities] = useState(false);
+  const [, setActivities] = useState<Activity[]>([]);
+  const [, setIsLoadingActivities] = useState(false);
 
   const {
     register,
@@ -108,7 +106,6 @@ export function ModalCreateCliente() {
     mode: "onSubmit",
     defaultValues: {
       profilesFromRepo: false,
-      activityIds: [], // Valor padrão
     }
   });
 
@@ -191,7 +188,6 @@ export function ModalCreateCliente() {
         city: data.city,
         address: data.address,
         number: data.number,
-        activityIds: data.activityIds, // Incluído no payload
     };
     setIsLoading(true);
     try {
@@ -402,7 +398,7 @@ export function ModalCreateCliente() {
               </Label>
             </div>
 
-            {/* SEÇÃO DE ATIVIDADES */}
+            {/* SEÇÃO DE ATIVIDADES
             <div className="mt-4">
               <Label className="text-white">Atividades</Label>
               <div className="p-2 mt-1 bg-white/10 rounded-md max-h-40 overflow-y-auto">
@@ -428,7 +424,7 @@ export function ModalCreateCliente() {
                 )}
               </div>
               {errors.activityIds && <span className="text-sm text-red-600">{errors.activityIds.message}</span>}
-            </div>
+            </div> */}
 
             <div className="mt-2">
               {isLoading ? (

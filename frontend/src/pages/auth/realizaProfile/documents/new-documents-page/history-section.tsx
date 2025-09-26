@@ -121,12 +121,6 @@ export function HistorySection({ idBranch }: HistorySectionProps) {
   const [selectedParamType, setSelectedParamType] =
     useState<ParamType>("documents");
 
-  {/*const historyData = [
-    { date: "2025-06-20", action: "Alteração na configuração de serviços", user: "Admin" },
-    { date: "2025-06-18", action: "Adição de novo perfil de permissão", user: "João" },
-    { date: "2025-06-15", action: "Atualização do cadastro de documentos", user: "Maria" },
-  ];*/}
-
   useEffect(() => {
   if (!idBranch) return;
   fetchParametrization();
@@ -164,8 +158,8 @@ const fetchAuditLog = async () => {
         Authorization: `Bearer ${token}`,
       },
       params: {
-        auditEntityTypeEnum: "BRANCH",
-        entityId: idBranch,
+        auditLogTypeEnum: "BRANCH",
+        id: idBranch,
         direction: sortOrder.toUpperCase(),
         page: 0,
         size: 10,
@@ -175,7 +169,7 @@ const fetchAuditLog = async () => {
         endDate: endDate || undefined,
       },
     });
-
+    console.log("Dados" , res.data);
     setHistoryData(res.data.content || []);
   } catch (err) {
     console.error("Erro ao buscar histórico de auditoria:", err);
@@ -428,7 +422,7 @@ const fetchAuditLog = async () => {
                   key={item.id}
                   className="text-sm border-b border-gray-200 last:border-b-0 hover:bg-gray-50 transition duration-150 ease-in-out"
                 >
-                  <td className="px-6 py-3">{item.date.slice(0, 10)}</td>
+                  <td className="px-6 py-3">{item.date?.slice(0, 10) ?? '—'}</td>
                   <td className="px-6 py-3">{item.action}</td>
                   <td className="px-6 py-3">{item.userName}</td>
                 </tr>

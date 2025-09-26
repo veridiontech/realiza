@@ -1194,10 +1194,10 @@ export function ConfigPanel() {
     }
 
     const documentTypes = [
-        { value: 'thirdCompany', label: 'Cadastro e Certidões' },
-        { value: 'thirdCollaborators', label: 'Saúde' },
-        { value: 'otherRequirements', label: 'Segurança do Trabalho' },
-        { value: 'ambient', label: 'Meio Ambiente' },
+        { value: 'cadastro e certidões', label: 'Cadastro e Certidões' },
+        { value: 'saude', label: 'Saúde' },
+        { value: 'segurança do trabalho', label: 'Segurança do Trabalho' },
+        { value: 'meio ambiente', label: 'Meio Ambiente' },
         { value: 'trabalhista', label: 'Trabalhista' },
         { value: 'geral', label: 'Geral' },
     ];
