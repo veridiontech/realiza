@@ -21,6 +21,7 @@ public class ItemManagement {
     @GeneratedValue(strategy = GenerationType.UUID)
     private String idSolicitation;
     private SolicitationType solicitationType;
+    @Enumerated(EnumType.STRING)
     @Builder.Default
     private Status status = Status.PENDING;
     @Builder.Default

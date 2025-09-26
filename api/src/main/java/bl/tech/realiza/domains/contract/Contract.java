@@ -41,6 +41,7 @@ public abstract class Contract {
     private String contractReference;
     private String description;
     private String allocatedLimit;
+    @Enumerated(EnumType.STRING)
     @Builder.Default
     private ContractStatusEnum status = ContractStatusEnum.PENDING;
     @Builder.Default
