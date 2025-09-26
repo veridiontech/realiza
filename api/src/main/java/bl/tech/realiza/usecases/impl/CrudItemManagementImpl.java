@@ -52,6 +52,7 @@ import org.hibernate.Hibernate;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Date;
 import java.time.LocalDate;
@@ -182,6 +183,7 @@ public class CrudItemManagementImpl implements CrudItemManagement {
                 .orElseThrow(() -> new NotFoundException("Solicitation not found")));
     }
 
+    @Transactional
     @Override
     public String approveSolicitation(String idSolicitation) {
         ItemManagement solicitation = itemManagementRepository.findById(idSolicitation)
@@ -198,16 +200,35 @@ public class CrudItemManagementImpl implements CrudItemManagement {
             // enviar e-mail convite pedindo para finalizar cadastro
         } else if (solicitation.getNewProvider() != null) {
 
-            Provider provider = providerRepository.findById(solicitation.getNewProvider().getIdProvider())
+            Provider providerProxy = providerRepository.findById(solicitation.getNewProvider().getIdProvider())
                     .orElseThrow(() -> new NotFoundException("Provider not found"));
+
+            Provider provider = (Provider) Hibernate.unproxy(providerProxy);
 
             provider.setIsActive(true);
 
             providerRepository.save(provider);
 
+            String contractId = null;
+            if (provider instanceof ProviderSupplier supplier) {
+                contractId = supplier.getContractsSupplier()
+                        .stream()
+                        .sorted(Comparator.comparing(Contract::getCreationDate).reversed())
+                        .map(Contract::getIdContract)
+                        .findFirst()
+                        .orElseThrow(() -> new NotFoundException("Contract supplier not found"));
+            } else if (provider instanceof ProviderSubcontractor subcontractor) {
+                contractId = subcontractor.getContractsSubcontractor()
+                        .stream()
+                        .sorted(Comparator.comparing(Contract::getCreationDate).reversed())
+                        .map(Contract::getIdContract)
+                        .findFirst()
+                        .orElseThrow(() -> new NotFoundException("Contract subcontractor not found"));
+            } else {
+                throw new NotFoundException("Contract not found");
+            }
 
-            Contract contract = contractRepository.findById(
-                            contractProviderSupplierRepository.findTopByProviderSupplier_IdProviderAndStatusOrderByCreationDateDesc(provider.getIdProvider(), ContractStatusEnum.PENDING).getIdContract())
+            Contract contract = contractRepository.findById(contractId)
                     .orElseThrow(() -> new NotFoundException("Contract not found"));
 
             contract.setIsActive(ATIVADO);
@@ -530,6 +551,7 @@ public class CrudItemManagementImpl implements CrudItemManagement {
         return "Solicitation approved";
     }
 
+    @Transactional
     @Override
     public String denySolicitation(String idSolicitation) {
 
