@@ -17,16 +17,15 @@ import { ip } from "@/utils/ip";
 import { useClient } from "@/context/Client-Provider";
 import { useEffect, useMemo, useRef, useState } from "react";
 
-
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 
 const mockHistoryData = [
-  { month: 'Mai/25', Aderência: 83.04, Conformidade: 79.34 },
-  { month: 'Jun/25', Aderência: 86.52, Conformidade: 82.00 },
-  { month: 'Jul/25', Aderência: 91.27, Conformidade: 86.10 },
-  { month: 'Ago/25', Aderência: 91.01, Conformidade: 88.30 },
-  { month: 'Set/25', Aderência: 92.41, Conformidade: 88.01 },
+  { month: "Mai/25", Aderência: 83.04, Conformidade: 79.34 },
+  { month: "Jun/25", Aderência: 86.52, Conformidade: 82.0 },
+  { month: "Jul/25", Aderência: 91.27, Conformidade: 86.1 },
+  { month: "Ago/25", Aderência: 91.01, Conformidade: 88.3 },
+  { month: "Set/25", Aderência: 92.41, Conformidade: 88.01 },
 ];
 
 const monthMap: { [key: string]: string } = {
@@ -112,7 +111,7 @@ function MultiSelectDropdown(props: {
     options,
     values,
     onChange,
-    placeholder = "Selecionar",
+    placeholder = "",
     className,
   } = props;
   const [open, setOpen] = useState(false);
@@ -263,6 +262,17 @@ function filterDocumentStatus(
   return chartRows;
 }
 
+const contractStatusMap: { [key: string]: string } = {
+  PENDING: "Pendente",
+  DENIED: "Negado",
+  ACTIVE: "Ativo",
+  FINISHED: "Finalizado",
+  FINISH_REQUESTED: "Solicitação de Finalização",
+  SUSPENDED: "Suspenso",
+  SUSPEND_REQUESTED: "Solicitação de Suspensão",
+  REACTIVATION_REQUESTED: "Solicitação de Reativação",
+};
+
 function filterExemption(
   raw: RawExemption[],
   filters: FiltersState,
@@ -342,7 +352,6 @@ export const MonittoringBis = () => {
   const { client } = useClient();
   const clientId = client?.idClient;
   const token = localStorage.getItem("tokenClient");
-
 
   const USE_MOCK_DATA = true;
 
@@ -465,6 +474,9 @@ export const MonittoringBis = () => {
           documentDoesBlock = [],
           documentValidity = [],
         } = data ?? {};
+
+        console.log("STATUS RECEBIDOS DA API:", statuses);
+
         setBranchIdName(buildIdNameMap(branches));
         setProviderIdName(buildIdNameMap(providers));
         setRespIdName(buildIdNameMap(responsibles));
@@ -483,7 +495,12 @@ export const MonittoringBis = () => {
         setProviderOpts(toOptionsIdName(providers));
         setRespOpts(toOptionsIdName(responsibles));
         setDocTypeOpts(toOptions(documentTypes));
-        setContractStatusOpts(toOptions(contractStatus));
+        setContractStatusOpts(
+          contractStatus.map((s: string) => ({
+            value: s,
+            label: contractStatusMap[s] || s, // Usa a tradução do mapa, ou o original se não encontrar
+          }))
+        );
         setStatusOpts(toOptions(statuses));
         setDocTitleOpts(toOptions(documentTitles));
         setProviderCnpjOpts(toOptions(providerCnpjs));
@@ -623,7 +640,6 @@ export const MonittoringBis = () => {
   useEffect(() => {
     // Só busca se a aba "historico" estiver ativa e tiver um clientId
     if (activeTab === "historico" && clientId) {
-
       if (USE_MOCK_DATA) {
         console.log("--- USANDO DADOS MOCKADOS PARA O GRÁFICO ---");
         setIsLoadingHistory(true);
@@ -1015,49 +1031,6 @@ export const MonittoringBis = () => {
                   values={draft.providerIds}
                   onChange={(v) => setDraft((s) => ({ ...s, providerIds: v }))}
                 />
-                               
-                <MultiSelectDropdown
-                  label="Tipo de Documento"
-                  options={docTypeOpts}
-                  values={draft.documentTypes}
-                  onChange={(v) =>
-                    setDraft((s) => ({ ...s, documentTypes: v }))
-                  }
-                />
-                               
-                <MultiSelectDropdown
-                  label="Responsáveis"
-                  options={respOpts}
-                  values={draft.responsibleIds}
-                  onChange={(v) =>
-                    setDraft((s) => ({ ...s, responsibleIds: v }))
-                  }
-                />
-                               
-                <MultiSelectDropdown
-                  label="Status do Contrato"
-                  options={contractStatusOpts}
-                  values={draft.activeContract}
-                  onChange={(v) =>
-                    setDraft((s) => ({ ...s, activeContract: v }))
-                  }
-                />
-                               
-                <MultiSelectDropdown
-                  label="Status"
-                  options={statusOpts}
-                  values={draft.statuses}
-                  onChange={(v) => setDraft((s) => ({ ...s, statuses: v }))}
-                />
-                               
-                <MultiSelectDropdown
-                  label="Títulos de Documento"
-                  options={docTitleOpts}
-                  values={draft.documentTitles}
-                  onChange={(v) =>
-                    setDraft((s) => ({ ...s, documentTitles: v }))
-                  }
-                />
                 <MultiSelectDropdown
                   label="CNPJ do Fornecedor"
                   options={providerCnpjOpts}
@@ -1072,12 +1045,30 @@ export const MonittoringBis = () => {
                   values={draft.contractIds}
                   onChange={(v) => setDraft((s) => ({ ...s, contractIds: v }))}
                 />
+                           
+                <MultiSelectDropdown
+                  label="Status do Contrato"
+                  options={contractStatusOpts}
+                  values={draft.activeContract}
+                  onChange={(v) =>
+                    setDraft((s) => ({ ...s, activeContract: v }))
+                  }
+                />
+                <MultiSelectDropdown
+                  label="Responsáveis"
+                  options={respOpts}
+                  values={draft.responsibleIds}
+                  onChange={(v) =>
+                    setDraft((s) => ({ ...s, responsibleIds: v }))
+                  }
+                />
                 <MultiSelectDropdown
                   label="Funcionários"
                   options={employeeOpts}
                   values={draft.employeeIds}
                   onChange={(v) => setDraft((s) => ({ ...s, employeeIds: v }))}
                 />
+                 
                 <MultiSelectDropdown
                   label="CPF do Funcionário"
                   options={employeeCpfOpts}
@@ -1092,8 +1083,33 @@ export const MonittoringBis = () => {
                     setDraft((s) => ({ ...s, employeeSituations: v }))
                   }
                 />
+                   
                 <MultiSelectDropdown
-                  label="Documento Bloqueia?"
+                  label="Tipo de Documento"
+                  options={docTypeOpts}
+                  values={draft.documentTypes}
+                  onChange={(v) =>
+                    setDraft((s) => ({ ...s, documentTypes: v }))
+                  }
+                />
+                                                               
+                <MultiSelectDropdown
+                  label="Status de Documento"
+                  options={statusOpts}
+                  values={draft.statuses}
+                  onChange={(v) => setDraft((s) => ({ ...s, statuses: v }))}
+                />
+                             
+                <MultiSelectDropdown
+                  label="Títulos de Documento"
+                  options={docTitleOpts}
+                  values={draft.documentTitles}
+                  onChange={(v) =>
+                    setDraft((s) => ({ ...s, documentTitles: v }))
+                  }
+                />
+                <MultiSelectDropdown
+                  label="Documento Bloqueia ?"
                   options={docBlockOpts}
                   values={draft.documentDoesBlock.map(String)}
                   onChange={(v) =>
@@ -1242,45 +1258,6 @@ export const MonittoringBis = () => {
                   values={draft.providerIds}
                   onChange={(v) => setDraft((s) => ({ ...s, providerIds: v }))}
                 />
-                               
-                <MultiSelectDropdown
-                  label="Tipo de Documento"
-                  options={docTypeOpts}
-                  values={draft.documentTypes}
-                  onChange={(v) =>
-                    setDraft((s) => ({ ...s, documentTypes: v }))
-                  }
-                />
-                <MultiSelectDropdown
-                  label="Responsáveis"
-                  options={respOpts}
-                  values={draft.responsibleIds}
-                  onChange={(v) =>
-                    setDraft((s) => ({ ...s, responsibleIds: v }))
-                  }
-                />
-                <MultiSelectDropdown
-                  label="Status do Contrato"
-                  options={contractStatusOpts}
-                  values={draft.activeContract}
-                  onChange={(v) =>
-                    setDraft((s) => ({ ...s, activeContract: v }))
-                  }
-                />
-                <MultiSelectDropdown
-                  label="Status"
-                  options={statusOpts}
-                  values={draft.statuses}
-                  onChange={(v) => setDraft((s) => ({ ...s, statuses: v }))}
-                />
-                <MultiSelectDropdown
-                  label="Títulos de Documento"
-                  options={docTitleOpts}
-                  values={draft.documentTitles}
-                  onChange={(v) =>
-                    setDraft((s) => ({ ...s, documentTitles: v }))
-                  }
-                />
                 <MultiSelectDropdown
                   label="CNPJ do Fornecedor"
                   options={providerCnpjOpts}
@@ -1295,12 +1272,30 @@ export const MonittoringBis = () => {
                   values={draft.contractIds}
                   onChange={(v) => setDraft((s) => ({ ...s, contractIds: v }))}
                 />
+                           
+                <MultiSelectDropdown
+                  label="Status do Contrato"
+                  options={contractStatusOpts}
+                  values={draft.activeContract}
+                  onChange={(v) =>
+                    setDraft((s) => ({ ...s, activeContract: v }))
+                  }
+                />
+                <MultiSelectDropdown
+                  label="Responsáveis"
+                  options={respOpts}
+                  values={draft.responsibleIds}
+                  onChange={(v) =>
+                    setDraft((s) => ({ ...s, responsibleIds: v }))
+                  }
+                />
                 <MultiSelectDropdown
                   label="Funcionários"
                   options={employeeOpts}
                   values={draft.employeeIds}
                   onChange={(v) => setDraft((s) => ({ ...s, employeeIds: v }))}
                 />
+                 
                 <MultiSelectDropdown
                   label="CPF do Funcionário"
                   options={employeeCpfOpts}
@@ -1315,8 +1310,33 @@ export const MonittoringBis = () => {
                     setDraft((s) => ({ ...s, employeeSituations: v }))
                   }
                 />
+                   
                 <MultiSelectDropdown
-                  label="Documento Bloqueia?"
+                  label="Tipo de Documento"
+                  options={docTypeOpts}
+                  values={draft.documentTypes}
+                  onChange={(v) =>
+                    setDraft((s) => ({ ...s, documentTypes: v }))
+                  }
+                />
+                                                               
+                <MultiSelectDropdown
+                  label="Status de Documento"
+                  options={statusOpts}
+                  values={draft.statuses}
+                  onChange={(v) => setDraft((s) => ({ ...s, statuses: v }))}
+                />
+                             
+                <MultiSelectDropdown
+                  label="Títulos de Documento"
+                  options={docTitleOpts}
+                  values={draft.documentTitles}
+                  onChange={(v) =>
+                    setDraft((s) => ({ ...s, documentTitles: v }))
+                  }
+                />
+                <MultiSelectDropdown
+                  label="Documento Bloqueia ?"
                   options={docBlockOpts}
                   values={draft.documentDoesBlock.map(String)}
                   onChange={(v) =>
@@ -1368,12 +1388,10 @@ export const MonittoringBis = () => {
         )}
         {activeTab === "historico" && (
           <div>
-            {/* A mesma seção de filtros pode ser reutilizada aqui */}
             <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
               <h2 className="text-lg font-semibold text-gray-800">Filtros</h2>
-              {/* Você pode adicionar filtros de data aqui se quiser */}
+
               <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4">
-                               
                 <MultiSelectDropdown
                   label="Unidades"
                   options={branchOpts}
@@ -1387,49 +1405,6 @@ export const MonittoringBis = () => {
                   values={draft.providerIds}
                   onChange={(v) => setDraft((s) => ({ ...s, providerIds: v }))}
                 />
-                               
-                <MultiSelectDropdown
-                  label="Tipo de Documento"
-                  options={docTypeOpts}
-                  values={draft.documentTypes}
-                  onChange={(v) =>
-                    setDraft((s) => ({ ...s, documentTypes: v }))
-                  }
-                />
-                               
-                <MultiSelectDropdown
-                  label="Responsáveis"
-                  options={respOpts}
-                  values={draft.responsibleIds}
-                  onChange={(v) =>
-                    setDraft((s) => ({ ...s, responsibleIds: v }))
-                  }
-                />
-                               
-                <MultiSelectDropdown
-                  label="Status do Contrato"
-                  options={contractStatusOpts}
-                  values={draft.activeContract}
-                  onChange={(v) =>
-                    setDraft((s) => ({ ...s, activeContract: v }))
-                  }
-                />
-                               
-                <MultiSelectDropdown
-                  label="Status"
-                  options={statusOpts}
-                  values={draft.statuses}
-                  onChange={(v) => setDraft((s) => ({ ...s, statuses: v }))}
-                />
-                               
-                <MultiSelectDropdown
-                  label="Títulos de Documento"
-                  options={docTitleOpts}
-                  values={draft.documentTitles}
-                  onChange={(v) =>
-                    setDraft((s) => ({ ...s, documentTitles: v }))
-                  }
-                />
                 <MultiSelectDropdown
                   label="CNPJ do Fornecedor"
                   options={providerCnpjOpts}
@@ -1438,70 +1413,60 @@ export const MonittoringBis = () => {
                     setDraft((s) => ({ ...s, providerCnpjs: v }))
                   }
                 />
-                <MultiSelectDropdown
-                  label="Contratos"
-                  options={contractOpts}
-                  values={draft.contractIds}
-                  onChange={(v) => setDraft((s) => ({ ...s, contractIds: v }))}
-                />
-                <MultiSelectDropdown
-                  label="Funcionários"
-                  options={employeeOpts}
-                  values={draft.employeeIds}
-                  onChange={(v) => setDraft((s) => ({ ...s, employeeIds: v }))}
-                />
-                <MultiSelectDropdown
-                  label="CPF do Funcionário"
-                  options={employeeCpfOpts}
-                  values={draft.employeeCpfs}
-                  onChange={(v) => setDraft((s) => ({ ...s, employeeCpfs: v }))}
-                />
-                <MultiSelectDropdown
-                  label="Situação do Funcionário"
-                  options={employeeSituationOpts}
-                  values={draft.employeeSituations}
+
+                 <MultiSelectDropdown
+                  label="Responsáveis"
+                  options={respOpts}
+                  values={draft.responsibleIds}
                   onChange={(v) =>
-                    setDraft((s) => ({ ...s, employeeSituations: v }))
+                    setDraft((s) => ({ ...s, responsibleIds: v }))
                   }
                 />
-                <MultiSelectDropdown
-                  label="Documento Bloqueia?"
-                  options={docBlockOpts}
-                  values={draft.documentDoesBlock.map(String)}
+                 <MultiSelectDropdown
+                  label="Tipo de Documento"
+                  options={docTypeOpts}
+                  values={draft.documentTypes}
                   onChange={(v) =>
-                    setDraft((s) => ({
-                      ...s,
-                      documentDoesBlock: v.map((b) => b === "true"),
-                    }))
+                    setDraft((s) => ({ ...s, documentTypes: v }))
                   }
                 />
+
+                            
                 <MultiSelectDropdown
-                  label="Validade do Documento"
-                  options={docValidityOpts}
-                  values={draft.documentValidity}
+                  label="Status do Contrato"
+                  options={contractStatusOpts}
+                  values={draft.activeContract}
                   onChange={(v) =>
-                    setDraft((s) => ({ ...s, documentValidity: v }))
+                    setDraft((s) => ({ ...s, activeContract: v }))
                   }
                 />
-                             
+                       
               </div>
               <div className="mt-6 flex justify-end gap-3 border-t border-gray-200 pt-4">
-                <button type="button" onClick={clearFilters} className="...">
-                  Limpar
+                <button
+                  type="button"
+                  onClick={clearFilters}
+                  className="rounded-md bg-white px-4 py-2 text-sm font-medium text-gray-800 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
+                >
+                                    Limpar            
                 </button>
                 <button
                   type="button"
                   onClick={applyFilters}
                   disabled={!canApply}
-                  className="..."
+                  className={`rounded-md px-4 py-2 text-sm font-medium text-white shadow-sm ${
+                    canApply
+                      ? "bg-blue-600 hover:bg-blue-700"
+                      : "cursor-not-allowed bg-blue-300"
+                  }`}
                 >
-                  Aplicar Filtros
+                                    Aplicar Filtros    
                 </button>
               </div>
             </div>
 
             {/* Renderiza o componente do gráfico */}
-            <HistoryChart data={historyData} isLoading={isLoadingHistory}/>
+            <HistoryChart data={historyData} isLoading={isLoadingHistory} />
           </div>
         )}
       </section>
