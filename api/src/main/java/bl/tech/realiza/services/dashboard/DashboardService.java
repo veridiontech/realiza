@@ -48,6 +48,7 @@ import bl.tech.realiza.gateways.repositories.documents.matrix.DocumentMatrixRepo
 import bl.tech.realiza.gateways.repositories.documents.provider.DocumentProviderSubcontractorRepository;
 import bl.tech.realiza.gateways.repositories.documents.provider.DocumentProviderSupplierRepository;
 import bl.tech.realiza.gateways.repositories.employees.EmployeeRepository;
+import bl.tech.realiza.gateways.repositories.providers.ProviderRepository;
 import bl.tech.realiza.gateways.repositories.providers.ProviderSubcontractorRepository;
 import bl.tech.realiza.gateways.repositories.providers.ProviderSupplierRepository;
 import bl.tech.realiza.gateways.repositories.services.snapshots.clients.BranchSnapshotRepository;
@@ -133,6 +134,7 @@ public class DashboardService {
     private final ContractDocumentSnapshotRepository contractDocumentSnapshotRepository;
     private final ProviderSnapshotRepository providerSnapshotRepository;
     private final CrudPermission crudPermission;
+    private final ProviderRepository providerRepository;
 
     public DashboardHomeResponseDto getHomeInfo(String branchId) {
         branchRepository.findById(branchId)
@@ -1200,8 +1202,15 @@ public class DashboardService {
             activeContract.add(ACTIVE);
         }
         Specification<Provider> providerSpecifications = getProviderSpecifications(filters, clientId);
-        List<ProviderSupplier> providerSuppliers = providerSupplierRepository.findAll((Sort) providerSpecifications);
-        List<ProviderSubcontractor> providerSubcontractors = providerSubcontractorRepository.findAll((Sort) providerSpecifications);
+        List<Provider> providersList = providerRepository.findAll(providerSpecifications);
+        List<ProviderSupplier> providerSuppliers = providersList.stream()
+                .filter(provider -> provider instanceof ProviderSupplier)
+                .map(provider -> (ProviderSupplier) provider)
+                .toList();
+        List<ProviderSubcontractor> providerSubcontractors = providersList.stream()
+                .filter(provider -> provider instanceof ProviderSubcontractor)
+                .map(provider -> (ProviderSubcontractor) provider)
+                .toList();
         for (ProviderSupplier providerSupplier : providerSuppliers ) {
             DashboardFiltersRequestDto filtersProvider = new DashboardFiltersRequestDto();
             filtersProvider = filters;

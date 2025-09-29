@@ -119,28 +119,7 @@ public class DashboardProviderDocumentHistorySpecification {
             assert query != null;
             query.distinct(true);
 
-            Join<DocumentStatusHistory, Provider> providerJoin = root
-                    .join("provider", JoinType.LEFT);
-
-            Join<ProviderSupplier, ContractProviderSupplier> contractSupplierJoin = criteriaBuilder
-                    .treat(providerJoin, ProviderSupplier.class)
-                    .join("contractsSupplier", JoinType.LEFT);
-            Join<ContractProviderSupplier, ContractDocument> contractSupplierDocumentJoin = contractSupplierJoin.join("contractDocuments", JoinType.LEFT);
-            Join<ContractDocument, Document> documentSupplierJoin = contractSupplierDocumentJoin.join("document", JoinType.LEFT);
-            Predicate supplierPredicate = documentSupplierJoin
-                    .get("type")
-                    .in(documentTypes);
-
-            Join<ProviderSubcontractor, ContractProviderSubcontractor> contractSubcontractorJoin = criteriaBuilder
-                    .treat(providerJoin, ProviderSubcontractor.class)
-                    .join("contractsSubcontractor", JoinType.LEFT);
-            Join<ContractProviderSubcontractor, ContractDocument> contractSubcontractorDocumentJoin = contractSubcontractorJoin.join("contractDocuments", JoinType.LEFT);
-            Join<ContractDocument, Document> documentSubcontractorJoin = contractSubcontractorDocumentJoin.join("document", JoinType.LEFT);
-            Predicate subcontractorPredicate = documentSubcontractorJoin
-                    .get("type")
-                    .in(documentTypes);
-
-            return criteriaBuilder.or(supplierPredicate, subcontractorPredicate);
+            return root.get("documentType").in(documentTypes);
         };
     }
 

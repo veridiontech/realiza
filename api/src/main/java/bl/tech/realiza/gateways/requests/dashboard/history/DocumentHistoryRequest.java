@@ -31,4 +31,5 @@ public class DocumentHistoryRequest {
     private List<String> branchIds;
     private List<String> providerIds;
     private List<String> providerCnpjs;
+    private List<String> documentTypes;
 }

@@ -32,6 +32,7 @@ public class DocumentStatusHistoryServiceImpl implements DocumentStatusHistorySe
     public void save() {
         List<String> findAllProviderIds = providerRepository.findAllActiveIds();
         YearMonth previousMonth = YearMonth.now(ZoneId.of("America/Sao_Paulo")).minusMonths(1);
+        List<String> documentTypes = documentRepository.findDistinctDocumentType();
         for (String id : findAllProviderIds) {
             Provider provider = providerRepository.findById(id)
                     .orElseThrow(() -> new RuntimeException("Provider not found"));
@@ -39,16 +40,26 @@ public class DocumentStatusHistoryServiceImpl implements DocumentStatusHistorySe
             providerIds.add(provider.getIdProvider());
             Specification<Document> spec = Specification.where(null);
             spec = spec.and(DashboardDocumentSpecification.byProviderIds(providerIds));
-            long totalDocuments = documentRepository.count(spec);
-            long adherentDocuments = documentRepository.count(spec.and(DashboardDocumentSpecification.byAdherenceIsTrue()));
-            long conformityDocuments = documentRepository.count(spec.and(DashboardDocumentSpecification.byConformingIsTrue()));
-            documentStatusHistoryRepository.save(DocumentStatusHistory.builder()
-                            .totalDocuments(totalDocuments)
-                            .adherent(adherentDocuments)
-                            .conformity(conformityDocuments)
-                            .provider(provider)
-                            .historyPeriod(previousMonth)
-                    .build());
+            for (String type : documentTypes) {
+                List<String> singleDocumentType = new ArrayList<>();
+                singleDocumentType.add(type);
+                long totalDocuments = documentRepository.count(spec
+                        .and(DashboardDocumentSpecification.byDocumentTypes(singleDocumentType)));
+                long adherentDocuments = documentRepository.count(spec
+                        .and(DashboardDocumentSpecification.byAdherenceIsTrue())
+                        .and(DashboardDocumentSpecification.byDocumentTypes(singleDocumentType)));
+                long conformityDocuments = documentRepository.count(spec
+                        .and(DashboardDocumentSpecification.byConformingIsTrue())
+                        .and(DashboardDocumentSpecification.byDocumentTypes(singleDocumentType)));
+                documentStatusHistoryRepository.save(DocumentStatusHistory.builder()
+                                .totalDocuments(totalDocuments)
+                                .adherent(adherentDocuments)
+                                .conformity(conformityDocuments)
+                                .provider(provider)
+                                .historyPeriod(previousMonth)
+                                .documentType(type)
+                        .build());
+            }
         }
     }
 
@@ -68,6 +79,9 @@ public class DocumentStatusHistoryServiceImpl implements DocumentStatusHistorySe
         }
         if (request.getProviderCnpjs() != null && !request.getProviderCnpjs().isEmpty()) {
             spec.and(DashboardProviderDocumentHistorySpecification.byProviderCnpjs(request.getProviderCnpjs()));
+        }
+        if (request.getDocumentTypes() != null && !request.getDocumentTypes().isEmpty()) {
+            spec.and(DashboardProviderDocumentHistorySpecification.byDocumentTypes(request.getProviderCnpjs()));
         }
         spec.and(DashboardProviderDocumentHistorySpecification.byHistoryPeriodBetween(startYearMonth, endYearMonth));
         List<DocumentStatusHistory> histories = documentStatusHistoryRepository
