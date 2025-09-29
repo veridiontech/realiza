@@ -217,7 +217,7 @@ public class SetupService {
         if (!batch.isEmpty()) {
             documentBranchRepository.saveAll(batch);
         }
-        crudActivity.transferFromRepo(branch.getIdBranch());
+//        crudActivity.transferFromRepo(branch.getIdBranch());
 
         log.info("Finished setup branch ✔️ {}", branchId);
     }
