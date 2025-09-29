@@ -35,40 +35,39 @@ const mockHistoryData = [
 
 const mockDocStatusData: RawDocumentStatus[] = [
   {
-    name: 'Segurança do Trabalho',
+    name: "Segurança do Trabalho",
     status: [
-      { status: 'APROVADO', quantity: 120 },
-      { status: 'PENDENTE', quantity: 35 },
-      { status: 'REPROVADO', quantity: 15 },
-      { status: 'VENCIDO', quantity: 8 },
+      { status: "APROVADO", quantity: 120 },
+      { status: "PENDENTE", quantity: 35 },
+      { status: "REPROVADO", quantity: 15 },
+      { status: "VENCIDO", quantity: 8 },
     ],
   },
   {
-    name: 'Cadastro e Certidões',
+    name: "Cadastro e Certidões",
     status: [
-      { status: 'APROVADO', quantity: 250 },
-      { status: 'PENDENTE', quantity: 40 },
-      { status: 'REPROVADO', quantity: 5 },
-      { status: 'ISENTO', quantity: 50 },
+      { status: "APROVADO", quantity: 250 },
+      { status: "PENDENTE", quantity: 40 },
+      { status: "REPROVADO", quantity: 5 },
+      { status: "ISENTO", quantity: 50 },
     ],
   },
   {
-    name: 'Saúde Ocupacional',
+    name: "Saúde Ocupacional",
     status: [
-      { status: 'APROVADO', quantity: 180 },
-      { status: 'PENDENTE', quantity: 60 },
-      { status: 'VENCIDO', quantity: 22 },
+      { status: "APROVADO", quantity: 180 },
+      { status: "PENDENTE", quantity: 60 },
+      { status: "VENCIDO", quantity: 22 },
     ],
   },
   {
-    name: 'Outras Exigências',
+    name: "Outras Exigências",
     status: [
-      { status: 'APROVADO', quantity: 95 },
-      { status: 'PENDENTE', quantity: 10 },
+      { status: "APROVADO", quantity: 95 },
+      { status: "PENDENTE", quantity: 10 },
     ],
   },
 ];
-
 
 const monthMap: { [key: string]: string } = {
   JANUARY: "Jan",
@@ -260,7 +259,6 @@ function filterDocumentStatus(
   let filtered = raw.filter((r) => {
     const byName = matchesAny(r.name, nameNeedles);
 
-    // ADICIONADO: Lógica para os novos filtros de documento
     const byBlock = filters.documentDoesBlock.length
       ? filters.documentDoesBlock.includes(r.doesBlock ?? false)
       : true;
@@ -341,8 +339,8 @@ function filterRanking(
     branchNames: string[];
     providerNames: string[];
     responsibleNames: string[];
-    contractNames: string[]; // ADICIONADO
-    employeeNames: string[]; // ADICIONADO
+    contractNames: string[];
+    employeeNames: string[];
   }
 ) {
   const providerNeedles = names.providerNames;
@@ -351,7 +349,7 @@ function filterRanking(
     ...names.responsibleNames,
     ...filters.documentTitles,
     ...filters.documentTypes,
-    // ADICIONADO: Incluindo nomes de contratos e funcionários na busca geral
+
     ...names.contractNames,
     ...names.employeeNames,
   ].filter(Boolean);
@@ -362,10 +360,9 @@ function filterRanking(
       : true;
 
     const byOthers = otherNeedles.length
-      ? matchesAny(r.corporateName, otherNeedles) // Pode ser necessário ajustar onde isso busca
+      ? matchesAny(r.corporateName, otherNeedles)
       : true;
 
-    // ADICIONADO: Lógica específica para os novos filtros
     const byProviderCnpj = filters.providerCnpjs.length
       ? filters.providerCnpjs.includes(r.cnpj)
       : true;
@@ -540,13 +537,13 @@ export const MonittoringBis = () => {
         setDocTypeOpts(
           documentTypes.map((dt: string) => ({
             value: dt,
-            label: docTypeMap[dt] || dt, // Isso usa o mapa corrigido
+            label: docTypeMap[dt] || dt,
           }))
         );
         setContractStatusOpts(
           contractStatus.map((s: string) => ({
             value: s,
-            label: contractStatusMap[s] || s, // Usa a tradução do mapa, ou o original se não encontrar
+            label: contractStatusMap[s] || s,
           }))
         );
         setStatusOpts(toOptions(statuses));
@@ -604,34 +601,47 @@ export const MonittoringBis = () => {
         employeeQuantity: 0,
       });
       return;
-      
     }
 
-     if (USE_MOCK_DATA) {
-      console.log("--- USANDO DADOS MOCKADOS PARA /general (Status, Cards, etc.) ---");
-      // Simula um atraso de rede
+    if (USE_MOCK_DATA) {
+      console.log(
+        "--- USANDO DADOS MOCKADOS PARA /general (Status, Cards, etc.) ---"
+      );
+
       setTimeout(() => {
-        setRawDocStatus(mockDocStatusData); // Usa os dados mockados para o gráfico
-        
-        // Também podemos mockar os dados para os outros gráficos e cards que vêm desta rota
+        setRawDocStatus(mockDocStatusData);
+
         setRawExemption([
-            { name: 'Segurança do Trabalho', quantity: 12 },
-            { name: 'Saúde Ocupacional', quantity: 8 },
-            { name: 'Cadastro e Certidões', quantity: 5 },
+          { name: "Segurança do Trabalho", quantity: 12 },
+          { name: "Saúde Ocupacional", quantity: 8 },
+          { name: "Cadastro e Certidões", quantity: 5 },
         ]);
         setRawRanking([
-            { corporateName: 'Fornecedor Mock A', cnpj: '11.222.333/0001-44', adherence: 95.5, conformity: 98.0, nonConformingDocumentQuantity: 2, conformityLevel: 'Alto' },
-            { corporateName: 'Fornecedor Mock B', cnpj: '44.555.666/0001-77', adherence: 80.0, conformity: 75.0, nonConformingDocumentQuantity: 15, conformityLevel: 'Médio' },
+          {
+            corporateName: "Fornecedor Mock A",
+            cnpj: "11.222.333/0001-44",
+            adherence: 95.5,
+            conformity: 98.0,
+            nonConformingDocumentQuantity: 2,
+            conformityLevel: "Alto",
+          },
+          {
+            corporateName: "Fornecedor Mock B",
+            cnpj: "44.555.666/0001-77",
+            adherence: 80.0,
+            conformity: 75.0,
+            nonConformingDocumentQuantity: 15,
+            conformityLevel: "Médio",
+          },
         ]);
         setRawCounts({
-            contractQuantity: 25,
-            supplierQuantity: 15,
-            allocatedEmployeeQuantity: 150,
-            employeeQuantity: 200,
+          contractQuantity: 25,
+          supplierQuantity: 15,
+          allocatedEmployeeQuantity: 150,
+          employeeQuantity: 200,
         });
-
       }, 500);
-      return; // Impede a chamada real à API
+      return;
     }
     (async () => {
       try {
@@ -719,13 +729,11 @@ export const MonittoringBis = () => {
   }, [clientId, token, USE_MOCK_DATA]);
 
   useEffect(() => {
-    // Esta função calcula o total de documentos somando as quantidades de cada status
     const calculateTotal = () => {
       if (!rawDocStatus || rawDocStatus.length === 0) {
         return 0;
       }
 
-      // Usamos 'reduce' para somar as quantidades de todos os tipos de documento
       const total = rawDocStatus.reduce((acc, documentType) => {
         const quantityInType = documentType.status.reduce(
           (subAcc, s) => subAcc + s.quantity,
@@ -741,17 +749,15 @@ export const MonittoringBis = () => {
   }, [rawDocStatus]);
 
   useEffect(() => {
-    // Só busca se a aba "historico" estiver ativa e tiver um clientId
     if (activeTab === "historico" && clientId) {
       if (USE_MOCK_DATA) {
         console.log("--- USANDO DADOS MOCKADOS PARA O GRÁFICO ---");
         setIsLoadingHistory(true);
-        // Simula um pequeno atraso de carregamento, como se fosse uma API
         setTimeout(() => {
           setHistoryData(mockHistoryData);
           setIsLoadingHistory(false);
-        }, 500); // 500ms de atraso
-        return; // Para a execução aqui e não chama a API real
+        }, 500);
+        return;
       }
 
       const fetchHistoryData = async () => {
@@ -770,10 +776,9 @@ export const MonittoringBis = () => {
             headers: { Authorization: `Bearer ${token}` },
           });
 
-          // Processa a resposta para o formato que o gráfico precisa
           const formattedData = Object.entries(data).map(
             ([monthYear, values]: [string, any]) => {
-              const [year, monthName] = monthYear.split("-"); // Ex: "2025-JANUARY"
+              const [year, monthName] = monthYear.split("-");
               const adherence =
                 values.total > 0 ? (values.adherent / values.total) * 100 : 0;
               const conformity =
@@ -790,7 +795,7 @@ export const MonittoringBis = () => {
           setHistoryData(formattedData);
         } catch (error) {
           console.error("Erro ao buscar dados do histórico:", error);
-          setHistoryData([]); // Limpa os dados em caso de erro
+          setHistoryData([]);
         } finally {
           setIsLoadingHistory(false);
         }
@@ -851,8 +856,6 @@ export const MonittoringBis = () => {
       (id) => employeeIdName.get(id) ?? id
     );
 
-    // --- CORREÇÃO AQUI ---
-    // Crie um único objeto com TODOS os nomes
     const allNames = {
       branchNames,
       providerNames,
@@ -861,8 +864,6 @@ export const MonittoringBis = () => {
       employeeNames,
     };
 
-    // Atualiza os dados do Status de Documentos
-    // Agora passamos o objeto completo, caso a função precise
     const docStatusChart = filterDocumentStatus(
       rawDocStatus,
       applied,
@@ -874,14 +875,10 @@ export const MonittoringBis = () => {
     );
     setChartData(docStatusChart);
 
-    // Atualiza os dados de Isenção
-    // Agora passamos o objeto completo, caso a função precise
     const docExFiltered = filterExemption(rawExemption, applied, allNames);
     console.log("Resultados do filtro de Isenção:", docExFiltered);
     setDocumentExemptionData(docExFiltered);
 
-    // Atualiza os dados do Ranking de Pendências
-    // A chamada aqui já estava correta, mas agora usa o novo objeto 'allNames'
     const rankingFiltered = filterRanking(rawRanking, applied, allNames);
     console.log("Resultados do filtro de Ranking:", rankingFiltered);
     setTableData(
@@ -928,7 +925,7 @@ export const MonittoringBis = () => {
       const selectedBranchNames =
         draft.branchIds.length > 0
           ? draft.branchIds.map((id) => branchIdName.get(id) || id).join(", ")
-          : "Todas as filiais"; // Cabeçalho Principal do PDF
+          : "Todas as filiais";
 
       doc.setFontSize(18);
       doc.text("Relatório Geral de Monitoramento", 14, 22);
@@ -963,7 +960,7 @@ export const MonittoringBis = () => {
         fontStyle: "bold",
       };
 
-      const allRows: any[] = []; // --- Seção 1: Resumo Geral ---
+      const allRows: any[] = [];
 
       if (rawCounts) {
         allRows.push([
@@ -980,9 +977,7 @@ export const MonittoringBis = () => {
           "Funcionários Alocados",
           rawCounts.allocatedEmployeeQuantity,
         ]);
-      } // --- Seção 2: Status dos Documentos ---
-      // A MUDANÇA ESTÁ AQUI: Adicionamos o tipo 'any[]' para a variável statusRows.
-
+      }
       const statusRows: any[] = [];
       rawDocStatus.forEach((doc) => {
         doc.status.forEach((s) => {
@@ -1002,7 +997,7 @@ export const MonittoringBis = () => {
           { content: "Quantidade", styles: headerStyleBlue },
         ]);
         allRows.push(...statusRows);
-      } // --- Seção 3: Isenção de Documentos ---
+      }
 
       if (rawExemption.length > 0) {
         allRows.push([
@@ -1015,7 +1010,7 @@ export const MonittoringBis = () => {
         rawExemption.forEach((item) => {
           allRows.push([item.name, item.quantity]);
         });
-      } // --- Seção 4: Ranking de Pendências ---
+      }
 
       if (rawRanking.length > 0) {
         allRows.push([
@@ -1039,7 +1034,7 @@ export const MonittoringBis = () => {
             item.conformityLevel,
           ]);
         });
-      } // --- A ÚNICA CHAMADA AUTOTABLE ---
+      }
 
       autoTable(doc, {
         startY: 45,
@@ -1064,46 +1059,38 @@ export const MonittoringBis = () => {
     }
   };
 
-  // Dentro do componente MonittoringBis, antes do return()
-
   const handleExport = () => {
     if (historyData.length === 0) {
       alert("Não há dados no histórico para exportar.");
       return;
     }
 
-    // A lógica para pegar o nome da filial continua a mesma e está correta
     const selectedBranchNames = applied.branchIds
       .map((id) => branchIdName.get(id) || id)
       .join(", ");
     const branchText = selectedBranchNames || "Todas as Filiais";
-    const safeBranchName = branchText.replace(/[^a-z0-9]/gi, "_").toLowerCase();
+    const safeBranchName = branchText
+      .replace(/[^a-z0-9]/gi, "_")
+      .toLowerCase();
     const fileName = `historico_${safeBranchName}`;
 
     const fileType =
       "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8";
     const fileExtension = ".xlsx";
 
-    // --- LÓGICA DE EXPORTAÇÃO CORRIGIDA ---
-
-    // 1. Preparamos os cabeçalhos que queremos no arquivo final.
-    //    Isso inclui o cabeçalho da filial e os cabeçalhos da tabela.
     const headers = [
-      ["Filial(is):", branchText], // Linha 1
-      [], // Linha 2 (em branco para espaçamento)
-      ["Mês", "Aderência", "Conformidade"], // Linha 3 (os títulos da nossa tabela)
+      ["Filial(is):", branchText],
+      [],
+      ["Mês", "Aderência", "Conformidade"],
     ];
 
-    // 2. Criamos a planilha (worksheet) INICIALMENTE apenas com os cabeçalhos.
     const ws = XLSX.utils.aoa_to_sheet(headers);
 
-    // 3. Agora, adicionamos os dados do gráfico (historyData) ABAIXO dos cabeçalhos que já criamos.
     XLSX.utils.sheet_add_json(ws, historyData, {
-      origin: "A4", // Começa a inserir os dados na célula A4 (abaixo dos nossos 3 cabeçalhos)
-      skipHeader: true, // Pula os cabeçalhos do JSON, pois já criamos os nossos próprios
+      origin: "A4",
+      skipHeader: true,
     });
 
-    // O resto do processo para criar e baixar o arquivo continua o mesmo
     const wb = { Sheets: { Histórico: ws }, SheetNames: ["Histórico"] };
     const excelBuffer = XLSX.write(wb, { bookType: "xlsx", type: "array" });
     const data = new Blob([excelBuffer], { type: fileType });
@@ -1117,7 +1104,6 @@ export const MonittoringBis = () => {
         className="mx-5 md:mx-20 flex flex-col gap-6 pb-20"
         id="contentToCapture"
       >
-        {/* Tabs */}
         <div className="border-b border-gray-200">
           <nav className="-mb-px flex space-x-8" aria-label="Tabs">
             <button
@@ -1340,7 +1326,6 @@ export const MonittoringBis = () => {
                 <GeneralDocumentsTable clientId={clientId} filters={applied} />
               )}
             </div>
-
 
             <div className="overflow-x-auto mt-10">
               <div className="flex flex-col md:flex-row gap-6 md:gap-8">

@@ -101,7 +101,7 @@ export function AllocatedEmployees({ count }: AllocatedEmployeesProps) {
           style={{
             fontWeight: "700",
             fontSize: 40,
-            color: "#374151", // azul acinzentado
+            color: "#374151",
             display: "flex",
           }}
         >

@@ -1,8 +1,7 @@
-
 import { ip } from "@/utils/ip";
 import axios from "axios";
 import { useEffect, useState } from "react";
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
 interface Filters {
   branchIds: string[];
@@ -22,11 +21,11 @@ interface Filters {
 }
 interface Documento {
   documentTitle: string;
-  documentGroupName: string; 
+  documentGroupName: string;
   status: string;
-  versionDate: string; 
-  expirationDate: string; 
-  doesBlock: boolean; 
+  versionDate: string;
+  expirationDate: string;
+  doesBlock: boolean;
   supplierName: string;
   branchName: string;
 }
@@ -35,9 +34,10 @@ interface GeneralDocumentsTableProps {
   filters: Filters;
 }
 
-
-export function GeneralDocumentsTable({ clientId, filters }: GeneralDocumentsTableProps) {
-
+export function GeneralDocumentsTable({
+  clientId,
+  filters,
+}: GeneralDocumentsTableProps) {
   const USE_MOCK_DATA = true;
   const mockDocumentosData: Documento[] = [
     {
@@ -49,7 +49,6 @@ export function GeneralDocumentsTable({ clientId, filters }: GeneralDocumentsTab
       doesBlock: true,
       supplierName: "Fornecedor Exemplo A",
       branchName: "Filial São Paulo",
-
     },
     {
       documentTitle: "ASO - Atestado de Saúde Ocupacional",
@@ -60,9 +59,8 @@ export function GeneralDocumentsTable({ clientId, filters }: GeneralDocumentsTab
       doesBlock: true,
       supplierName: "Fornecedor Exemplo B",
       branchName: "Filial Rio de Janeiro",
-
     },
-     {
+    {
       documentTitle: "Certidão Negativa de Débitos",
       documentGroupName: "Cadastro e Certidões",
       status: "REPROVADO",
@@ -83,25 +81,26 @@ export function GeneralDocumentsTable({ clientId, filters }: GeneralDocumentsTab
       branchName: "Filial Curitiba",
     },
   ];
-  
+
   const [documentos, setDocumentos] = useState<Documento[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  
+
   const [page, setPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
 
   useEffect(() => {
-
     if (USE_MOCK_DATA) {
       setIsLoading(true);
       setTimeout(() => {
-        console.log("--- USANDO DADOS MOCKADOS PARA A TABELA DE DOCUMENTOS GERAIS ---");
+        console.log(
+          "--- USANDO DADOS MOCKADOS PARA A TABELA DE DOCUMENTOS GERAIS ---"
+        );
         setDocumentos(mockDocumentosData);
-        setTotalPages(1); 
+        setTotalPages(1);
         setIsLoading(false);
-      }, 500); 
-      return; 
+      }, 500);
+      return;
     }
 
     const fetchDocuments = async () => {
@@ -122,10 +121,11 @@ export function GeneralDocumentsTable({ clientId, filters }: GeneralDocumentsTab
 
         setDocumentos(data.content || []);
         setTotalPages(data.totalPages || 0);
-
       } catch (err) {
         console.error("Erro ao buscar detalhes dos documentos:", err);
-        setError("Não foi possível carregar os documentos. Tente novamente mais tarde.");
+        setError(
+          "Não foi possível carregar os documentos. Tente novamente mais tarde."
+        );
       } finally {
         setIsLoading(false);
       }
@@ -134,7 +134,7 @@ export function GeneralDocumentsTable({ clientId, filters }: GeneralDocumentsTab
     if (clientId) {
       fetchDocuments();
     }
-  }, [clientId, filters, page, USE_MOCK_DATA]); 
+  }, [clientId, filters, page, USE_MOCK_DATA]);
 
   const handlePreviousPage = () => {
     setPage((prevPage) => Math.max(prevPage - 1, 0));
@@ -143,57 +143,103 @@ export function GeneralDocumentsTable({ clientId, filters }: GeneralDocumentsTab
   const handleNextPage = () => {
     setPage((prevPage) => Math.min(prevPage + 1, totalPages - 1));
   };
-  
+
   return (
     <div className="mt-6 rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
-        <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold text-gray-800">Documentos Gerais</h2>
-            <button className="rounded-md bg-gray-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-gray-700">
-            Baixar PDF
-            </button>
-        </div>
+      <div className="flex items-center justify-between mb-4">
+        <h2 className="text-lg font-semibold text-gray-800">
+          Documentos Gerais
+        </h2>
+        <button className="rounded-md bg-gray-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-gray-700">
+          Baixar PDF
+        </button>
+      </div>
 
-        {isLoading ? (
-            <div className="text-center py-10">Carregando documentos...</div>
-        ) : error ? (
-            <div className="text-center py-10 text-red-500">{error}</div>
-        ) : documentos.length === 0 ? (
-            <div className="text-center py-10 text-gray-500">Nenhum documento encontrado para os filtros selecionados.</div>
-        ) : (
-            <>
-            <div className="overflow-x-auto">
-      <table className="min-w-full divide-y divide-gray-200">
+      {isLoading ? (
+        <div className="text-center py-10">Carregando documentos...</div>
+      ) : error ? (
+        <div className="text-center py-10 text-red-500">{error}</div>
+      ) : documentos.length === 0 ? (
+        <div className="text-center py-10 text-gray-500">
+          Nenhum documento encontrado para os filtros selecionados.
+        </div>
+      ) : (
+        <>
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Documento</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Grupo</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Data de Envio</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Validade</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Bloqueia?</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fornecedor</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Documento
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Grupo
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Status
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Data de Envio
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Validade
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Bloqueia?
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Fornecedor
+                  </th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
                 {documentos.map((doc, index) => (
                   <tr key={index}>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">{doc.documentTitle}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{doc.documentGroupName}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{doc.status}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{new Date(doc.versionDate).toLocaleDateString()}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{new Date(doc.expirationDate).toLocaleDateString()}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{doc.doesBlock ? 'Sim' : 'Não'}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{doc.supplierName}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">
+                      {doc.documentTitle}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {doc.documentGroupName}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {doc.status}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {new Date(doc.versionDate).toLocaleDateString()}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {new Date(doc.expirationDate).toLocaleDateString()}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {doc.doesBlock ? "Sim" : "Não"}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {doc.supplierName}
+                    </td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
           <div className="flex items-center justify-end mt-4">
-            <span className="text-sm text-gray-700">Página {page + 1} de {totalPages}</span>
+            <span className="text-sm text-gray-700">
+              Página {page + 1} de {totalPages}
+            </span>
             <div className="ml-4">
-              <button onClick={handlePreviousPage} disabled={page === 0} className="p-2 border rounded-md disabled:opacity-50"><ChevronLeft size={16} /></button>
-              <button onClick={handleNextPage} disabled={page >= totalPages - 1} className="p-2 border rounded-md ml-2 disabled:opacity-50"><ChevronRight size={16} /></button>
+              <button
+                onClick={handlePreviousPage}
+                disabled={page === 0}
+                className="p-2 border rounded-md disabled:opacity-50"
+              >
+                <ChevronLeft size={16} />
+              </button>
+              <button
+                onClick={handleNextPage}
+                disabled={page >= totalPages - 1}
+                className="p-2 border rounded-md ml-2 disabled:opacity-50"
+              >
+                <ChevronRight size={16} />
+              </button>
             </div>
           </div>
         </>

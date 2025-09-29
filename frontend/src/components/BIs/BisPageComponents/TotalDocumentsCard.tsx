@@ -1,15 +1,13 @@
-
 import { useState } from "react";
-import { FileText } from "lucide-react"; 
+import { FileText } from "lucide-react";
 
 interface TotalDocumentsCardProps {
   count: number;
 }
 
 export function TotalDocumentsCard({ count }: TotalDocumentsCardProps) {
-    const [showTooltip, setShowTooltip] = useState(false);
+  const [showTooltip, setShowTooltip] = useState(false);
   return (
-    // Container principal com layout horizontal (flex-row)
     <div
       style={{
         background: "#fff",

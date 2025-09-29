@@ -38,7 +38,7 @@ function formatDate(v?: string) {
   if (!v) return "—";
   const d = new Date(v);
   if (isNaN(+d)) return v;
-  return d.toLocaleDateString('pt-BR');
+  return d.toLocaleDateString("pt-BR");
 }
 
 function mapItemToRow(it: ApiItem, idx: number): Row {
@@ -88,56 +88,63 @@ async function fetchDocumentDetails(clientId: string, filters: Filters) {
   const content = Array.isArray(data?.content)
     ? data.content
     : Array.isArray(data)
-      ? data
-      : [];
+    ? data
+    : [];
   return content as ApiItem[];
 }
 
 const generatePDF = (data: Row[]) => {
-  const doc = new jsPDF({ orientation: 'landscape' });
-  
+  const doc = new jsPDF({ orientation: "landscape" });
+
   doc.setFontSize(16);
   doc.text("Relatório de Documentos de Fornecedores", 14, 22);
 
   const tableHeaders = [
-    "Fornecedor", "CNPJ", "Filial", "Documento", "Status", 
-    "Conformidade", "Validade", "Responsável", "Última Checagem"
+    "Fornecedor",
+    "CNPJ",
+    "Filial",
+    "Documento",
+    "Status",
+    "Conformidade",
+    "Validade",
+    "Responsável",
+    "Última Checagem",
   ];
 
-  const tableBody = data.map(row => [
-    row.fornecedor ?? '—',
-    row.cnpjFornecedor ?? '—',
-    row.filial ?? '—',
-    row.documento ?? '—',
-    row.status ?? '—',
-    row.conformidade ?? '—',
-    row.validade ?? '—',
-    row.responsavel ?? '—',
-    row.ultimaChecagem ?? '—'
+  const tableBody = data.map((row) => [
+    row.fornecedor ?? "—",
+    row.cnpjFornecedor ?? "—",
+    row.filial ?? "—",
+    row.documento ?? "—",
+    row.status ?? "—",
+    row.conformidade ?? "—",
+    row.validade ?? "—",
+    row.responsavel ?? "—",
+    row.ultimaChecagem ?? "—",
   ]);
 
   autoTable(doc, {
     head: [tableHeaders],
     body: tableBody,
     startY: 30,
-    theme: 'grid',
+    theme: "grid",
     headStyles: {
       fillColor: [22, 160, 133],
       textColor: 255,
-      fontStyle: 'bold'
+      fontStyle: "bold",
     },
     styles: {
       fontSize: 8,
     },
     columnStyles: {
-      0: { cellWidth: 'auto' },
+      0: { cellWidth: "auto" },
       1: { cellWidth: 35 },
-      2: { cellWidth: 'auto' },
-      3: { cellWidth: 'auto' },
-    }
+      2: { cellWidth: "auto" },
+      3: { cellWidth: "auto" },
+    },
   });
 
-  doc.save('relatorio_documentos.pdf');
+  doc.save("relatorio_documentos.pdf");
 };
 
 type Props = {
@@ -190,49 +197,49 @@ const SortIcon = ({ direction }: { direction: "asc" | "desc" | null }) => {
 
 export default function FornecedoresTable({ clientId, filters = {} }: Props) {
   const USE_MOCK_DATA = true;
-  
+
   const mockApiData: ApiItem[] = [
     {
       id: 1,
-      branchName: 'Matriz - São Paulo',
-      branchCnpj: '01.234.567/0001-88',
-      supplierName: 'Tech Solutions Ltda',
-      supplierCnpj: '12.345.678/0001-99',
-      documentTitle: 'Contrato Social',
-      documentType: 'Cadastro',
-      status: 'APROVADO',
-      responsibleFullName: 'Juliana Martins',
+      branchName: "Matriz - São Paulo",
+      branchCnpj: "01.234.567/0001-88",
+      supplierName: "Tech Solutions Ltda",
+      supplierCnpj: "12.345.678/0001-99",
+      documentTitle: "Contrato Social",
+      documentType: "Cadastro",
+      status: "APROVADO",
+      responsibleFullName: "Juliana Martins",
       conforming: true,
-      lastCheck: '2025-09-15T11:00:00Z',
-      expirationDate: '2030-01-01T00:00:00Z',
+      lastCheck: "2025-09-15T11:00:00Z",
+      expirationDate: "2030-01-01T00:00:00Z",
     },
     {
       id: 2,
-      branchName: 'Filial - Rio de Janeiro',
-      branchCnpj: '01.234.567/0002-69',
-      supplierName: 'Inovação e Cia',
-      supplierCnpj: '98.765.432/0001-11',
-      documentTitle: 'Licença de Operação',
-      documentType: 'Certidão',
-      status: 'PENDENTE',
-      responsibleFullName: 'Ricardo Alves',
+      branchName: "Filial - Rio de Janeiro",
+      branchCnpj: "01.234.567/0002-69",
+      supplierName: "Inovação e Cia",
+      supplierCnpj: "98.765.432/0001-11",
+      documentTitle: "Licença de Operação",
+      documentType: "Certidão",
+      status: "PENDENTE",
+      responsibleFullName: "Ricardo Alves",
       conforming: false,
-      lastCheck: '2025-09-20T15:00:00Z',
-      expirationDate: '2025-11-25T00:00:00Z',
+      lastCheck: "2025-09-20T15:00:00Z",
+      expirationDate: "2025-11-25T00:00:00Z",
     },
     {
       id: 3,
-      branchName: 'Matriz - São Paulo',
-      branchCnpj: '01.234.567/0001-88',
-      supplierName: 'Serviços Gerais Express',
-      supplierCnpj: '55.555.555/0001-55',
-      documentTitle: 'CIPA - Relatório Anual',
-      documentType: 'Segurança do Trabalho',
-      status: 'REPROVADO',
-      responsibleFullName: 'Fernanda Lima',
+      branchName: "Matriz - São Paulo",
+      branchCnpj: "01.234.567/0001-88",
+      supplierName: "Serviços Gerais Express",
+      supplierCnpj: "55.555.555/0001-55",
+      documentTitle: "CIPA - Relatório Anual",
+      documentType: "Segurança do Trabalho",
+      status: "REPROVADO",
+      responsibleFullName: "Fernanda Lima",
       conforming: false,
-      lastCheck: '2025-09-28T09:30:00Z',
-      expirationDate: '2025-10-10T00:00:00Z',
+      lastCheck: "2025-09-28T09:30:00Z",
+      expirationDate: "2025-10-10T00:00:00Z",
     },
   ];
 
@@ -306,10 +313,14 @@ export default function FornecedoresTable({ clientId, filters = {} }: Props) {
           Documentos de Fornecedores
         </h2>
         <button
-            onClick={() => generatePDF(sorted)}
-            className="bg-blue-600 text-white px-4 py-2 text-sm font-medium rounded-md shadow-sm hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
-            disabled={loading || sorted.length === 0}
-            title={sorted.length === 0 ? "Nenhum dado para exportar" : "Exportar para PDF"}
+          onClick={() => generatePDF(sorted)}
+          className="bg-blue-600 text-white px-4 py-2 text-sm font-medium rounded-md shadow-sm hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
+          disabled={loading || sorted.length === 0}
+          title={
+            sorted.length === 0
+              ? "Nenhum dado para exportar"
+              : "Exportar para PDF"
+          }
         >
           Baixar PDF
         </button>
