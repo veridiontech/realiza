@@ -51,7 +51,7 @@ export function Employees({ count }: EmployeeCountProps) {
             gap: 6,
           }}
         >
-          Colaboradores
+           Colaboradores <br /> Nao Alocados
           <span
             onMouseEnter={() => setShowTooltip(true)}
             onMouseLeave={() => setShowTooltip(false)}
@@ -99,7 +99,8 @@ export function Employees({ count }: EmployeeCountProps) {
             fontWeight: "700",
             fontSize: 40,
             color: "#374151",
-            display: "flex"
+            display: "flex",
+            justifyContent: "center"
           }}
         >
           {count}

@@ -7,6 +7,7 @@ import { ExemptionPendingChart } from "@/components/BIs/BisPageComponents/exempt
 import { ConformityGaugeChart } from "@/components/BIs/BisPageComponents/conformityChart";
 import { HistoryChart } from "@/components/BIs/BisPageComponents/HistoryChart";
 import FornecedoresTable from "@/components/BIs/BisPageComponents/FornecedoresTable";
+import { GeneralDocumentsTable } from "@/components/BIs/BisPageComponents/GeneralDocumentsTable";
 import { ConformityRankingTable } from "@/components/BIs/BisPageComponents/conformityRankingTable";
 import { AllocatedEmployees } from "@/components/BIs/BisPageComponents/AllocatedEmployees";
 import { Employees } from "@/components/BIs/BisPageComponents/employees";
@@ -16,17 +17,58 @@ import axios from "axios";
 import { ip } from "@/utils/ip";
 import { useClient } from "@/context/Client-Provider";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { TotalDocumentsCard } from "@/components/BIs/BisPageComponents/TotalDocumentsCard";
+
+import * as XLSX from "xlsx";
+import { saveAs } from "file-saver";
 
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 
 const mockHistoryData = [
-  { month: "Mai/25", Aderência: 83.04, Conformidade: 79.34 },
-  { month: "Jun/25", Aderência: 86.52, Conformidade: 82.0 },
-  { month: "Jul/25", Aderência: 91.27, Conformidade: 86.1 },
-  { month: "Ago/25", Aderência: 91.01, Conformidade: 88.3 },
-  { month: "Set/25", Aderência: 92.41, Conformidade: 88.01 },
+  { mes: "Mai/25", Aderência: 83.04, Conformidade: 79.34 },
+  { mes: "Jun/25", Aderência: 86.52, Conformidade: 82.0 },
+  { mes: "Jul/25", Aderência: 91.27, Conformidade: 86.1 },
+  { mes: "Ago/25", Aderência: 91.01, Conformidade: 88.3 },
+  { mes: "Set/25", Aderência: 92.41, Conformidade: 88.01 },
 ];
+
+const mockDocStatusData: RawDocumentStatus[] = [
+  {
+    name: 'Segurança do Trabalho',
+    status: [
+      { status: 'APROVADO', quantity: 120 },
+      { status: 'PENDENTE', quantity: 35 },
+      { status: 'REPROVADO', quantity: 15 },
+      { status: 'VENCIDO', quantity: 8 },
+    ],
+  },
+  {
+    name: 'Cadastro e Certidões',
+    status: [
+      { status: 'APROVADO', quantity: 250 },
+      { status: 'PENDENTE', quantity: 40 },
+      { status: 'REPROVADO', quantity: 5 },
+      { status: 'ISENTO', quantity: 50 },
+    ],
+  },
+  {
+    name: 'Saúde Ocupacional',
+    status: [
+      { status: 'APROVADO', quantity: 180 },
+      { status: 'PENDENTE', quantity: 60 },
+      { status: 'VENCIDO', quantity: 22 },
+    ],
+  },
+  {
+    name: 'Outras Exigências',
+    status: [
+      { status: 'APROVADO', quantity: 95 },
+      { status: 'PENDENTE', quantity: 10 },
+    ],
+  },
+];
+
 
 const monthMap: { [key: string]: string } = {
   JANUARY: "Jan",
@@ -134,62 +176,48 @@ function MultiSelectDropdown(props: {
 
   return (
     <div ref={ref} className={`relative ${className ?? ""}`}>
-           
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
         className="w-full border border-gray-300 rounded-md px-3 py-2 text-left flex items-center justify-between"
       >
-               
         <span className="truncate">
-                    {label}: <span className="font-medium">{title}</span>       
+          {label}: <span className="font-medium">{title}</span>
         </span>
-               
+
         <svg viewBox="0 0 20 20" className="w-4 h-4">
-                   
           <path
             d="M5.5 7.5l4.5 4 4.5-4"
             fill="none"
             stroke="currentColor"
             strokeWidth="2"
           />
-                 
         </svg>
-             
       </button>
-           
+
       {open && (
         <div className="absolute z-20 mt-1 w-full bg-white shadow-lg border border-gray-200 rounded-md max-h-64 overflow-auto">
-                   
           <ul className="py-1">
-                       
             {options.length === 0 && (
               <li className="px-3 py-2 text-sm text-gray-500">Sem opções</li>
             )}
-                       
+
             {options.map((opt) => (
               <li key={opt.value}>
-                               
                 <label className="flex items-center gap-2 px-3 py-2 cursor-pointer hover:bg-gray-50">
-                                   
                   <input
                     type="checkbox"
                     className="h-4 w-4"
                     checked={values.includes(opt.value)}
                     onChange={() => toggle(opt.value)}
                   />
-                                    <span className="text-sm">{opt.label}</span>
-                                 
+                  <span className="text-sm">{opt.label}</span>
                 </label>
-                             
               </li>
             ))}
-                     
           </ul>
-                 
         </div>
       )}
-         
     </div>
   );
 }
@@ -271,6 +299,19 @@ const contractStatusMap: { [key: string]: string } = {
   SUSPENDED: "Suspenso",
   SUSPEND_REQUESTED: "Solicitação de Suspensão",
   REACTIVATION_REQUESTED: "Solicitação de Reativação",
+};
+
+const docValidityMap: { [key: string]: string } = {
+  INDEFINITE: "Indefinido",
+  WEEKLY: "Semanal",
+  MONTHLY: "Mensal",
+  ANNUAL: "Anual",
+};
+
+const docTypeMap: { [key: string]: string } = {
+  thirdCompany: "Empresa Terceirizada",
+  thirdCollaborators: "Colaboradores Terceirizados",
+  otherRequirements: "Outras Exigências",
 };
 
 function filterExemption(
@@ -390,11 +431,11 @@ export const MonittoringBis = () => {
 
   const [historyData, setHistoryData] = useState<any[]>([]);
   const [isLoadingHistory, setIsLoadingHistory] = useState(false);
-  // ADICIONADO: Estado para controlar o período do histórico (ex: últimos 6 meses)
+
   const [historyPeriod] = useState({
-    startMonth: "JANUARY", // Ajuste conforme necessário
+    startMonth: "JANEIRO",
     startYear: 2025,
-    endMonth: "DECEMBER",
+    endMonth: "DEZEMBRO",
     endYear: 2025,
   });
 
@@ -426,6 +467,8 @@ export const MonittoringBis = () => {
     allocatedEmployeeQuantity: 0,
     employeeQuantity: 0,
   });
+
+  const [totalDocuments, setTotalDocuments] = useState(0);
 
   const [chartData, setChartData] = useState<ChartData[]>([]);
   const [documentExemptionData, setDocumentExemptionData] = useState<
@@ -494,7 +537,12 @@ export const MonittoringBis = () => {
         setBranchOpts(toOptionsIdName(branches));
         setProviderOpts(toOptionsIdName(providers));
         setRespOpts(toOptionsIdName(responsibles));
-        setDocTypeOpts(toOptions(documentTypes));
+        setDocTypeOpts(
+          documentTypes.map((dt: string) => ({
+            value: dt,
+            label: docTypeMap[dt] || dt, // Isso usa o mapa corrigido
+          }))
+        );
         setContractStatusOpts(
           contractStatus.map((s: string) => ({
             value: s,
@@ -508,7 +556,12 @@ export const MonittoringBis = () => {
         setEmployeeOpts(toOptionsIdName(employees));
         setEmployeeCpfOpts(toOptions(employeeCpfs));
         setEmployeeSituationOpts(toOptions(employeeSituations));
-        setDocValidityOpts(toOptions(documentValidity));
+        setDocValidityOpts(
+          documentValidity.map((dv: string) => ({
+            value: dv,
+            label: docValidityMap[dv] || dv,
+          }))
+        );
         setDocBlockOpts(
           documentDoesBlock.map((v: boolean) => ({
             value: String(v),
@@ -551,6 +604,34 @@ export const MonittoringBis = () => {
         employeeQuantity: 0,
       });
       return;
+      
+    }
+
+     if (USE_MOCK_DATA) {
+      console.log("--- USANDO DADOS MOCKADOS PARA /general (Status, Cards, etc.) ---");
+      // Simula um atraso de rede
+      setTimeout(() => {
+        setRawDocStatus(mockDocStatusData); // Usa os dados mockados para o gráfico
+        
+        // Também podemos mockar os dados para os outros gráficos e cards que vêm desta rota
+        setRawExemption([
+            { name: 'Segurança do Trabalho', quantity: 12 },
+            { name: 'Saúde Ocupacional', quantity: 8 },
+            { name: 'Cadastro e Certidões', quantity: 5 },
+        ]);
+        setRawRanking([
+            { corporateName: 'Fornecedor Mock A', cnpj: '11.222.333/0001-44', adherence: 95.5, conformity: 98.0, nonConformingDocumentQuantity: 2, conformityLevel: 'Alto' },
+            { corporateName: 'Fornecedor Mock B', cnpj: '44.555.666/0001-77', adherence: 80.0, conformity: 75.0, nonConformingDocumentQuantity: 15, conformityLevel: 'Médio' },
+        ]);
+        setRawCounts({
+            contractQuantity: 25,
+            supplierQuantity: 15,
+            allocatedEmployeeQuantity: 150,
+            employeeQuantity: 200,
+        });
+
+      }, 500);
+      return; // Impede a chamada real à API
     }
     (async () => {
       try {
@@ -635,7 +716,29 @@ export const MonittoringBis = () => {
         });
       }
     })();
-  }, [clientId, token]);
+  }, [clientId, token, USE_MOCK_DATA]);
+
+  useEffect(() => {
+    // Esta função calcula o total de documentos somando as quantidades de cada status
+    const calculateTotal = () => {
+      if (!rawDocStatus || rawDocStatus.length === 0) {
+        return 0;
+      }
+
+      // Usamos 'reduce' para somar as quantidades de todos os tipos de documento
+      const total = rawDocStatus.reduce((acc, documentType) => {
+        const quantityInType = documentType.status.reduce(
+          (subAcc, s) => subAcc + s.quantity,
+          0
+        );
+        return acc + quantityInType;
+      }, 0);
+
+      return total;
+    };
+
+    setTotalDocuments(calculateTotal());
+  }, [rawDocStatus]);
 
   useEffect(() => {
     // Só busca se a aba "historico" estiver ativa e tiver um clientId
@@ -677,7 +780,7 @@ export const MonittoringBis = () => {
                 values.total > 0 ? (values.conformity / values.total) * 100 : 0;
 
               return {
-                month: `${monthMap[monthName]}/${year.slice(2)}`,
+                mes: `${monthMap[monthName]}/${year.slice(2)}`,
                 Aderência: adherence,
                 Conformidade: conformity,
               };
@@ -961,18 +1064,62 @@ export const MonittoringBis = () => {
     }
   };
 
+  // Dentro do componente MonittoringBis, antes do return()
+
+  const handleExport = () => {
+    if (historyData.length === 0) {
+      alert("Não há dados no histórico para exportar.");
+      return;
+    }
+
+    // A lógica para pegar o nome da filial continua a mesma e está correta
+    const selectedBranchNames = applied.branchIds
+      .map((id) => branchIdName.get(id) || id)
+      .join(", ");
+    const branchText = selectedBranchNames || "Todas as Filiais";
+    const safeBranchName = branchText.replace(/[^a-z0-9]/gi, "_").toLowerCase();
+    const fileName = `historico_${safeBranchName}`;
+
+    const fileType =
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8";
+    const fileExtension = ".xlsx";
+
+    // --- LÓGICA DE EXPORTAÇÃO CORRIGIDA ---
+
+    // 1. Preparamos os cabeçalhos que queremos no arquivo final.
+    //    Isso inclui o cabeçalho da filial e os cabeçalhos da tabela.
+    const headers = [
+      ["Filial(is):", branchText], // Linha 1
+      [], // Linha 2 (em branco para espaçamento)
+      ["Mês", "Aderência", "Conformidade"], // Linha 3 (os títulos da nossa tabela)
+    ];
+
+    // 2. Criamos a planilha (worksheet) INICIALMENTE apenas com os cabeçalhos.
+    const ws = XLSX.utils.aoa_to_sheet(headers);
+
+    // 3. Agora, adicionamos os dados do gráfico (historyData) ABAIXO dos cabeçalhos que já criamos.
+    XLSX.utils.sheet_add_json(ws, historyData, {
+      origin: "A4", // Começa a inserir os dados na célula A4 (abaixo dos nossos 3 cabeçalhos)
+      skipHeader: true, // Pula os cabeçalhos do JSON, pois já criamos os nossos próprios
+    });
+
+    // O resto do processo para criar e baixar o arquivo continua o mesmo
+    const wb = { Sheets: { Histórico: ws }, SheetNames: ["Histórico"] };
+    const excelBuffer = XLSX.write(wb, { bookType: "xlsx", type: "array" });
+    const data = new Blob([excelBuffer], { type: fileType });
+    saveAs(data, fileName + fileExtension);
+  };
+
   return (
     <>
-            <Helmet title="monitoring table" />     
+      <Helmet title="monitoring table" />
       <section
         className="mx-5 md:mx-20 flex flex-col gap-6 pb-20"
         id="contentToCapture"
       >
-                {/* Tabs */}       
+        {/* Tabs */}
         <div className="border-b border-gray-200">
-                   
           <nav className="-mb-px flex space-x-8" aria-label="Tabs">
-                       
             <button
               onClick={() => setActiveTab("visao-geral")}
               className={`whitespace-nowrap border-b-2 px-1 py-4 text-sm font-medium ${
@@ -981,9 +1128,9 @@ export const MonittoringBis = () => {
                   : "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700"
               }`}
             >
-                            Visão Geral            
+              Visão Geral
             </button>
-                       
+
             <button
               onClick={() => setActiveTab("fornecedores")}
               className={`whitespace-nowrap border-b-2 px-1 py-4 text-sm font-medium ${
@@ -992,7 +1139,7 @@ export const MonittoringBis = () => {
                   : "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700"
               }`}
             >
-                            Fornecedores            
+              Fornecedores
             </button>
             <button
               onClick={() => setActiveTab("historico")}
@@ -1004,27 +1151,22 @@ export const MonittoringBis = () => {
             >
               Histórico
             </button>
-                     
           </nav>
-                 
         </div>
-               
+
         {activeTab === "visao-geral" && (
           <div>
-                       
             <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
-                           
-              <h2 className="text-lg font-semibold text-gray-800">Filtros</h2> 
-                         
-              <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4">
-                               
+              <h2 className="text-lg font-semibold text-gray-800">Filtros</h2>
+
+              <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-6">
                 <MultiSelectDropdown
                   label="Unidades"
                   options={branchOpts}
                   values={draft.branchIds}
                   onChange={(v) => setDraft((s) => ({ ...s, branchIds: v }))}
                 />
-                               
+
                 <MultiSelectDropdown
                   label="Fornecedores"
                   options={providerOpts}
@@ -1045,7 +1187,7 @@ export const MonittoringBis = () => {
                   values={draft.contractIds}
                   onChange={(v) => setDraft((s) => ({ ...s, contractIds: v }))}
                 />
-                           
+
                 <MultiSelectDropdown
                   label="Status do Contrato"
                   options={contractStatusOpts}
@@ -1068,7 +1210,7 @@ export const MonittoringBis = () => {
                   values={draft.employeeIds}
                   onChange={(v) => setDraft((s) => ({ ...s, employeeIds: v }))}
                 />
-                 
+
                 <MultiSelectDropdown
                   label="CPF do Funcionário"
                   options={employeeCpfOpts}
@@ -1083,7 +1225,7 @@ export const MonittoringBis = () => {
                     setDraft((s) => ({ ...s, employeeSituations: v }))
                   }
                 />
-                   
+
                 <MultiSelectDropdown
                   label="Tipo de Documento"
                   options={docTypeOpts}
@@ -1092,14 +1234,14 @@ export const MonittoringBis = () => {
                     setDraft((s) => ({ ...s, documentTypes: v }))
                   }
                 />
-                                                               
+
                 <MultiSelectDropdown
                   label="Status de Documento"
                   options={statusOpts}
                   values={draft.statuses}
                   onChange={(v) => setDraft((s) => ({ ...s, statuses: v }))}
                 />
-                             
+
                 <MultiSelectDropdown
                   label="Títulos de Documento"
                   options={docTitleOpts}
@@ -1127,19 +1269,17 @@ export const MonittoringBis = () => {
                     setDraft((s) => ({ ...s, documentValidity: v }))
                   }
                 />
-                             
               </div>
-                           
+
               <div className="mt-6 flex justify-end gap-3 border-t border-gray-200 pt-4">
-                               
                 <button
                   type="button"
                   onClick={clearFilters}
                   className="rounded-md bg-white px-4 py-2 text-sm font-medium text-gray-800 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
                 >
-                                    Limpar                
+                  Limpar
                 </button>
-                               
+
                 <button
                   type="button"
                   onClick={applyFilters}
@@ -1150,108 +1290,92 @@ export const MonittoringBis = () => {
                       : "cursor-not-allowed bg-blue-300"
                   }`}
                 >
-                                    Aplicar Filtros                
+                  Aplicar Filtros
                 </button>
-                             
               </div>
-                         
             </div>
-                       
+
             <div className="grid grid-cols-1 py-5 gap-6 md:grid-cols-2">
-                           
               <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm h-[30vh]">
-                                <ConformityGaugeChart percentage={conformity} />
-                             
+                <ConformityGaugeChart percentage={conformity} />
               </div>
-                           
+
               <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm h-[30vh]">
-                               
                 <ConformityGaugeChart
                   title="Aderência"
                   percentage={adherence}
                 />
-                             
               </div>
-                         
             </div>
-                       
-            <div className="grid grid-cols-1 gap-6 sm:grid-cols-4">
-                           
+
+            <div className="grid grid-cols-1 gap-6 sm:grid-cols-5">
               <div className="rounded-lg py-6 flex justify-center">
-                               
-                <ActiveContracts count={stats.contractQuantity ?? 0} />         
-                   
+                <ActiveContracts count={stats.contractQuantity ?? 0} />
               </div>
-                           
+
               <div className="rounded-lg py-6 flex justify-center">
-                               
-                <Suppliers count={stats.supplierQuantity ?? 0} />             
+                <Suppliers count={stats.supplierQuantity ?? 0} />
               </div>
-                           
               <div className="rounded-lg py-6 flex justify-center">
-                               
-                <Employees count={stats.employeeQuantity ?? 0} />             
+                <TotalDocumentsCard count={totalDocuments} />
               </div>
-                           
+
               <div className="rounded-lg py-6 flex justify-center">
-                               
+                <Employees count={stats.employeeQuantity ?? 0} />
+              </div>
+
+              <div className="rounded-lg py-6 flex justify-center">
                 <AllocatedEmployees
                   count={stats.allocatedEmployeeQuantity ?? 0}
                 />
-                             
               </div>
-                         
             </div>
-                       
+
             <div className="overflow-x-auto mt-10 pb-10">
-                            <StatusDocumentChart data={chartData} />           
+              <StatusDocumentChart data={chartData} />
             </div>
-                       
+
+            <div className="overflow-x-auto mt-10 pb-10">
+              {clientId && (
+                <GeneralDocumentsTable clientId={clientId} filters={applied} />
+              )}
+            </div>
+
+
             <div className="overflow-x-auto mt-10">
-                           
               <div className="flex flex-col md:flex-row gap-6 md:gap-8">
-                               
                 <div className="w-full md:w-2/5">
-                                   
-                  <ExemptionPendingChart data={documentExemptionData} />       
-                         
+                  <ExemptionPendingChart data={documentExemptionData} />
                 </div>
-                               
+
                 <div className="w-full md:w-3/5">
-                                    <ConformityRankingTable data={tableData} /> 
-                               
+                  <ConformityRankingTable data={tableData} />
                 </div>
-                             
               </div>
-                         
             </div>
-                       
+
             <button
               onClick={generatePDF}
               className="mt-4 px-4 py-2 bg-blue-500 text-white rounded"
             >
-                            Gerar Relatório em PDF            
+              Gerar Relatório em PDF
             </button>
-                     
           </div>
         )}
-               
+
         {activeTab === "fornecedores" && (
           <div>
-                       
             <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
-                           
-              <h2 className="text-lg font-semibold text-gray-800">Filtros</h2> 
-                         
-              <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4">
-                               
+              <h2 className="text-lg font-semibold text-gray-800">Filtros</h2>
+
+              <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-6">
                 <MultiSelectDropdown
                   label="Unidades"
                   options={branchOpts}
                   values={draft.branchIds}
                   onChange={(v) => setDraft((s) => ({ ...s, branchIds: v }))}
                 />
-                               
+
                 <MultiSelectDropdown
                   label="Fornecedores"
                   options={providerOpts}
@@ -1272,7 +1396,7 @@ export const MonittoringBis = () => {
                   values={draft.contractIds}
                   onChange={(v) => setDraft((s) => ({ ...s, contractIds: v }))}
                 />
-                           
+
                 <MultiSelectDropdown
                   label="Status do Contrato"
                   options={contractStatusOpts}
@@ -1295,7 +1419,7 @@ export const MonittoringBis = () => {
                   values={draft.employeeIds}
                   onChange={(v) => setDraft((s) => ({ ...s, employeeIds: v }))}
                 />
-                 
+
                 <MultiSelectDropdown
                   label="CPF do Funcionário"
                   options={employeeCpfOpts}
@@ -1310,7 +1434,7 @@ export const MonittoringBis = () => {
                     setDraft((s) => ({ ...s, employeeSituations: v }))
                   }
                 />
-                   
+
                 <MultiSelectDropdown
                   label="Tipo de Documento"
                   options={docTypeOpts}
@@ -1319,14 +1443,14 @@ export const MonittoringBis = () => {
                     setDraft((s) => ({ ...s, documentTypes: v }))
                   }
                 />
-                                                               
+
                 <MultiSelectDropdown
                   label="Status de Documento"
                   options={statusOpts}
                   values={draft.statuses}
                   onChange={(v) => setDraft((s) => ({ ...s, statuses: v }))}
                 />
-                             
+
                 <MultiSelectDropdown
                   label="Títulos de Documento"
                   options={docTitleOpts}
@@ -1361,7 +1485,7 @@ export const MonittoringBis = () => {
                   onClick={clearFilters}
                   className="rounded-md bg-white px-4 py-2 text-sm font-medium text-gray-800 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
                 >
-                                    Limpar            
+                  Limpar
                 </button>
                 <button
                   type="button"
@@ -1373,7 +1497,7 @@ export const MonittoringBis = () => {
                       : "cursor-not-allowed bg-blue-300"
                   }`}
                 >
-                                    Aplicar Filtros    
+                  Aplicar Filtros
                 </button>
               </div>
             </div>
@@ -1391,14 +1515,14 @@ export const MonittoringBis = () => {
             <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
               <h2 className="text-lg font-semibold text-gray-800">Filtros</h2>
 
-              <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4">
+              <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-6">
                 <MultiSelectDropdown
                   label="Unidades"
                   options={branchOpts}
                   values={draft.branchIds}
                   onChange={(v) => setDraft((s) => ({ ...s, branchIds: v }))}
                 />
-                               
+
                 <MultiSelectDropdown
                   label="Fornecedores"
                   options={providerOpts}
@@ -1413,8 +1537,7 @@ export const MonittoringBis = () => {
                     setDraft((s) => ({ ...s, providerCnpjs: v }))
                   }
                 />
-
-                 <MultiSelectDropdown
+                <MultiSelectDropdown
                   label="Responsáveis"
                   options={respOpts}
                   values={draft.responsibleIds}
@@ -1422,7 +1545,7 @@ export const MonittoringBis = () => {
                     setDraft((s) => ({ ...s, responsibleIds: v }))
                   }
                 />
-                 <MultiSelectDropdown
+                <MultiSelectDropdown
                   label="Tipo de Documento"
                   options={docTypeOpts}
                   values={draft.documentTypes}
@@ -1431,7 +1554,6 @@ export const MonittoringBis = () => {
                   }
                 />
 
-                            
                 <MultiSelectDropdown
                   label="Status do Contrato"
                   options={contractStatusOpts}
@@ -1440,7 +1562,6 @@ export const MonittoringBis = () => {
                     setDraft((s) => ({ ...s, activeContract: v }))
                   }
                 />
-                       
               </div>
               <div className="mt-6 flex justify-end gap-3 border-t border-gray-200 pt-4">
                 <button
@@ -1448,7 +1569,7 @@ export const MonittoringBis = () => {
                   onClick={clearFilters}
                   className="rounded-md bg-white px-4 py-2 text-sm font-medium text-gray-800 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
                 >
-                                    Limpar            
+                  Limpar
                 </button>
                 <button
                   type="button"
@@ -1460,13 +1581,22 @@ export const MonittoringBis = () => {
                       : "cursor-not-allowed bg-blue-300"
                   }`}
                 >
-                                    Aplicar Filtros    
+                  Aplicar Filtros
                 </button>
               </div>
             </div>
 
-            {/* Renderiza o componente do gráfico */}
             <HistoryChart data={historyData} isLoading={isLoadingHistory} />
+
+            <div className="mt-6 flex justify-end">
+              <button
+                onClick={handleExport}
+                className="rounded-md bg-green-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
+                disabled={isLoadingHistory || historyData.length === 0}
+              >
+                Exportar para Excel
+              </button>
+            </div>
           </div>
         )}
       </section>

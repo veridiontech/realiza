@@ -1,16 +1,15 @@
-import { useState } from "react";
-import { HousePlus } from "lucide-react";
 
-interface AllocatedEmployeesProps {
-  count?: number;
+import { useState } from "react";
+import { FileText } from "lucide-react"; 
+
+interface TotalDocumentsCardProps {
+  count: number;
 }
 
-export function AllocatedEmployees({ count }: AllocatedEmployeesProps) {
-  const [showTooltip, setShowTooltip] = useState(false);
-
-  console.log("count dentro do componente:", count);
-
+export function TotalDocumentsCard({ count }: TotalDocumentsCardProps) {
+    const [showTooltip, setShowTooltip] = useState(false);
   return (
+    // Container principal com layout horizontal (flex-row)
     <div
       style={{
         background: "#fff",
@@ -34,8 +33,9 @@ export function AllocatedEmployees({ count }: AllocatedEmployeesProps) {
           alignContent: "center",
         }}
       >
-        <HousePlus height={80} width={70} color="#cccccc" />
+        <FileText height={80} width={70} color="#cccccc" />
       </div>
+
       <div
         style={{
           justifyContent: "start",
@@ -53,7 +53,7 @@ export function AllocatedEmployees({ count }: AllocatedEmployeesProps) {
             gap: 6,
           }}
         >
-          Colaboradores Alocados
+          Total de Documentos
           <span
             onMouseEnter={() => setShowTooltip(true)}
             onMouseLeave={() => setShowTooltip(false)}
@@ -91,21 +91,20 @@ export function AllocatedEmployees({ count }: AllocatedEmployeesProps) {
                   userSelect: "none",
                 }}
               >
-                Funcionários atualmente alocados em contratos
+                Número total de Documentos
               </div>
             )}
           </span>
         </div>
-
         <div
           style={{
             fontWeight: "700",
             fontSize: 40,
-            color: "#374151", // azul acinzentado
+            color: "#374151",
             display: "flex",
           }}
         >
-          {count?.toLocaleString("pt-BR")}
+          {count}
         </div>
       </div>
     </div>
