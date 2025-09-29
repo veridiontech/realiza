@@ -1,5 +1,6 @@
 package bl.tech.realiza.usecases.interfaces.users;
 
+import bl.tech.realiza.domains.documents.Document;
 import bl.tech.realiza.domains.documents.employee.DocumentEmployee;
 import bl.tech.realiza.domains.documents.provider.DocumentProviderSubcontractor;
 import bl.tech.realiza.domains.documents.provider.DocumentProviderSupplier;
@@ -26,6 +27,9 @@ public interface CrudNotification {
     @Transactional
     @Async
     void saveProviderNotificationForRealizaUsers(ItemManagement itemManagement);
+    @Transactional
+    @Async
+    void saveDocumentNotificationForRealizaUsers(String documentId);
     @Transactional
     @Async
     void saveExpiredSupplierDocumentNotificationForSupplierUsers(DocumentProviderSupplier documentProviderSupplier);

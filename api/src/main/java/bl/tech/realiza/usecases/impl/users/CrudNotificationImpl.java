@@ -230,6 +230,46 @@ public class CrudNotificationImpl implements CrudNotification {
     }
 
     @Override
+    public void saveDocumentNotificationForRealizaUsers(String documentId) {
+        List<Notification> notifications = new ArrayList<>();
+        String title = "Novo documento inserido no sistema!";
+        String description = null;
+
+        Document document = documentRepository.findById(documentId)
+                .orElse(null);
+
+        if (document != null) {
+            if (document instanceof DocumentEmployee documentEmployee) {
+                description = "Novo documento " + documentEmployee.getDocumentMatrix().getName()
+                        + " do colaborador " + documentEmployee.getEmployee().getFullName()
+                        + " inserido no sistema aguardando checagem";
+            } else if (document instanceof DocumentProviderSupplier documentProviderSupplier) {
+                description = "Novo documento " +  documentProviderSupplier.getDocumentMatrix().getName()
+                        + "da empresa " + documentProviderSupplier.getProviderSupplier().getCorporateName()
+                        + " inserido no sistema aguardando checagem";
+            } else if (document instanceof DocumentProviderSubcontractor documentProviderSubcontractor) {
+                description = "Novo documento " + documentProviderSubcontractor.getDocumentMatrix().getName()
+                        + "da empresa " + documentProviderSubcontractor.getProviderSubcontractor().getCorporateName()
+                        + " inserido no sistema aguardando checagem";
+            }
+            String finalDescription = description;
+
+            List<UserManager> users = userManagerRepository.findAll();
+            for (UserManager userManager : users) {
+                notifications.add(
+                        Notification.builder()
+                                .user(userManager)
+                                .title(title)
+                                .description(finalDescription)
+                                .build()
+                );
+            }
+            notificationRepository.saveAll(notifications);
+        }
+
+    }
+
+    @Override
     public void saveExpiredSupplierDocumentNotificationForSupplierUsers(DocumentProviderSupplier documentProviderSupplier) {
         int page = 0;
         int size = 50;

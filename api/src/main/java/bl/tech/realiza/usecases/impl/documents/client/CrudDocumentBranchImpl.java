@@ -513,7 +513,10 @@ public class CrudDocumentBranchImpl implements CrudDocumentBranch {
             throw new NotFoundException("Documents not found");
         }
 
-        documentList.forEach(documentBranch -> documentBranch.setIsActive(isSelected));
+        documentList.forEach(documentBranch -> {
+            documentBranch.setDoesBlock(Boolean.FALSE);
+            documentBranch.setIsActive(isSelected);
+        });
 
         documentBranchRepository.saveAll(documentList);
         String action = "";

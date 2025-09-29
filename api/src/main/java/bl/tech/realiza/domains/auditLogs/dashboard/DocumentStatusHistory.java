@@ -24,6 +24,7 @@ public class DocumentStatusHistory {
     private Long totalDocuments;
     private Long adherent;
     private Long conformity;
+    private String documentType;
     @Column(nullable = false)
     private YearMonth historyPeriod;
     @CreationTimestamp
