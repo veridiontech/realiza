@@ -1,13 +1,12 @@
 import { useState } from "react";
-import { Users } from "lucide-react";
+import { FileText } from "lucide-react";
 
-interface EmployeeCountProps {
-  count?: number | undefined;
+interface TotalDocumentsCardProps {
+  count: number;
 }
 
-export function Employees({ count }: EmployeeCountProps) {
+export function TotalDocumentsCard({ count }: TotalDocumentsCardProps) {
   const [showTooltip, setShowTooltip] = useState(false);
-
   return (
     <div
       style={{
@@ -32,8 +31,9 @@ export function Employees({ count }: EmployeeCountProps) {
           alignContent: "center",
         }}
       >
-        <Users height={80} width={70} color="#cccccc" />
+        <FileText height={80} width={70} color="#cccccc" />
       </div>
+
       <div
         style={{
           justifyContent: "start",
@@ -51,7 +51,7 @@ export function Employees({ count }: EmployeeCountProps) {
             gap: 6,
           }}
         >
-           Colaboradores <br /> Nao Alocados
+          Total de Documentos
           <span
             onMouseEnter={() => setShowTooltip(true)}
             onMouseLeave={() => setShowTooltip(false)}
@@ -89,7 +89,7 @@ export function Employees({ count }: EmployeeCountProps) {
                   userSelect: "none",
                 }}
               >
-                Número total de colaboradores ativos
+                Número total de Documentos
               </div>
             )}
           </span>
@@ -100,7 +100,6 @@ export function Employees({ count }: EmployeeCountProps) {
             fontSize: 40,
             color: "#374151",
             display: "flex",
-            justifyContent: "center"
           }}
         >
           {count}

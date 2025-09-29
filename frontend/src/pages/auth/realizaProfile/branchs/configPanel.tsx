@@ -217,7 +217,6 @@ export function ConfigPanel() {
     const [editingServiceTitle, setEditingServiceTitle] = useState("");
     const [editingServiceRisk, setEditingServiceRisk] = useState("");
 
-    // NOVOS ESTADOS PARA ATIVIDADE
     const [editingActivity, setEditingActivity] = useState<Activity | null>(null);
     const [editingActivityTitle, setEditingActivityTitle] = useState("");
     const [editingActivityRisk, setEditingActivityRisk] = useState("");
@@ -328,7 +327,6 @@ export function ConfigPanel() {
         }
     }
 
-    // NOVAS FUNÇÕES PARA ATIVIDADES
     function handleEditActivity(activity: Activity) {
         console.log("✏️ Editar atividade:", activity);
         setEditingActivity(activity);
@@ -596,7 +594,6 @@ export function ConfigPanel() {
         }
     }
 
-    // troque sua getActivities por esta versão
     async function getActivities() {
         setIsLoadingActivities(true);
         try {
@@ -615,7 +612,6 @@ export function ConfigPanel() {
                     ? (data as any).content
                     : [];
 
-            // <-- normalização do ID
             const normalized: Activity[] = raw
                 .map((a) => ({
                     id: a.id ?? a.idActivity ?? a.idActivityRepo ?? "",
@@ -1077,8 +1073,10 @@ export function ConfigPanel() {
         if (!docsSearchTerm) {
             return docsList;
         }
+        const lowerCaseSearchTerm = docsSearchTerm.toLowerCase();
         return docsList.filter((doc) =>
-            doc.name.toLowerCase().includes(docsSearchTerm.toLowerCase())
+            doc.name.toLowerCase().includes(lowerCaseSearchTerm) ||
+            doc.type.toLowerCase().includes(lowerCaseSearchTerm)
         );
     }, [docsList, docsSearchTerm]);
 
@@ -1869,6 +1867,7 @@ export function ConfigPanel() {
                                                             )?.label
                                                             }`
                                                             : "Sem validade padrão"}
+                                                        {doc.type && ` (${doc.type})`}
                                                     </p>
                                                 </li>
                                             ))}

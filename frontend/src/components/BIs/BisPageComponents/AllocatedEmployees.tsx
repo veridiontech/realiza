@@ -53,7 +53,7 @@ export function AllocatedEmployees({ count }: AllocatedEmployeesProps) {
             gap: 6,
           }}
         >
-          Funcionários Alocados
+          Colaboradores Alocados
           <span
             onMouseEnter={() => setShowTooltip(true)}
             onMouseLeave={() => setShowTooltip(false)}
@@ -101,7 +101,7 @@ export function AllocatedEmployees({ count }: AllocatedEmployeesProps) {
           style={{
             fontWeight: "700",
             fontSize: 40,
-            color: "#374151", // azul acinzentado
+            color: "#374151",
             display: "flex",
           }}
         >

@@ -20,6 +20,7 @@ import bl.tech.realiza.services.auth.JwtService;
 import bl.tech.realiza.services.documentProcessing.DocumentProcessingService;
 import bl.tech.realiza.usecases.interfaces.auditLogs.AuditLogService;
 import bl.tech.realiza.usecases.interfaces.documents.provider.CrudDocumentProviderSubcontractor;
+import bl.tech.realiza.usecases.interfaces.users.CrudNotification;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.hibernate.Hibernate;
@@ -48,6 +49,7 @@ public class CrudDocumentProviderSubcontractorImpl implements CrudDocumentProvid
     private final UserRepository userRepository;
     private final AuditLogService auditLogServiceImpl;
     private final GoogleCloudService googleCloudService;
+    private final CrudNotification crudNotification;
 
     @Override
     public DocumentResponseDto save(DocumentProviderSubcontractorRequestDto documentProviderSubcontractorRequestDto) {
@@ -220,6 +222,7 @@ public class CrudDocumentProviderSubcontractorImpl implements CrudDocumentProvid
                         userResponsible.getIdUser());
             }
         }
+        crudNotification.saveDocumentNotificationForRealizaUsers(savedDocumentSubcontractor.getIdDocumentation());
 
         DocumentResponseDto documentSubcontractorResponse = DocumentResponseDto.builder()
                 .idDocument(savedDocumentSubcontractor.getIdDocumentation())
