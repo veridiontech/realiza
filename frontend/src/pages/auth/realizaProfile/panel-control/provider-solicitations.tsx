@@ -7,39 +7,34 @@ import { CardPanelControlProvider } from "@/components/cardPanelControlProvider"
 import { ColumnPanelControl } from "@/components/column-panel-control";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
-interface Requester {
-  idUser: string;
-  firstName: string;
-  surname: string;
-}
-
+// Interface simplificada para refletir a resposta real da API
 export interface Solicitation {
   idSolicitation: string;
-  title: string;
-  details: string;
   creationDate: string;
-  requester: Requester;
-  newProvider: {
-    cnpj: string | undefined;
-    corporateName: string | undefined;
-    telephone: string | undefined;
-  };
-  newUser: {
-    idUser: string;
-    firstName?: string | undefined;
-    surname?: string | undefined;
-    nameEnterprise?: string | undefined;
-    cpf?: string | undefined;
-    email?: string | undefined;
-    enterprise?: string | undefined;
-  };
   status: string;
+  
+  // Campos que a API está retornando no nível superior:
+  requesterName: string; // Vindo como "realiza Assessoria"
+  requesterEmail: string; 
+  solicitationType: string; 
+  
+  // O nome da empresa deve estar vindo como "enterpriseName" no JSON
+  enterpriseName?: string; 
+  
+  clientCnpj: string;
+  clientName: string;
+  branchName: boolean;
+  
+  // Removido: 'requester' e 'newProvider' complexos, pois não estão no JSON
+  // Os campos abaixo (do newUser) parecem não estar sendo usados ou não vêm no JSON real
+  // newUser: { ... }; 
 }
 
 interface ApiResponse {
   content: Solicitation[];
   totalPages: number;
 }
+
 
 export function ProviderSolicitations() {
   const [solicitations, setSolicitations] = useState<Solicitation[]>([]);
@@ -55,8 +50,9 @@ export function ProviderSolicitations() {
           headers: { Authorization: `Bearer ${tokenFromStorage}` },
         }
       );
-      console.log(response.data.content);
       
+      console.log("Dados recebidos da API (content):", response.data.content);
+
       setSolicitations(response.data.content);
     } catch (err) {
       console.error("Erro ao buscar solicitações:", err);
@@ -81,11 +77,14 @@ export function ProviderSolicitations() {
     ).length;
   };
 
+  // Funções getRequesterName e getEnterpriseName foram removidas, pois os dados estão no nível superior.
+
   return (
     <div className="flex h-full w-full flex-col items-center justify-center gap-9 p-4">
       <div className="relative bottom-[3vw] flex h-full w-full flex-col gap-6 rounded-md bg-white p-4 shadow-sm">
         <h1 className="font-semibold text-[30px]">Empresas Solicitantes </h1>
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3">
+          
           <div>
             <ColumnPanelControl
               lenghtControl={countStatus("PENDING")}
@@ -103,13 +102,15 @@ export function ProviderSolicitations() {
                       .filter(
                         (solicitation) => solicitation.status === "PENDING"
                       )
-                      .map((solicitation: any) => (
+                      .map((solicitation: Solicitation) => (
                         <CardPanelControlProvider
-                          branchName
+                          branchName={solicitation.branchName}
                           key={solicitation.idSolicitation}
-                          requesterName={solicitation.requesterName}
+                          // Mapeamento Direto: Usa o campo que veio no JSON
+                          requesterName={solicitation.requesterName} 
                           creationDate={solicitation.creationDate}
-                          enterpriseName={solicitation.enterpriseName}
+                          // Mapeamento Direto: Usa o campo que veio no JSON
+                          enterpriseName={solicitation.enterpriseName} 
                           idSolicitation={solicitation.idSolicitation}
                           requesterEmail={solicitation.requesterEmail}
                           solicitationType={solicitation.solicitationType}
@@ -124,6 +125,7 @@ export function ProviderSolicitations() {
               </div>
             </div>
           </div>
+          
           <div>
             <ColumnPanelControl
               lenghtControl={countStatus("APPROVED")}
@@ -141,19 +143,18 @@ export function ProviderSolicitations() {
                       .filter(
                         (solicitation) => solicitation.status === "APPROVED"
                       )
-                      .map((solicitation: any) => (
+                      .map((solicitation: Solicitation) => (
                         <CardPanelControlProvider
-                        branchName
+                          branchName={solicitation.branchName}
                           key={solicitation.idSolicitation}
                           requesterName={solicitation.requesterName}
                           creationDate={solicitation.creationDate}
+                          enterpriseName={solicitation.enterpriseName}
                           idSolicitation={solicitation.idSolicitation}
                           requesterEmail={solicitation.requesterEmail}
                           solicitationType={solicitation.solicitationType}
                           clientCnpj={solicitation.clientCnpj}
                           clientName={solicitation.clientName}
-                          // onActionCompleted={removeSolicitation}
-                          // onActionCompleted={removeSolicitation}
                           status="APPROVED"
                         />
                       ))}
@@ -162,7 +163,7 @@ export function ProviderSolicitations() {
               </div>
             </div>
           </div>
-
+          
           <div>
             <ColumnPanelControl
               lenghtControl={countStatus("DENIED")}
@@ -177,12 +178,13 @@ export function ProviderSolicitations() {
                 <ScrollArea className="h-[40vh]">
                   {solicitations
                     .filter((solicitation) => solicitation.status === "DENIED")
-                    .map((solicitation: any) => (
+                    .map((solicitation: Solicitation) => (
                       <CardPanelControlProvider
-                      branchName
+                        branchName={solicitation.branchName}
                         key={solicitation.idSolicitation}
                         requesterName={solicitation.requesterName}
                         creationDate={solicitation.creationDate}
+                        enterpriseName={solicitation.enterpriseName}
                         idSolicitation={solicitation.idSolicitation}
                         requesterEmail={solicitation.requesterEmail}
                         solicitationType={solicitation.solicitationType}
@@ -196,17 +198,6 @@ export function ProviderSolicitations() {
             </div>
           </div>
         </div>
-        {/* <div className="grid grid-cols-1 gap-5 rounded-md p-4 shadow-sm sm:grid-cols-2 lg:grid-cols-4">
-                  {solicitations.map((solicitation) => (
-                    <CardPanelControl
-                      key={solicitation.idSolicitation}
-                      data={solicitation}
-                      onActionCompleted={removeSolicitation}
-                    />
-                  ))}
-                </div> */}
-
-        {/* Controles de Paginação */}
       </div>
     </div>
   );
