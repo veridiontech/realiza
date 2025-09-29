@@ -752,7 +752,9 @@ public class CrudItemManagementImpl implements CrudItemManagement {
         String clientCnpj = null;
         String branchName = null;
 
-        if (newProvider instanceof ProviderSupplier providerSupplier) {
+        Provider unproxiedProvider = (Provider) Hibernate.unproxy(newProvider);
+
+        if (unproxiedProvider instanceof ProviderSupplier providerSupplier) {
             enterpriseName = providerSupplier.getCorporateName();
             clientName = !providerSupplier.getBranches().isEmpty()
                     ? providerSupplier.getBranches().get(0).getClient().getCorporateName()
@@ -765,7 +767,7 @@ public class CrudItemManagementImpl implements CrudItemManagement {
                     ? providerSupplier.getBranches().get(0).getName()
                     : null
                     : null;
-        } else if (newProvider instanceof ProviderSubcontractor providerSubcontractor) {
+        } else if (unproxiedProvider instanceof ProviderSubcontractor providerSubcontractor) {
             enterpriseName = providerSubcontractor.getCorporateName();
             clientName = !providerSubcontractor.getProviderSupplier().getBranches().isEmpty()
                     ? providerSubcontractor.getProviderSupplier().getBranches().get(0).getClient().getCorporateName()
