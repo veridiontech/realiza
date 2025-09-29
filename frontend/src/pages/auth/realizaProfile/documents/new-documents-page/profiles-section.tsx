@@ -3,7 +3,7 @@ import axios from "axios";
 import { toast } from "sonner";
 import { ip } from "@/utils/ip";
 import { useClient } from "@/context/Client-Provider";
-import { Trash2 } from "lucide-react";
+import { Trash2, Pencil } from "lucide-react";
 
 type User = {
   id: string;
@@ -62,8 +62,19 @@ type ProfileDetails = {
   name: string;
   description: string;
   admin: boolean;
-  permissions: Permissions;
+  permissions?: Permissions;
   clientId: string;
+};
+
+const endpoints = {
+  listByClient: (clientId: string) => `${ip}/profile/by-name/${clientId}`,
+  getOne: (id: string) => `${ip}/profile/${id}`,
+  create: () => `${ip}/profile`,
+  update: (id: string) => `${ip}/profile/repo/${id}`, // <-- PUT correto
+  remove: (id: string) => `${ip}/profile/${id}`,
+  usersByProfile: (id: string) => `${ip}/user/find-by-profile/${id}`,
+  changeUserProfile: (userId: string, newProfileId: string) =>
+    `${ip}/user/${userId}/change-profile?profileId=${newProfileId}`,
 };
 
 export function ProfilesSection() {
@@ -73,7 +84,7 @@ export function ProfilesSection() {
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [loading, setLoading] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
-  
+
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isFinalConfirmModalOpen, setIsFinalConfirmModalOpen] = useState(false);
 
@@ -81,68 +92,54 @@ export function ProfilesSection() {
   const [associatedUsers, setAssociatedUsers] = useState<User[]>([]);
   const [individualAssignments, setIndividualAssignments] = useState<Record<string, string>>({});
 
+  // FORM (create/edit)
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [admin, setAdmin] = useState(false);
-  
   const [permissions, setPermissions] = useState<Permissions>({
-    dashboard: {
-      general: false,
-      provider: false,
-      document: false,
-      documentDetail: false,
-    },
+    dashboard: { general: false, provider: false, document: false, documentDetail: false },
     document: {
-      view: {
-        laboral: false,
-        workplaceSafety: false,
-        registrationAndCertificates: false,
-        general: false,
-        health: false,
-        environment: false,
-      },
-      upload: {
-        laboral: false,
-        workplaceSafety: false,
-        registrationAndCertificates: false,
-        general: false,
-        health: false,
-        environment: false,
-      },
-      exempt: {
-        laboral: false,
-        workplaceSafety: false,
-        registrationAndCertificates: false,
-        general: false,
-        health: false,
-        environment: false,
-      },
+      view: { laboral: false, workplaceSafety: false, registrationAndCertificates: false, general: false, health: false, environment: false },
+      upload: { laboral: false, workplaceSafety: false, registrationAndCertificates: false, general: false, health: false, environment: false },
+      exempt: { laboral: false, workplaceSafety: false, registrationAndCertificates: false, general: false, health: false, environment: false },
     },
-    contract: {
-      finish: false,
-      suspend: false,
-      create: false,
-    },
+    contract: { finish: false, suspend: false, create: false },
     reception: false,
   });
+
+  // EDIÇÃO
+  const [isEditing, setIsEditing] = useState(false);
+  const [editingProfileId, setEditingProfileId] = useState<string | null>(null);
+
+  const resetForm = () => {
+    setName("");
+    setDescription("");
+    setAdmin(false);
+    setPermissions({
+      dashboard: { general: false, provider: false, document: false, documentDetail: false },
+      document: {
+        view: { laboral: false, workplaceSafety: false, registrationAndCertificates: false, general: false, health: false, environment: false },
+        upload: { laboral: false, workplaceSafety: false, registrationAndCertificates: false, general: false, health: false, environment: false },
+        exempt: { laboral: false, workplaceSafety: false, registrationAndCertificates: false, general: false, health: false, environment: false },
+      },
+      contract: { finish: false, suspend: false, create: false },
+      reception: false,
+    });
+  };
 
   const fetchProfiles = async () => {
     if (!clientId) return;
     setLoading(true);
-    const tokenFromStorage = localStorage.getItem("tokenClient");
+    const token = localStorage.getItem("tokenClient");
     try {
-      console.log("Iniciando requisição GET para buscar perfis...");
-      const response = await axios.get(`${ip}/profile/by-name/${clientId}`, {
-        headers: { Authorization: `Bearer ${tokenFromStorage}` },
+      const { data } = await axios.get(endpoints.listByClient(clientId), {
+        headers: { Authorization: `Bearer ${token}` },
       });
-      console.log("Resposta da requisição GET:", response.data);
-      const data = Array.isArray(response.data) ? response.data : [];
-      const sortedProfiles = data.sort((a, b) =>
-        a.profileName.localeCompare(b.profileName)
-      );
-      setProfiles(sortedProfiles);
+      const arr = Array.isArray(data) ? data : [];
+      const sorted = arr.sort((a: Profile, b: Profile) => a.profileName.localeCompare(b.profileName));
+      setProfiles(sorted);
     } catch (err) {
-      console.error("Erro ao buscar perfis:", err);
+      console.error(err);
       toast.error("Erro ao carregar a lista de perfis.");
     } finally {
       setLoading(false);
@@ -152,28 +149,21 @@ export function ProfilesSection() {
   const handleAttemptDelete = async (profileId: string) => {
     setIndividualAssignments({});
     setLoading(true);
-    const tokenFromStorage = localStorage.getItem("tokenClient");
+    const token = localStorage.getItem("tokenClient");
     try {
-      console.log(`Iniciando requisição GET para buscar detalhes do perfil ${profileId}...`);
-      const detailsResponse = await axios.get(`${ip}/profile/${profileId}`, {
-        headers: { Authorization: `Bearer ${tokenFromStorage}` },
+      const details = await axios.get(endpoints.getOne(profileId), {
+        headers: { Authorization: `Bearer ${token}` },
       });
-      console.log("Resposta da requisição GET de detalhes:", detailsResponse.data);
-      setSelectedProfileDetails(detailsResponse.data);
+      setSelectedProfileDetails(details.data);
 
-      console.log(`Iniciando requisição GET para buscar usuários do perfil ${profileId}...`);
-      const usersResponse = await axios.get(
-        `${ip}/user/find-by-profile/${profileId}`,
-        {
-          headers: { Authorization: `Bearer ${tokenFromStorage}` },
-        }
-      );
-      console.log("Resposta da requisição GET de usuários:", usersResponse.data);
-      setAssociatedUsers(usersResponse.data);
+      const users = await axios.get(endpoints.usersByProfile(profileId), {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setAssociatedUsers(users.data);
 
       setIsDeleteModalOpen(true);
     } catch (err) {
-      console.error("Erro ao verificar usuários vinculados:", err);
+      console.error(err);
       toast.error("Não foi possível verificar os usuários vinculados.");
     } finally {
       setLoading(false);
@@ -183,19 +173,17 @@ export function ProfilesSection() {
   const handleConfirmDelete = async () => {
     if (!selectedProfileDetails) return;
     setLoading(true);
-    const tokenFromStorage = localStorage.getItem("tokenClient");
+    const token = localStorage.getItem("tokenClient");
     try {
-      console.log(`Iniciando requisição DELETE para o perfil ${selectedProfileDetails.id}...`);
-      await axios.delete(`${ip}/profile/${selectedProfileDetails.id}`, {
-        headers: { Authorization: `Bearer ${tokenFromStorage}` },
+      await axios.delete(endpoints.remove(selectedProfileDetails.id), {
+        headers: { Authorization: `Bearer ${token}` },
       });
-      console.log("Perfil excluído com sucesso.");
       toast.success("Perfil excluído com sucesso!");
       setIsDeleteModalOpen(false);
       setSelectedProfileDetails(null);
       fetchProfiles();
     } catch (err) {
-      console.error("Erro ao excluir o perfil:", err);
+      console.error(err);
       toast.error("Erro ao excluir o perfil.");
     } finally {
       setLoading(false);
@@ -203,10 +191,7 @@ export function ProfilesSection() {
   };
 
   const handleIndividualAssignmentChange = (userId: string, newProfileId: string) => {
-    setIndividualAssignments(prevAssignments => ({
-      ...prevAssignments,
-      [userId]: newProfileId,
-    }));
+    setIndividualAssignments((prev) => ({ ...prev, [userId]: newProfileId }));
   };
 
   const handleOpenFinalConfirm = () => {
@@ -222,22 +207,15 @@ export function ProfilesSection() {
     setLoading(true);
     const token = localStorage.getItem("tokenClient");
     try {
-      const reassignPromises = Object.entries(individualAssignments).map(([userId, profileId]) => {
-        console.log(`Iniciando requisição POST para reatribuir usuário ${userId} para o perfil ${profileId}...`);
-        return axios.post(`${ip}/user/${userId}/change-profile?profileId=${profileId}`, null, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-      });
-      
-      await Promise.all(reassignPromises);
-      console.log("Todos os usuários foram reatribuídos.");
+      const reassigns = Object.entries(individualAssignments).map(([userId, profileId]) =>
+        axios.post(endpoints.changeUserProfile(userId, profileId), null, { headers: { Authorization: `Bearer ${token}` } })
+      );
+      await Promise.all(reassigns);
       toast.success(`${associatedUsers.length} usuário(s) foram reatribuídos.`);
 
-      console.log(`Iniciando requisição DELETE para excluir o perfil ${selectedProfileDetails.id}...`);
-      await axios.delete(`${ip}/profile/${selectedProfileDetails.id}`, {
+      await axios.delete(endpoints.remove(selectedProfileDetails.id), {
         headers: { Authorization: `Bearer ${token}` },
       });
-      console.log("Perfil excluído após reatribuição.");
       toast.success(`O perfil "${selectedProfileDetails.name}" foi excluído.`);
 
       setIsFinalConfirmModalOpen(false);
@@ -245,9 +223,8 @@ export function ProfilesSection() {
       setSelectedProfileDetails(null);
       setIndividualAssignments({});
       fetchProfiles();
-
-    } catch (error) {
-      console.error("Erro ao reatribuir e excluir:", error);
+    } catch (err) {
+      console.error(err);
       toast.error("Ocorreu um erro durante a operação.");
     } finally {
       setLoading(false);
@@ -259,117 +236,148 @@ export function ProfilesSection() {
       toast.warning("O nome do perfil é obrigatório.");
       return;
     }
-
     setIsCreating(true);
 
     let profilePermissions = permissions;
-
     if (admin) {
       profilePermissions = {
-        dashboard: {
-          general: true,
-          provider: true,
-          document: true,
-          documentDetail: true,
-        },
+        dashboard: { general: true, provider: true, document: true, documentDetail: true },
         document: {
-          view: {
-            laboral: true,
-            workplaceSafety: true,
-            registrationAndCertificates: true,
-            general: true,
-            health: true,
-            environment: true,
-          },
-          upload: {
-            laboral: true,
-            workplaceSafety: true,
-            registrationAndCertificates: true,
-            general: true,
-            health: true,
-            environment: true,
-          },
-          exempt: {
-            laboral: true,
-            workplaceSafety: true,
-            registrationAndCertificates: true,
-            general: true,
-            health: true,
-            environment: true,
-          },
+          view: { laboral: true, workplaceSafety: true, registrationAndCertificates: true, general: true, health: true, environment: true },
+          upload: { laboral: true, workplaceSafety: true, registrationAndCertificates: true, general: true, health: true, environment: true },
+          exempt: { laboral: true, workplaceSafety: true, registrationAndCertificates: true, general: true, health: true, environment: true },
         },
-        contract: {
-          finish: true,
-          suspend: true,
-          create: true,
-        },
+        contract: { finish: true, suspend: true, create: true },
         reception: true,
       };
     }
 
-    const newProfile = {
+    const body = {
       name,
       description,
       admin,
       ...profilePermissions,
       clientId,
       branchIds: [],
-      contractIds: []
+      contractIds: [],
     };
 
-    const tokenFromStorage = localStorage.getItem("tokenClient");
+    const token = localStorage.getItem("tokenClient");
     try {
-      console.log("Iniciando requisição POST para criar perfil com os dados:", newProfile);
-      await axios.post(`${ip}/profile`, newProfile, {
-        headers: { Authorization: `Bearer ${tokenFromStorage}` },
-      });
-      console.log("Perfil criado com sucesso.");
+      await axios.post(endpoints.create(), body, { headers: { Authorization: `Bearer ${token}` } });
       toast.success("Perfil criado com sucesso!");
-      setName("");
-      setDescription("");
-      setAdmin(false);
-      setPermissions({
-        dashboard: { general: false, provider: false, document: false, documentDetail: false },
-        document: {
-          view: { laboral: false, workplaceSafety: false, registrationAndCertificates: false, general: false, health: false, environment: false },
-          upload: { laboral: false, workplaceSafety: false, registrationAndCertificates: false, general: false, health: false, environment: false },
-          exempt: { laboral: false, workplaceSafety: false, registrationAndCertificates: false, general: false, health: false, environment: false },
-        },
-        contract: { finish: false, suspend: false, create: false },
-        reception: false,
-      });
+      resetForm();
       fetchProfiles();
-    } catch (err: any) {
-      console.error("Erro ao criar perfil:", err.response || err);
+    } catch (err) {
+      console.error(err);
       toast.error("Erro ao criar o perfil.");
     } finally {
       setIsCreating(false);
     }
   };
 
-  const handlePermissionChange = (path: string, type: 'view' | 'upload' | 'exempt' | null = null) => {
-    setPermissions(prev => {
+  // ABRIR EDIÇÃO (GET /profile/{id})
+  const handleOpenEdit = async (profileId: string) => {
+    const token = localStorage.getItem("tokenClient");
+    try {
+      setLoading(true);
+      const { data } = await axios.get(endpoints.getOne(profileId), {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setEditingProfileId(profileId);
+      setIsEditing(true);
+      setName(data.name ?? "");
+      setDescription(data.description ?? "");
+      setAdmin(Boolean(data.admin));
+      toast.message("Editando perfil: " + (data.name ?? ""));
+    } catch (err) {
+      console.error(err);
+      toast.error("Não foi possível carregar o perfil para edição.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // SALVAR EDIÇÃO (PUT /profile/repo/{id})
+  const handleUpdateProfile = async () => {
+    if (!editingProfileId) return;
+    if (!name.trim()) {
+      toast.warning("O nome do perfil é obrigatório.");
+      return;
+    }
+    const token = localStorage.getItem("tokenClient");
+
+    const payload = admin
+      ? {
+          name,
+          description,
+          admin: true,
+          dashboard: { general: true, provider: true, document: true, documentDetail: true },
+          document: {
+            view: { laboral: true, workplaceSafety: true, registrationAndCertificates: true, general: true, health: true, environment: true },
+            upload: { laboral: true, workplaceSafety: true, registrationAndCertificates: true, general: true, health: true, environment: true },
+            exempt: { laboral: true, workplaceSafety: true, registrationAndCertificates: true, general: true, health: true, environment: true },
+          },
+          contract: { finish: true, suspend: true, create: true },
+          reception: true,
+        }
+      : {
+          name,
+          description,
+          admin: false,
+          dashboard: permissions.dashboard,
+          document: permissions.document,
+          contract: permissions.contract,
+          reception: permissions.reception,
+        };
+
+    try {
+      setLoading(true);
+      await axios.put(endpoints.update(editingProfileId), payload, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      toast.success("Perfil atualizado com sucesso!");
+      setIsEditing(false);
+      setEditingProfileId(null);
+      resetForm();
+      fetchProfiles();
+    } catch (err) {
+      console.error(err);
+      toast.error("Erro ao atualizar o perfil.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleCancelEdit = () => {
+    setIsEditing(false);
+    setEditingProfileId(null);
+    resetForm();
+  };
+
+  const handlePermissionChange = (path: string, type: "view" | "upload" | "exempt" | null = null) => {
+    setPermissions((prev) => {
       let newState = { ...prev };
-      const [mainKey, subKey] = path.split('.');
-      
-      if (mainKey === 'document' && subKey) {
+      const [mainKey, subKey] = path.split(".");
+
+      if (mainKey === "document" && subKey) {
         if (type) {
           newState.document = {
             ...newState.document,
             [type]: {
               ...newState.document[type],
-              [subKey]: !newState.document[type][subKey as keyof typeof newState.document.view]
-            }
+              [subKey]: !newState.document[type][subKey as keyof typeof newState.document.view],
+            },
           };
         } else {
-          const documentKeys = ['view', 'upload', 'exempt'] as const;
+          const documentKeys = ["view", "upload", "exempt"] as const;
           if (documentKeys.includes(subKey as any)) {
             (newState.document as any)[subKey] = !(newState.document as any)[subKey];
           }
         }
       } else {
         let currentLevel = newState as any;
-        const keys = path.split('.');
+        const keys = path.split(".");
         for (let i = 0; i < keys.length - 1; i++) {
           currentLevel[keys[i]] = { ...currentLevel[keys[i]] };
           currentLevel = currentLevel[keys[i]];
@@ -377,15 +385,12 @@ export function ProfilesSection() {
         const lastKey = keys[keys.length - 1];
         currentLevel[lastKey] = !currentLevel[lastKey];
       }
-      
       return newState;
     });
   };
 
   useEffect(() => {
-    if (clientId) {
-      fetchProfiles();
-    }
+    if (clientId) fetchProfiles();
   }, [clientId]);
 
   return (
@@ -394,9 +399,7 @@ export function ProfilesSection() {
         <div className="bg-white shadow-md rounded p-6 md:w-1/2">
           <h2 className="text-xl font-semibold mb-4">Perfis vinculados ao cliente</h2>
           {loading && !isDeleteModalOpen && <p className="text-gray-500">Carregando...</p>}
-          {!loading && profiles.length === 0 && (
-            <p className="text-gray-500">Nenhum perfil encontrado para este cliente.</p>
-          )}
+          {!loading && profiles.length === 0 && <p className="text-gray-500">Nenhum perfil encontrado para este cliente.</p>}
           {!loading && profiles.length > 0 && (
             <ul className="space-y-3 mb-6">
               {profiles.map((profile) => (
@@ -406,6 +409,13 @@ export function ProfilesSection() {
                 >
                   <span className="text-md text-gray-700">{profile.profileName}</span>
                   <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => handleOpenEdit(profile.id)}
+                      className="p-1 rounded-full hover:bg-blue-100"
+                      title="Editar perfil"
+                    >
+                      <Pencil className="w-5 h-5 text-blue-600" />
+                    </button>
                     <button
                       onClick={() => handleAttemptDelete(profile.id)}
                       className="p-1 rounded-full hover:bg-red-100"
@@ -421,7 +431,7 @@ export function ProfilesSection() {
         </div>
 
         <div className="bg-white shadow-md rounded p-6 md:w-1/2">
-          <h3 className="text-lg font-medium mb-2">Criar novo perfil</h3>
+          <h3 className="text-lg font-medium mb-2">{isEditing ? "Editar perfil" : "Criar novo perfil"}</h3>
           <div className="flex flex-col gap-4">
             <input className="border border-gray-300 rounded px-3 py-2" placeholder="Nome do perfil" value={name} onChange={(e) => setName(e.target.value)} />
             <input className="border border-gray-300 rounded px-3 py-2" placeholder="Descrição" value={description} onChange={(e) => setDescription(e.target.value)} />
@@ -436,120 +446,97 @@ export function ProfilesSection() {
                 </label>
               </div>
             </div>
+
             {!admin && (
               <div className="flex flex-col gap-2 mt-4">
                 <p className="font-medium">Permissões</p>
                 <div className="grid grid-cols-1 gap-2">
                   <p className="font-medium">Dashboard</p>
-                  <label>
-                    <input type="checkbox" checked={permissions.dashboard.general} onChange={() => handlePermissionChange("dashboard.general")} /> Geral
-                  </label>
-                  <label>
-                    <input type="checkbox" checked={permissions.dashboard.provider} onChange={() => handlePermissionChange("dashboard.provider")} /> Fornecedores
-                  </label>
-                  <label>
-                    <input type="checkbox" checked={permissions.dashboard.document} onChange={() => handlePermissionChange("dashboard.document")} /> Documentos
-                  </label>
-                  <label>
-                    <input type="checkbox" checked={permissions.dashboard.documentDetail} onChange={() => handlePermissionChange("dashboard.documentDetail")} /> Detalhes de Documentos
-                  </label>
+                  <label><input type="checkbox" checked={permissions.dashboard.general} onChange={() => handlePermissionChange("dashboard.general")} /> Geral</label>
+                  <label><input type="checkbox" checked={permissions.dashboard.provider} onChange={() => handlePermissionChange("dashboard.provider")} /> Fornecedores</label>
+                  <label><input type="checkbox" checked={permissions.dashboard.document} onChange={() => handlePermissionChange("dashboard.document")} /> Documentos</label>
+                  <label><input type="checkbox" checked={permissions.dashboard.documentDetail} onChange={() => handlePermissionChange("dashboard.documentDetail")} /> Detalhes de Documentos</label>
+
                   <hr className="my-2" />
                   <p className="font-medium">Documentos</p>
+
                   <div className="ml-4 mt-2 border-l-2 pl-4">
                     <p className="font-medium">Visualizar</p>
                     <div className="grid grid-cols-1 gap-2">
-                      <label>
-                        <input type="checkbox" checked={permissions.document.view.laboral} onChange={() => handlePermissionChange("document.laboral", "view")} /> Trabalhista
-                      </label>
-                      <label>
-                        <input type="checkbox" checked={permissions.document.view.workplaceSafety} onChange={() => handlePermissionChange("document.workplaceSafety", "view")} /> Segurança do Trabalho
-                      </label>
-                      <label>
-                        <input type="checkbox" checked={permissions.document.view.registrationAndCertificates} onChange={() => handlePermissionChange("document.registrationAndCertificates", "view")} /> Cadastro e Certidões
-                      </label>
-                      <label>
-                        <input type="checkbox" checked={permissions.document.view.general} onChange={() => handlePermissionChange("document.general", "view")} /> Geral
-                      </label>
-                      <label>
-                        <input type="checkbox" checked={permissions.document.view.health} onChange={() => handlePermissionChange("document.health", "view")} /> Saúde
-                      </label>
-                      <label>
-                        <input type="checkbox" checked={permissions.document.view.environment} onChange={() => handlePermissionChange("document.environment", "view")} /> Meio Ambiente
-                      </label>
+                      <label><input type="checkbox" checked={permissions.document.view.laboral} onChange={() => handlePermissionChange("document.laboral", "view")} /> Trabalhista</label>
+                      <label><input type="checkbox" checked={permissions.document.view.workplaceSafety} onChange={() => handlePermissionChange("document.workplaceSafety", "view")} /> Segurança do Trabalho</label>
+                      <label><input type="checkbox" checked={permissions.document.view.registrationAndCertificates} onChange={() => handlePermissionChange("document.registrationAndCertificates", "view")} /> Cadastro e Certidões</label>
+                      <label><input type="checkbox" checked={permissions.document.view.general} onChange={() => handlePermissionChange("document.general", "view")} /> Geral</label>
+                      <label><input type="checkbox" checked={permissions.document.view.health} onChange={() => handlePermissionChange("document.health", "view")} /> Saúde</label>
+                      <label><input type="checkbox" checked={permissions.document.view.environment} onChange={() => handlePermissionChange("document.environment", "view")} /> Meio Ambiente</label>
                     </div>
                   </div>
+
                   <div className="ml-4 mt-2 border-l-2 pl-4">
                     <p className="font-medium">Upload</p>
                     <div className="grid grid-cols-1 gap-2">
-                      <label>
-                        <input type="checkbox" checked={permissions.document.upload.laboral} onChange={() => handlePermissionChange("document.laboral", "upload")} /> Trabalhista
-                      </label>
-                      <label>
-                        <input type="checkbox" checked={permissions.document.upload.workplaceSafety} onChange={() => handlePermissionChange("document.workplaceSafety", "upload")} /> Segurança do Trabalho
-                      </label>
-                      <label>
-                        <input type="checkbox" checked={permissions.document.upload.registrationAndCertificates} onChange={() => handlePermissionChange("document.registrationAndCertificates", "upload")} /> Cadastro e Certidões
-                      </label>
-                      <label>
-                        <input type="checkbox" checked={permissions.document.upload.general} onChange={() => handlePermissionChange("document.general", "upload")} /> Geral
-                      </label>
-                      <label>
-                        <input type="checkbox" checked={permissions.document.upload.health} onChange={() => handlePermissionChange("document.health", "upload")} /> Saúde
-                      </label>
-                      <label>
-                        <input type="checkbox" checked={permissions.document.upload.environment} onChange={() => handlePermissionChange("document.environment", "upload")} /> Meio Ambiente
-                      </label>
+                      <label><input type="checkbox" checked={permissions.document.upload.laboral} onChange={() => handlePermissionChange("document.laboral", "upload")} /> Trabalhista</label>
+                      <label><input type="checkbox" checked={permissions.document.upload.workplaceSafety} onChange={() => handlePermissionChange("document.workplaceSafety", "upload")} /> Segurança do Trabalho</label>
+                      <label><input type="checkbox" checked={permissions.document.upload.registrationAndCertificates} onChange={() => handlePermissionChange("document.registrationAndCertificates", "upload")} /> Cadastro e Certidões</label>
+                      <label><input type="checkbox" checked={permissions.document.upload.general} onChange={() => handlePermissionChange("document.general", "upload")} /> Geral</label>
+                      <label><input type="checkbox" checked={permissions.document.upload.health} onChange={() => handlePermissionChange("document.health", "upload")} /> Saúde</label>
+                      <label><input type="checkbox" checked={permissions.document.upload.environment} onChange={() => handlePermissionChange("document.environment", "upload")} /> Meio Ambiente</label>
                     </div>
                   </div>
+
                   <div className="ml-4 mt-2 border-l-2 pl-4">
                     <p className="font-medium">Isentar</p>
                     <div className="grid grid-cols-1 gap-2">
-                      <label>
-                        <input type="checkbox" checked={permissions.document.exempt.laboral} onChange={() => handlePermissionChange("document.laboral", "exempt")} /> Trabalhista
-                      </label>
-                      <label>
-                        <input type="checkbox" checked={permissions.document.exempt.workplaceSafety} onChange={() => handlePermissionChange("document.workplaceSafety", "exempt")} /> Segurança do Trabalho
-                      </label>
-                      <label>
-                        <input type="checkbox" checked={permissions.document.exempt.registrationAndCertificates} onChange={() => handlePermissionChange("document.registrationAndCertificates", "exempt")} /> Cadastro e Certidões
-                      </label>
-                      <label>
-                        <input type="checkbox" checked={permissions.document.exempt.general} onChange={() => handlePermissionChange("document.general", "exempt")} /> Geral
-                      </label>
-                      <label>
-                        <input type="checkbox" checked={permissions.document.exempt.health} onChange={() => handlePermissionChange("document.health", "exempt")} /> Saúde
-                      </label>
-                      <label>
-                        <input type="checkbox" checked={permissions.document.exempt.environment} onChange={() => handlePermissionChange("document.environment", "exempt")} /> Meio Ambiente
-                      </label>
+                      <label><input type="checkbox" checked={permissions.document.exempt.laboral} onChange={() => handlePermissionChange("document.laboral", "exempt")} /> Trabalhista</label>
+                      <label><input type="checkbox" checked={permissions.document.exempt.workplaceSafety} onChange={() => handlePermissionChange("document.workplaceSafety", "exempt")} /> Segurança do Trabalho</label>
+                      <label><input type="checkbox" checked={permissions.document.exempt.registrationAndCertificates} onChange={() => handlePermissionChange("document.registrationAndCertificates", "exempt")} /> Cadastro e Certidões</label>
+                      <label><input type="checkbox" checked={permissions.document.exempt.general} onChange={() => handlePermissionChange("document.general", "exempt")} /> Geral</label>
+                      <label><input type="checkbox" checked={permissions.document.exempt.health} onChange={() => handlePermissionChange("document.health", "exempt")} /> Saúde</label>
+                      <label><input type="checkbox" checked={permissions.document.exempt.environment} onChange={() => handlePermissionChange("document.environment", "exempt")} /> Meio Ambiente</label>
                     </div>
                   </div>
+
                   <hr className="my-2" />
                   <p className="font-medium">Contrato</p>
-                  <label>
-                    <input type="checkbox" checked={permissions.contract.finish} onChange={() => handlePermissionChange("contract.finish")} /> Finalizar
-                  </label>
-                  <label>
-                    <input type="checkbox" checked={permissions.contract.suspend} onChange={() => handlePermissionChange("contract.suspend")} /> Suspender
-                  </label>
-                  <label>
-                    <input type="checkbox" checked={permissions.contract.create} onChange={() => handlePermissionChange("contract.create")} /> Criar
-                  </label>
+                  <label><input type="checkbox" checked={permissions.contract.finish} onChange={() => handlePermissionChange("contract.finish")} /> Finalizar</label>
+                  <label><input type="checkbox" checked={permissions.contract.suspend} onChange={() => handlePermissionChange("contract.suspend")} /> Suspender</label>
+                  <label><input type="checkbox" checked={permissions.contract.create} onChange={() => handlePermissionChange("contract.create")} /> Criar</label>
+
                   <hr className="my-2" />
                   <p className="font-medium">Outros</p>
-                  <label>
-                    <input type="checkbox" checked={permissions.reception} onChange={() => handlePermissionChange("reception")} /> Portaria
-                  </label>
+                  <label><input type="checkbox" checked={permissions.reception} onChange={() => handlePermissionChange("reception")} /> Portaria</label>
                 </div>
               </div>
             )}
-            <button 
-              onClick={handleCreateProfile} 
-              className="bg-realizaBlue text-white px-4 py-2 rounded w-fit disabled:bg-realizaBlue/70 disabled:cursor-not-allowed" 
-              disabled={isCreating}
-            >
-              {isCreating ? 'Criando...' : 'Criar perfil'}
-            </button>
+
+            <div className="flex gap-3">
+              {isEditing ? (
+                <>
+                  <button
+                    onClick={handleUpdateProfile}
+                    className="bg-blue-600 text-white px-4 py-2 rounded disabled:bg-blue-300 disabled:cursor-not-allowed"
+                    disabled={loading}
+                  >
+                    {loading ? "Salvando..." : "Salvar alterações"}
+                  </button>
+                  <button
+                    onClick={handleCancelEdit}
+                    className="bg-gray-200 text-gray-800 px-4 py-2 rounded hover:bg-gray-300"
+                    disabled={loading}
+                  >
+                    Cancelar
+                  </button>
+                </>
+              ) : (
+                <button
+                  onClick={handleCreateProfile}
+                  className="bg-realizaBlue text-white px-4 py-2 rounded w-fit disabled:bg-realizaBlue/70 disabled:cursor-not-allowed"
+                  disabled={isCreating}
+                >
+                  {isCreating ? "Criando..." : "Criar perfil"}
+                </button>
+              )}
+            </div>
           </div>
         </div>
       </div>
@@ -559,16 +546,30 @@ export function ProfilesSection() {
           <div className="bg-white p-6 rounded shadow-lg w-full max-w-2xl">
             <h3 className="text-xl font-semibold mb-2 text-red-600">Excluir Perfil e Reatribuir Usuários</h3>
             <p className="mb-4">Você está prestes a excluir o perfil <strong>"{selectedProfileDetails.name}"</strong>.</p>
-            {loading && !associatedUsers.length ? (<p>Verificando usuários...</p>) : associatedUsers.length > 0 ? (
+
+            {loading && !associatedUsers.length ? (
+              <p>Verificando usuários...</p>
+            ) : associatedUsers.length > 0 ? (
               <div className="mb-4">
                 <p className="font-semibold text-orange-600">Atenção! Para prosseguir, reatribua cada usuário a um novo perfil.</p>
                 <ul className="text-sm space-y-3 bg-gray-50 p-4 rounded max-h-60 overflow-y-auto my-4">
                   {associatedUsers.map((user) => (
                     <li key={user.id} className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-                      <span className="font-medium text-gray-800">{user.fullName} <span className="text-gray-500 font-normal">({user.email})</span></span>
-                      <select value={individualAssignments[user.id] || ''} onChange={(e) => handleIndividualAssignmentChange(user.id, e.target.value)} className="p-2 border border-gray-300 rounded w-full sm:w-64" aria-label={`Novo perfil para ${user.fullName}`}>
+                      <span className="font-medium text-gray-800">
+                        {user.fullName} <span className="text-gray-500 font-normal">({user.email})</span>
+                      </span>
+                      <select
+                        value={individualAssignments[user.id] || ""}
+                        onChange={(e) => handleIndividualAssignmentChange(user.id, e.target.value)}
+                        className="p-2 border border-gray-300 rounded w-full sm:w-64"
+                        aria-label={`Novo perfil para ${user.fullName}`}
+                      >
                         <option value="" disabled>Selecione um novo perfil...</option>
-                        {profiles.filter(p => p.id !== selectedProfileDetails.id).map(p => (<option key={p.id} value={p.id}>{p.profileName}</option>))}
+                        {profiles
+                          .filter((p) => p.id !== selectedProfileDetails.id)
+                          .map((p) => (
+                            <option key={p.id} value={p.id}>{p.profileName}</option>
+                          ))}
                       </select>
                     </li>
                   ))}
@@ -577,8 +578,11 @@ export function ProfilesSection() {
             ) : (
               <p className="mb-4 text-green-600 bg-green-50 p-3 rounded">Nenhum usuário está vinculado a este perfil.</p>
             )}
+
             <div className="flex justify-end gap-4 mt-6">
-              <button onClick={() => setIsDeleteModalOpen(false)} className="bg-gray-300 text-gray-800 px-4 py-2 rounded hover:bg-gray-400" disabled={loading}>Cancelar</button>
+              <button onClick={() => setIsDeleteModalOpen(false)} className="bg-gray-300 text-gray-800 px-4 py-2 rounded hover:bg-gray-400" disabled={loading}>
+                Cancelar
+              </button>
               {associatedUsers.length > 0 ? (
                 <button
                   onClick={handleOpenFinalConfirm}
@@ -605,18 +609,10 @@ export function ProfilesSection() {
             <p className="mb-6">Após a reatribuição, o perfil <strong>"{selectedProfileDetails.name}"</strong> será <strong>excluído permanentemente</strong>.</p>
             <p className="font-bold">Esta ação não pode ser desfeita. Deseja continuar?</p>
             <div className="flex justify-end gap-4 mt-8">
-              <button
-                onClick={() => setIsFinalConfirmModalOpen(false)}
-                className="bg-gray-300 text-gray-800 px-4 py-2 rounded hover:bg-gray-400"
-                disabled={loading}
-              >
+              <button onClick={() => setIsFinalConfirmModalOpen(false)} className="bg-gray-300 text-gray-800 px-4 py-2 rounded hover:bg-gray-400" disabled={loading}>
                 Cancelar
               </button>
-              <button
-                onClick={handleReassignAndDelete}
-                className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700"
-                disabled={loading}
-              >
+              <button onClick={handleReassignAndDelete} className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700" disabled={loading}>
                 {loading ? "Processando..." : "Sim, excluir perfil"}
               </button>
             </div>
