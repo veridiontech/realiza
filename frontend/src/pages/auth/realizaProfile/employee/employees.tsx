@@ -24,7 +24,6 @@ export const EmployeesTable = (): JSX.Element => {
   const { user } = useUser();
   const { supplier, setSupplier } = useSupplier();
 
-  // Função para buscar fornecedores
   const suppliers = async () => {
     try {
       const tokenFromStorage = localStorage.getItem("tokenClient");
@@ -40,7 +39,6 @@ export const EmployeesTable = (): JSX.Element => {
     }
   };
 
-  // Função para buscar um único fornecedor (opcional, pode ser refatorada)
   const uniqueSupplier = async () => {
     try {
       const tokenFromStorage = localStorage.getItem("tokenClient");
@@ -53,7 +51,6 @@ export const EmployeesTable = (): JSX.Element => {
     }
   };
 
-  // Função para buscar subcontratados
   const getSubcontractor = async () => {
     setLoading(true);
     try {
@@ -72,7 +69,6 @@ export const EmployeesTable = (): JSX.Element => {
     }
   };
 
-  // Hook useEffect para carregar dados
   useEffect(() => {
     if (selectedBranch?.idBranch) {
       suppliers();
@@ -89,30 +85,30 @@ export const EmployeesTable = (): JSX.Element => {
     <div className="m-4 flex justify-center">
       <div className="flex flex-col">
         <div className="dark:bg-primary relative bottom-[8vw] flex h-[30vh] w-[95vw] flex-col rounded-lg bg-white p-10 shadow-md">
-          {/* Cabeçalho com Título e Botões de Ação */}
           <div className="mb-6 flex items-center justify-between rounded-md bg-realizaBlue p-5">
             <div className="flex items-center gap-1">
               <Users2Icon className="text-[#FFCE50]" />
               <h1 className="text-2xl font-medium text-white">Colaboradores</h1>
             </div>
             <div className="flex gap-2">
-              {/* Botões de Seleção de Aba */}
               <Button
                 variant="ghost"
-                className={`px-4 py-2 transition-all duration-300 ${selectedTab === "fornecedor"
-                  ? "scale-110 font-bold shadow-lg bg-white text-realizaBlue"
-                  : "text-white border border-white"
-                  }`}
+                className={`px-4 py-2 transition-all duration-300 ${
+                  selectedTab === "fornecedor"
+                    ? "scale-110 font-bold shadow-lg bg-white text-realizaBlue"
+                    : "text-white border border-white"
+                }`}
                 onClick={() => setSelectedTab("fornecedor")}
               >
                 <Cog className="mr-2 h-4 w-4" /> Fornecedor
               </Button>
               <Button
                 variant="ghost"
-                className={`px-4 py-2 transition-all duration-300 ${selectedTab === "subcontratado"
-                  ? "scale-110 font-bold shadow-lg bg-white text-realizaBlue"
-                  : "text-white border border-white"
-                  }`}
+                className={`px-4 py-2 transition-all duration-300 ${
+                  selectedTab === "subcontratado"
+                    ? "scale-110 font-bold shadow-lg bg-white text-realizaBlue"
+                    : "text-white border border-white"
+                }`}
                 onClick={() => setSelectedTab("subcontratado")}
               >
                 <BriefcaseBusiness className="mr-2 h-4 w-4" /> Subcontratado
@@ -120,7 +116,6 @@ export const EmployeesTable = (): JSX.Element => {
             </div>
           </div>
 
-          {/* Renderização Condicional do Conteúdo */}
           <div className="p-4">
             {loading ? (
               <div className="text-center text-gray-600">
@@ -158,7 +153,10 @@ export const EmployeesTable = (): JSX.Element => {
                       >
                         <option value="">Selecione um fornecedor</option>
                         {suppliersList.map((supplier) => (
-                          <option key={supplier.idProvider} value={supplier.idProvider}>
+                          <option
+                            key={supplier.idProvider}
+                            value={supplier.idProvider}
+                          >
                             {supplier.corporateName}
                           </option>
                         ))}
