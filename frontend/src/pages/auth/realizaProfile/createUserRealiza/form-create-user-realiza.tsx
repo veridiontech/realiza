@@ -11,7 +11,6 @@ import { TailSpin } from "react-loader-spinner";
 import { toast } from "sonner";
 import { z } from "zod";
 
-// --- Validação de CPF e telefone ---
 function validarCPF(cpf: string): boolean {
   cpf = cpf.replace(/[^\d]+/g, "");
   if (cpf.length !== 11 || /^(\d)\1{10}$/.test(cpf)) return false;
@@ -34,7 +33,6 @@ function validarTelefoneRepetido(telefone: string) {
   return !/^(\d)\1+$/.test(digits);
 }
 
-// --- Schema Zod ---
 const cpfRegex = /^(\d{3}\.\d{3}\.\d{3}-\d{2}|\d{11})$/;
 const phoneRegex = /^\(?\d{2}\)?[\s-]?\d{4,5}[-]?\d{4}$/;
 
@@ -62,7 +60,7 @@ export function FormCreateUserRealiza() {
   const [isLoading, setIsLoading] = useState(false);
   const [phoneValue, setPhoneValue] = useState("");
   const [cpfValue, setCpfValue] = useState("");
-  const [, setImage] = useState<File | null>(null);
+  const [image, setImage] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
   const {
@@ -102,6 +100,15 @@ export function FormCreateUserRealiza() {
     }
   };
 
+  const handleRemovePhoto = () => {
+    setImage(null);
+    setPreviewUrl(null);
+    const fileInput = document.getElementById("photo-upload") as HTMLInputElement;
+    if (fileInput) {
+      fileInput.value = "";
+    }
+  };
+
   const firstName = watch("firstName");
   const surname = watch("surname");
   const email = watch("email");
@@ -114,15 +121,34 @@ export function FormCreateUserRealiza() {
     setIsLoading(true);
     try {
       const token = localStorage.getItem("tokenClient");
-      await axios.post(`${ip}/user/manager/new-user`, data, {
-        headers: { Authorization: `Bearer ${token}` },
+      
+      const formData = new FormData();
+
+      Object.keys(data).forEach(key => {
+        formData.append(key, data[key as keyof CreateUserRealizaSchema]);
       });
+
+      if (image) {
+          formData.append("profilePicture", image);
+      }
+
+      await axios.post(`${ip}/user/manager/new-user`, formData, {
+        headers: { 
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+
       toast.success("Sucesso ao criar novo usuário Realiza");
       reset();
       setCpfValue("");
       setPhoneValue("");
       setImage(null);
       setPreviewUrl(null);
+      const fileInput = document.getElementById("photo-upload") as HTMLInputElement;
+      if (fileInput) {
+          fileInput.value = "";
+      }
     } catch (err: any) {
       toast.error("Erro ao criar um novo usuário, tente novamente");
       console.error("Erro:", err);
@@ -133,131 +159,139 @@ export function FormCreateUserRealiza() {
 
   return (
     <form onSubmit={handleSubmit(createUser)} className="flex flex-col gap-6">
-  <div className="flex flex-col lg:flex-row gap-6">
-    
-    {/* COLUNA ESQUERDA: FORMULÁRIO */}
-    <div className="w-full lg:w-[70%] border rounded-md p-6 shadow-md bg-white">
-      <h2 className="text-lg font-semibold text-gray-800 mb-4">Informações Pessoais</h2>
+      <div className="flex flex-col lg:flex-row gap-6">
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div>
-          <Label>Nome:</Label>
-          <Input type="text" placeholder="Digite seu nome" {...register("firstName")} />
-          {errors.firstName && <p className="text-red-500">{errors.firstName.message}</p>}
+        {/* COLUNA ESQUERDA: FORMULÁRIO */}
+        <div className="w-full lg:w-[70%] border rounded-md p-6 shadow-md bg-white">
+          <h2 className="text-lg font-semibold text-gray-800 mb-4">Informações Pessoais</h2>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <Label>Nome:</Label>
+              <Input type="text" placeholder="Digite seu nome" {...register("firstName")} />
+              {errors.firstName && <p className="text-red-500">{errors.firstName.message}</p>}
+            </div>
+            <div>
+              <Label>Sobrenome:</Label>
+              <Input type="text" placeholder="Digite seu sobrenome" {...register("surname")} />
+              {errors.surname && <p className="text-red-500">{errors.surname.message}</p>}
+            </div>
+          </div>
+
+          <div className="mt-4">
+            <Label>CPF:</Label>
+            <Input
+              type="text"
+              value={cpfValue}
+              onChange={(e) => {
+                const formatted = formatCPF(e.target.value);
+                setCpfValue(formatted);
+                setValue("cpf", formatted, { shouldValidate: true });
+              }}
+              placeholder="000.000.000-00"
+              maxLength={14}
+            />
+            {errors.cpf && <p className="text-red-500">{errors.cpf.message}</p>}
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
+            <div>
+              <Label>Cargo:</Label>
+              <Input type="text" placeholder="Digite seu cargo" {...register("position")} />
+              {errors.position && <p className="text-red-500">{errors.position.message}</p>}
+            </div>
+            <div>
+              <Label>Email:</Label>
+              <Input type="email" placeholder="Digite seu email" {...register("email")} />
+              {errors.email && <p className="text-red-500">{errors.email.message}</p>}
+            </div>
+          </div>
+
+          <div className="mt-4">
+            <Label>Telefone:</Label>
+            <Input
+              type="text"
+              value={phoneValue}
+              onChange={(e) => {
+                const formatted = formatPhone(e.target.value);
+                setPhoneValue(formatted);
+                setValue("cellPhone", formatted, { shouldValidate: true });
+              }}
+              placeholder="(00) 00000-0000"
+              maxLength={15}
+            />
+            {errors.cellPhone && <p className="text-red-500">{errors.cellPhone.message}</p>}
+          </div>
+
+          <div className="mt-6 flex justify-end">
+            <Button type="submit" className="bg-[#1f2e4d] text-white px-6 py-2 rounded-md hover:bg-[#2e3e5e]">
+              {isLoading ? (
+                <TailSpin height="24" width="24" color="#fff" />
+              ) : (
+                "Criar usuário"
+              )}
+            </Button>
+          </div>
         </div>
-        <div>
-          <Label>Sobrenome:</Label>
-          <Input type="text" placeholder="Digite seu sobrenome" {...register("surname")} />
-          {errors.surname && <p className="text-red-500">{errors.surname.message}</p>}
-        </div>
-      </div>
 
-      <div className="mt-4">
-        <Label>CPF:</Label>
-        <Input
-          type="text"
-          value={cpfValue}
-          onChange={(e) => {
-            const formatted = formatCPF(e.target.value);
-            setCpfValue(formatted);
-            setValue("cpf", formatted, { shouldValidate: true });
-          }}
-          placeholder="000.000.000-00"
-          maxLength={14}
-        />
-        {errors.cpf && <p className="text-red-500">{errors.cpf.message}</p>}
-      </div>
-
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
-        <div>
-          <Label>Cargo:</Label>
-          <Input type="text" placeholder="Digite seu cargo" {...register("position")} />
-          {errors.position && <p className="text-red-500">{errors.position.message}</p>}
-        </div>
-        <div>
-          <Label>Email:</Label>
-          <Input type="email" placeholder="Digite seu email" {...register("email")} />
-          {errors.email && <p className="text-red-500">{errors.email.message}</p>}
-        </div>
-      </div>
-
-      <div className="mt-4">
-        <Label>Telefone:</Label>
-        <Input
-          type="text"
-          value={phoneValue}
-          onChange={(e) => {
-            const formatted = formatPhone(e.target.value);
-            setPhoneValue(formatted);
-            setValue("cellPhone", formatted, { shouldValidate: true });
-          }}
-          placeholder="(00) 00000-0000"
-          maxLength={15}
-        />
-        {errors.cellPhone && <p className="text-red-500">{errors.cellPhone.message}</p>}
-      </div>
-
-      <div className="mt-6 flex justify-end">
-        <Button type="submit" className="bg-[#1f2e4d] text-white px-6 py-2 rounded-md hover:bg-[#2e3e5e]">
-          {isLoading ? (
-            <TailSpin height="24" width="24" color="#fff" />
-          ) : (
-            "Criar usuário"
-          )}
-        </Button>
-      </div>
-    </div>
-
-    {/* LATERAL DIREITA */}
-      <div className="w-full lg:w-[30%] bg-[#34495E] p-6 rounded-md flex flex-col gap-6 text-white">
-        <h3 className="font-semibold text-base">Selecione uma foto:</h3>
+        {/* LATERAL DIREITA */}
+        <div className="w-full lg:w-[30%] bg-[#34495E] p-6 rounded-md flex flex-col gap-6 text-white">
+          <h3 className="font-semibold text-base">Selecione uma foto:</h3>
 
           {/* Área de upload com borda tracejada */}
           <label
             htmlFor="photo-upload"
-            className="cursor-pointer h-[200px] w-full flex items-center justify-center border-2 border-dashed border-[#7d8aa3] rounded-md    hover:border-white transition"
+            className="cursor-pointer h-[200px] w-full flex items-center justify-center border-2 border-dashed border-[#7d8aa3] rounded-md hover:border-white transition"
           >
             {previewUrl ? (
-          <img
-            src={previewUrl}
-            alt="Preview"
-            className="h-full w-full object-cover rounded-md"
-          />
-        ) : (
-          <User size={48} className="text-[#7d8aa3]" />
-        )}
-        <input
-          id="photo-upload"
-          type="file"
-          accept="image/*"
-          onChange={handleFileChange}
-          className="hidden"
-        />
-      </label>
+              <img
+                src={previewUrl}
+                alt="Preview"
+                className="h-full w-full object-cover rounded-md"
+              />
+            ) : (
+              <User size={48} className="text-[#7d8aa3]" />
+            )}
+            <input
+              id="photo-upload"
+              type="file"
+              accept="image/*"
+              onChange={handleFileChange}
+              className="hidden"
+            />
+          </label>
 
-    {/* Box de pré-visualização */}
-    <div className="mt-2">
-      <h4 className="text-sm font-medium text-gray-200 mb-1">Pré visualização</h4>
-      <div className="bg-[#3d5a73] p-4 rounded-md space-y-4">
-        <div>
-          <p className="text-xs text-[#d1d5db] mb-1">Nome:</p>
-          <div className="text-sm font-semibold bg-[#2e3e50] p-2 rounded-md">
-            {userPreview.firstName} {userPreview.surname}
-          </div>
-        </div>
-        <div>
-          <p className="text-xs text-[#d1d5db] mb-1">E-mail:</p>
-            <div className="text-sm font-semibold bg-[#2e3e50] p-2 rounded-md">
-              {userPreview.email || "exemplo@empresa.com"}
+          {/* Botão de Remoção */}
+          {previewUrl && (
+            <Button
+              type="button"
+              onClick={handleRemovePhoto}
+              className="w-full bg-red-600 text-white hover:bg-red-700 transition"
+            >
+              Remover Foto
+            </Button>
+          )}
+
+          {/* Box de pré-visualização */}
+          <div className="mt-2">
+            <h4 className="text-sm font-medium text-gray-200 mb-1">Pré visualização</h4>
+            <div className="bg-[#3d5a73] p-4 rounded-md space-y-4">
+              <div>
+                <p className="text-xs text-[#d1d5db] mb-1">Nome:</p>
+                <div className="text-sm font-semibold bg-[#2e3e50] p-2 rounded-md">
+                  {userPreview.firstName} {userPreview.surname}
+                </div>
+              </div>
+              <div>
+                <p className="text-xs text-[#d1d5db] mb-1">E-mail:</p>
+                <div className="text-sm font-semibold bg-[#2e3e50] p-2 rounded-md">
+                  {userPreview.email || "exemplo@empresa.com"}
+                </div>
+              </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
-
-
-  </div>
-</form>
-
+    </form>
   );
 }

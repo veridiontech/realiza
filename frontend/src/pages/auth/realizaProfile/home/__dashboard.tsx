@@ -7,6 +7,7 @@ import {
   University,
   Users,
   UsersRound,
+  Search,
 } from "lucide-react";
 import { Helmet } from "react-helmet-async";
 import { Link, NavLink } from "react-router-dom";
@@ -116,9 +117,23 @@ const createUserClient = z.object({
 });
 
 type CreateUserClient = z.infer<typeof createUserClient>;
+
+interface User {
+    idUser: string;
+    firstName: string;
+    surname: string;
+    cpf: string;
+    email: string;
+    position: string;
+}
+
 export function Dashboard() {
   const [selectedTab, setSelectedTab] = useState("filiais");
-  const [usersFromBranch, setUsersFromBranch] = useState([]);
+  
+  const [users, setUsers] = useState<User[]>([]);
+  const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
+  const [searchTerm, setSearchTerm] = useState("");
+
   const { client } = useClient();
   const { selectedBranch } = useBranch();
   const { user } = useUser();
@@ -189,7 +204,7 @@ export function Dashboard() {
 
   const onSubmitUserClient = async (data: CreateUserClient) => {
     const cpfSemPontuacao = data.cpf.replace(/\D/g, "");
-    const cpfJaExiste = usersFromBranch.some(
+    const cpfJaExiste = users.some(
       (user: any) => user.cpf.replace(/\D/g, "") === cpfSemPontuacao
     );
 
@@ -198,7 +213,7 @@ export function Dashboard() {
       return;
     }
 
-    const emailJaExiste = usersFromBranch.some(
+    const emailJaExiste = users.some(
       (user: any) => user.email.toLowerCase() === data.email.toLowerCase()
     );
 
@@ -251,21 +266,42 @@ export function Dashboard() {
   };
 
   const getUsersFromBranch = async () => {
+    setIsLoading(true); 
     try {
       const tokenFromStorage = localStorage.getItem("tokenClient");
       const res = await axios.get(
-        `${ip}/user/client/filtered-client?idSearch=${selectedBranch?.idBranch}`,
+        `${ip}/user/client/filtered-client?idSearch=${selectedBranch?.idBranch}&size=999999`, 
         {
           headers: { Authorization: `Bearer ${tokenFromStorage}` },
         }
       );
-      const { content } = res.data;
+      const content: User[] = res.data.content;
       console.log("usuários da branch:", content);
-      setUsersFromBranch(content);
+      setUsers(content);
+      setFilteredUsers(content);
+      setSearchTerm("");
     } catch (err) {
       console.error("erro ao buscar usuários:", err);
+      setUsers([]);
+      setFilteredUsers([]);
+    } finally {
+      setIsLoading(false);
     }
   };
+
+  const handleUserSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const term = event.target.value.toLowerCase();
+    setSearchTerm(term);
+    const filtered = users.filter(
+      (user: User) =>
+        user.firstName.toLowerCase().includes(term) ||
+        user.surname.toLowerCase().includes(term) ||
+        user.cpf.includes(term) ||
+        user.email.toLowerCase().includes(term)
+    );
+    setFilteredUsers(filtered);
+  };
+
 
   const fetchAvailableBranches = async () => {
     if (!client?.idClient) {
@@ -426,7 +462,6 @@ export function Dashboard() {
           allocatedEmployeeQuantity: 0,
         });
       } finally {
-        setIsLoading(false);
       }
     };
 
@@ -437,89 +472,89 @@ export function Dashboard() {
 
   if (client?.isUltragaz) {
     return (
-      <>
-        <Helmet title="Dashboard" />
-        <section className="relative bottom-[5vw] pb-10 pt-14">
-          <div className="mx-auto max-w-[80vw]">
-            <div className="flex flex-col gap-10">
-              <EnterpriseResume />
-              {client?.isUltragaz && <UltraSection />}
-            </div>
-            <div className="mt-8 grid grid-cols-1 gap-8">
-              <div className="w-full flex justify-center">
-                <div className="w-full bg-white rounded-xl shadow-lg p-6 flex flex-col items-center justify-center border border-gray-300 h-[900px]">
-                  <ConformityGaugeChart percentage={data?.conformity} />
+        <>
+          <Helmet title="Dashboard" />
+          <section className="relative bottom-[5vw] pb-10 pt-14">
+            <div className="mx-auto max-w-[80vw]">
+              <div className="flex flex-col gap-10">
+                <EnterpriseResume />
+                {client?.isUltragaz && <UltraSection />}
+              </div>
+              <div className="mt-8 grid grid-cols-1 gap-8">
+                <div className="w-full flex justify-center">
+                  <div className="w-full bg-white rounded-xl shadow-lg p-6 flex flex-col items-center justify-center border border-gray-300 h-[900px]">
+                    <ConformityGaugeChart percentage={data?.conformity} />
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-5 w-full text-right">
+                <NavLink to={`sistema/dashboard-details/${user?.idUser}`}>
+                  <Button className="hover:bg-realizaBlue dark:bg-primary bg-realizaBlue dark:text-white dark:hover:bg-blue-950">
+                    Ver mais <ChevronRight />
+                  </Button>
+                </NavLink>
+              </div>
+
+              <div className="pt-20">
+                <h2 className="pb-6 text-xl font-medium">Ações rápidas</h2>
+
+                <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
+                  <MainCard
+                    title="Fornecedores"
+                    value={324}
+                    icon={<UsersRound size={28} />}
+                  />
+                  <MainCard
+                    title="Mensagens"
+                    value={12}
+                    icon={<MessageCircle size={28} />}
+                  />
+                  <MainCard
+                    title="Unidades"
+                    value={4}
+                    icon={<University size={28} />}
+                  />
+                  <MainCard
+                    title="Contratos"
+                    value={72}
+                    icon={<Files size={28} />}
+                  />
+                </div>
+
+                <div className="mt-8 grid grid-cols-1 gap-x-8 gap-y-4 sm:grid-cols-2 lg:grid-cols-4">
+                  <ActionButton
+                    label="Adicionar fornecedor"
+                    icon={<ChevronRight />}
+                  />
+                  <ActionButton
+                    label="Enviar documento"
+                    icon={<ChevronRight />}
+                  />
+                  <ActionButton label="Criar contato" icon={<ChevronRight />} />
+                  <ActionButton label="Gerar relatório" icon={<ChevronRight />} />
+                  <ActionButton
+                    label="Atualizar documentos"
+                    icon={<ChevronRight />}
+                  />
+                  <ActionButton
+                    label="Consultar contratos"
+                    icon={<ChevronRight />}
+                  />
+                  <ActionButton
+                    label="Aprovar solicitações"
+                    icon={<ChevronRight />}
+                  />
+                  <ActionButton
+                    label="Editar colaboradores"
+                    icon={<ChevronRight />}
+                  />
                 </div>
               </div>
             </div>
-
-            <div className="mt-5 w-full text-right">
-              <NavLink to={`sistema/dashboard-details/${user?.idUser}`}>
-                <Button className="hover:bg-realizaBlue dark:bg-primary bg-realizaBlue dark:text-white dark:hover:bg-blue-950">
-                  Ver mais <ChevronRight />
-                </Button>
-              </NavLink>
-            </div>
-
-            <div className="pt-20">
-              <h2 className="pb-6 text-xl font-medium">Ações rápidas</h2>
-
-              <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
-                <MainCard
-                  title="Fornecedores"
-                  value={324}
-                  icon={<UsersRound size={28} />}
-                />
-                <MainCard
-                  title="Mensagens"
-                  value={12}
-                  icon={<MessageCircle size={28} />}
-                />
-                <MainCard
-                  title="Unidades"
-                  value={4}
-                  icon={<University size={28} />}
-                />
-                <MainCard
-                  title="Contratos"
-                  value={72}
-                  icon={<Files size={28} />}
-                />
-              </div>
-
-              <div className="mt-8 grid grid-cols-1 gap-x-8 gap-y-4 sm:grid-cols-2 lg:grid-cols-4">
-                <ActionButton
-                  label="Adicionar fornecedor"
-                  icon={<ChevronRight />}
-                />
-                <ActionButton
-                  label="Enviar documento"
-                  icon={<ChevronRight />}
-                />
-                <ActionButton label="Criar contato" icon={<ChevronRight />} />
-                <ActionButton label="Gerar relatório" icon={<ChevronRight />} />
-                <ActionButton
-                  label="Atualizar documentos"
-                  icon={<ChevronRight />}
-                />
-                <ActionButton
-                  label="Consultar contratos"
-                  icon={<ChevronRight />}
-                />
-                <ActionButton
-                  label="Aprovar solicitações"
-                  icon={<ChevronRight />}
-                />
-                <ActionButton
-                  label="Editar colaboradores"
-                  icon={<ChevronRight />}
-                />
-              </div>
-            </div>
-          </div>
-        </section>
-      </>
-    );
+          </section>
+        </>
+      );
   }
 
   return (
@@ -871,105 +906,135 @@ export function Dashboard() {
                     </div>
                   )}
                   {selectedTab === "usuarios" && (
-                    <div>
-                      <span>
-                        {selectedBranch ? (
-                          <div>
-                            <p>
-                              <strong>Filial:</strong> {selectedBranch.name}
-                            </p>
-                          </div>
-                        ) : (
-                          <div>
-                            <p>
-                              <strong>Filial:</strong> Filial não selecionada
-                            </p>
-                          </div>
-                        )}
-                      </span>
-
-                      <div className="block space-y-4 md:hidden">
-                        {usersFromBranch && usersFromBranch.length > 0 ? (
-                          usersFromBranch.map((users: any) => (
-                            <div
-                              key={users.idUser}
-                              className="rounded-lg border border-gray-300 bg-white p-4 shadow-sm"
-                            >
-                              <p className="text-sm font-semibold text-gray-700">
-                                Nome:
-                              </p>
-                              <p className="text-realizaBlue mb-2">
-                                {users.firstName} {users.surname}
-                              </p>
-
-                              <p className="text-sm font-semibold text-gray-700">
-                                CPF:
-                              </p>
-                              <p className="mb-2 text-gray-800">{users.cpf}</p>
-
-                              <Link
-                                to={`/sistema/detailsUsers/${users.idUser}`}
-                              >
-                                <button className="text-realizaBlue mt-2 flex items-center gap-1 hover:underline">
-                                  <Settings2 size={18} /> Acessar
-                                </button>
-                              </Link>
+                    <div className="flex flex-col gap-5">
+                        <span>
+                            {selectedBranch ? (
+                            <div>
+                                <p>
+                                <strong>Filial:</strong> {selectedBranch.name}
+                                </p>
                             </div>
-                          ))
-                        ) : (
-                          <p className="text-center text-gray-600">
-                            Nenhum colaborador encontrado
-                          </p>
-                        )}
-                      </div>
-                      <div className="hidden overflow-x-auto rounded-lg border bg-white p-4 shadow-lg md:block">
-                        <table className="w-full border-collapse border border-gray-300">
-                          <thead>
-                            <tr>
-                              <th className="border border-gray-300 px-4 py-2 text-start">
-                                Nome
-                              </th>
-                              <th className="border border-gray-300 px-4 py-2 text-start">
-                                CPF
-                              </th>
-                              <th className="border border-gray-300 px-4 py-2 text-start">
-                                Ações
-                              </th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {usersFromBranch && usersFromBranch.length > 0 ? (
-                              usersFromBranch.map((users: any) => (
-                                <tr key={users.idUser}>
-                                  <td className="border border-gray-300 px-4 py-2">
-                                    {users.firstName} {users.surname}
-                                  </td>
-                                  <td className="border border-gray-300 px-4 py-2">
-                                    {users.cpf}
-                                  </td>
-                                  <td className="border border-gray-300 px-4 py-2">
-                                    <Link
-                                      to={`/sistema/detailsUsers/${users.idUser}`}
-                                      className="text-realizaBlue hover:underline flex items-center gap-1"
-                                    >
-                                      <Settings2 size={16} />
-                                    </Link>
-                                  </td>
-                                </tr>
-                              ))
                             ) : (
-                              <tr>
-                                <td
-                                  colSpan={3}
-                                  className="border border-gray-300 px-4 py-2 text-center"
-                                >
-                                  Nenhum colaborador encontrado
-                                </td>
-                              </tr>
+                            <div>
+                                <p>
+                                <strong>Filial:</strong> Filial não selecionada
+                                </p>
+                            </div>
                             )}
-                          </tbody>
-                        </table>
-                      </div>
+                        </span>
+
+                        <div className="block space-y-4 overflow-y-auto md:hidden">
+                            <div className="flex w-full items-center gap-4 rounded-md border p-2">
+                                <Search />
+                                <input
+                                type="text"
+                                value={searchTerm}
+                                onChange={handleUserSearch}
+                                placeholder="Pesquisar usuários (Nome, CPF)"
+                                className="outline-none w-full"
+                                />
+                            </div>
+                            <div className="h-[300px] space-y-4 overflow-y-auto">
+                                {isLoading ? (
+                                <p className="text-center text-gray-600">Carregando...</p>
+                                ) : filteredUsers.length > 0 ? (
+                                filteredUsers.map((user: User) => (
+                                    <div
+                                    key={user.idUser}
+                                    className="rounded-lg border border-gray-300 bg-white p-4 shadow-sm"
+                                    >
+                                    <p className="bg-[#345D5C33] text-sm font-semibold text-gray-700">
+                                        Nome:
+                                    </p>
+                                    <p className="text-realizaBlue mb-2">
+                                        {user.firstName} {user.surname}
+                                    </p>
+
+                                    <p className="bg-[#345D5C33] text-sm font-semibold text-gray-700">
+                                        CPF:
+                                    </p>
+                                    <p className="mb-2 text-gray-800">{user.cpf}</p>
+
+                                    <Link
+                                        to={`/sistema/detailsUsers/${user.idUser}`}
+                                    >
+                                        <button className="text-realizaBlue mt-2 flex items-center gap-1 hover:underline">
+                                        <Settings2 size={18} /> Acessar
+                                        </button>
+                                    </Link>
+                                    </div>
+                                ))
+                                ) : (
+                                <p className="text-center text-gray-600">
+                                    Nenhum colaborador encontrado
+                                </p>
+                                )}
+                            </div>
+                        </div>
+
+                        <div className="hidden rounded-lg border bg-white p-4 shadow-lg md:block">
+                            <div className="flex w-64 items-center gap-4 rounded-md border p-2">
+                            <Search />
+                            <input
+                                type="text"
+                                value={searchTerm}
+                                onChange={handleUserSearch}
+                                placeholder="Pesquisar usuários"
+                                className="outline-none"
+                            />
+                            </div>
+                            <div className="mt-4 max-h-[300px] overflow-y-auto rounded-lg">
+                                <table className="w-full border-collapse border border-gray-300">
+                                <thead>
+                                    <tr className="sticky top-0 bg-[#345D5C33]">
+                                    <th className="border px-4 py-2 text-start">Nome</th>
+                                    <th className="border px-4 py-2 text-start">CPF</th>
+                                    <th className="border px-4 py-2 text-center">Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {isLoading ? (
+                                    <tr>
+                                        <td
+                                        colSpan={3}
+                                        className="px-4 py-2 text-center text-gray-600"
+                                        >
+                                        Carregando...
+                                        </td>
+                                    </tr>
+                                    ) : filteredUsers.length > 0 ? (
+                                    filteredUsers.map((user: User) => (
+                                        <tr key={user.idUser}>
+                                        <td className="px-4 py-2">
+                                            <li className="list-none text-realizaBlue">
+                                            {user.firstName} {user.surname}
+                                            </li>
+                                        </td>
+                                        <td className="px-4 py-2">{user.cpf}</td>
+                                        <td className="px-4 py-2 text-center">
+                                            <Link
+                                            to={`/sistema/detailsUsers/${user.idUser}`}
+                                            className="text-realizaBlue hover:underline flex items-center justify-center gap-1"
+                                            >
+                                            <Settings2 size={16} />
+                                            </Link>
+                                        </td>
+                                        </tr>
+                                    ))
+                                    ) : (
+                                    <tr>
+                                        <td
+                                        colSpan={3}
+                                        className="border border-gray-300 px-4 py-2 text-center"
+                                        >
+                                        Nenhum colaborador encontrado
+                                        </td>
+                                    </tr>
+                                    )}
+                                </tbody>
+                                </table>
+                            </div>
+                        </div>
                     </div>
                   )}
                 </div>
