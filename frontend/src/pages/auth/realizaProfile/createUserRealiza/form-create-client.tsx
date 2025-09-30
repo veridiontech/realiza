@@ -61,6 +61,7 @@ export function FormCreateUserClient() {
   const [clients, setClients] = useState<propsClient[]>([]);
   const [phoneValue, setPhoneValue] = useState("");
   const [cpfValue, setCpfValue] = useState("");
+  const [image, setImage] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
   const {
@@ -69,6 +70,7 @@ export function FormCreateUserClient() {
     watch,
     setValue,
     formState: { errors },
+    reset,
   } = useForm<CreateUserClientSchema>({
     resolver: zodResolver(createUserClientSchema),
   });
@@ -90,6 +92,25 @@ export function FormCreateUserClient() {
     return `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7, 11)}`;
   };
 
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setImage(file);
+      const reader = new FileReader();
+      reader.onloadend = () => setPreviewUrl(reader.result as string);
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleRemovePhoto = () => {
+    setImage(null);
+    setPreviewUrl(null);
+    const fileInput = document.getElementById("photo-upload") as HTMLInputElement;
+    if (fileInput) {
+      fileInput.value = "";
+    }
+  };
+
   const firstName = watch("firstName");
   const surname = watch("surname");
   const email = watch("email");
@@ -102,19 +123,38 @@ export function FormCreateUserClient() {
     setIsLoading(true);
     try {
       const token = localStorage.getItem("tokenClient");
-      await axios.post(`${ip}/user/manager/new-user`, data, {
-        headers: { Authorization: `Bearer ${token}` },
+      const formData = new FormData();
+
+      Object.keys(data).forEach(key => {
+        formData.append(key, data[key as keyof CreateUserClientSchema]);
       });
+
+      if (image) {
+          formData.append("profilePicture", image);
+      }
+
+      await axios.post(`${ip}/user/manager/new-user`, formData, {
+        headers: { 
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+      
       toast.success("Sucesso ao criar novo usuário cliente");
-    } catch (err) {
+      reset();
+      setCpfValue("");
+      setPhoneValue("");
+      setImage(null);
+      setPreviewUrl(null);
+      const fileInput = document.getElementById("photo-upload") as HTMLInputElement;
+      if (fileInput) {
+          fileInput.value = "";
+      }
+    } catch (err: any) {
       toast.error("Erro ao criar um novo usuário");
       console.error("Erro:", err);
     } finally {
       setIsLoading(false);
-      setPhoneValue("");
-      setCpfValue("");
-      setValue("telephone", "");
-      setValue("cpf", "");
     }
   };
 
@@ -237,17 +277,20 @@ export function FormCreateUserClient() {
               id="photo-upload"
               type="file"
               accept="image/*"
-              onChange={(e) => {
-                const file = e.target.files?.[0];
-                if (file) {
-                  const reader = new FileReader();
-                  reader.onloadend = () => setPreviewUrl(reader.result as string);
-                  reader.readAsDataURL(file);
-                }
-              }}
+              onChange={handleFileChange}
               className="hidden"
             />
           </label>
+          
+          {previewUrl && (
+            <Button
+              type="button"
+              onClick={handleRemovePhoto}
+              className="w-full bg-red-600 text-white hover:bg-red-700 transition"
+            >
+              Remover Foto
+            </Button>
+          )}
 
           <div className="mt-2">
             <h4 className="text-sm font-medium text-gray-200 mb-1">Pré visualização</h4>
