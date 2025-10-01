@@ -1036,7 +1036,7 @@ public class DashboardService {
         List<DashboardGeneralDetailsResponseDto.TypeStatus> documentStatus = new ArrayList<>();
         List<DashboardGeneralDetailsResponseDto.Exemption> documentExemption = new ArrayList<>();
 
-        if (filters != null && filters.getDocumentTypes() != null && filters.getDocumentTypes().isEmpty()) {
+        if (!(filters != null && filters.getDocumentTypes() != null && filters.getDocumentTypes().isEmpty())) {
             documentTypes = documentRepository.findDistinctDocumentType();
         }
         for (String type : documentTypes) {

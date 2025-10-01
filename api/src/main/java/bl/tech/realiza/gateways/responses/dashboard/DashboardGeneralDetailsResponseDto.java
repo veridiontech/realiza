@@ -13,7 +13,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@JsonInclude(JsonInclude.Include.NON_EMPTY)
+//@JsonInclude(JsonInclude.Include.NON_EMPTY)
 public class DashboardGeneralDetailsResponseDto {
     private Long supplierQuantity;
     private Long contractQuantity;
@@ -31,42 +31,42 @@ public class DashboardGeneralDetailsResponseDto {
     @Getter
 @Setter
 @NoArgsConstructor
-@AllArgsConstructor
+    @AllArgsConstructor
     @Builder
-    @JsonInclude(JsonInclude.Include.NON_EMPTY)
+//    @JsonInclude(JsonInclude.Include.NON_EMPTY)
     public static class TypeStatus {
         private String name;
         private List<Status> status;
     }
 
     @Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
+    @Setter
+    @NoArgsConstructor
+    @AllArgsConstructor
     @Builder
-    @JsonInclude(JsonInclude.Include.NON_EMPTY)
+//    @JsonInclude(JsonInclude.Include.NON_EMPTY)
     public static class Status {
         private Document.Status status;
         private Integer quantity;
     }
 
     @Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
+    @Setter
+    @NoArgsConstructor
+    @AllArgsConstructor
     @Builder
-    @JsonInclude(JsonInclude.Include.NON_EMPTY)
+//    @JsonInclude(JsonInclude.Include.NON_EMPTY)
     public static class Exemption {
         private String name;
         private Integer quantity;
     }
 
     @Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
+    @Setter
+    @NoArgsConstructor
+    @AllArgsConstructor
     @Builder
-    @JsonInclude(JsonInclude.Include.NON_EMPTY)
+//    @JsonInclude(JsonInclude.Include.NON_EMPTY)
     public static class Pending {
         private String corporateName;
         private String cnpj;
