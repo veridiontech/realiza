@@ -12,6 +12,7 @@ import bl.tech.realiza.services.auth.TokenManagerService;
 import io.github.cdimascio.dotenv.Dotenv;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.mail.MailException;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -20,6 +21,7 @@ import org.springframework.stereotype.Service;
 import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class EmailSender {
@@ -30,6 +32,7 @@ public class EmailSender {
 
     public void sendNewProviderEmail(EmailEnterpriseInviteRequestDto emailEnterpriseInviteRequestDto, String token) {
         String email = emailEnterpriseInviteRequestDto.getEmail();
+        log.info("Starting to send email to {}", email);
         String companyName = emailEnterpriseInviteRequestDto.getCompanyName();
         String requesterName = emailEnterpriseInviteRequestDto.getRequesterName();
         String serviceName = emailEnterpriseInviteRequestDto.getServiceName();
@@ -79,16 +82,20 @@ public class EmailSender {
 
             try {
                 mailSender.send(message);
+                log.info("Email sent to {}", email);
             } catch (MailException e) {
+                log.info("Failed mail send to {}", email);
                 throw new RuntimeException("Failed to send the email", e);
             }
         } catch (Exception e) {
+            log.info("Failed generate mail send to {}", email);
             throw new RuntimeException("Failed to generate email", e);
         }
     }
 
     public void sendNewUserEmail(EmailNewUserRequestDto emailNewUserRequestDto) {
         String email = emailNewUserRequestDto.getEmail();
+        log.info("Starting to send email to {}", email);
         String password = emailNewUserRequestDto.getPassword();
         String nameUser = emailNewUserRequestDto.getNameUser();
 
@@ -114,10 +121,13 @@ public class EmailSender {
 
             try {
                 mailSender.send(message);
+                log.info("Email sent to {}", email);
             } catch (MailException e) {
+                log.info("Failed mail send to {}", email);
                 throw new RuntimeException("Failed to send the email", e);
             }
         } catch (Exception e) {
+            log.info("Failed generate mail send to {}", email);
             throw new RuntimeException("Failed to generate email", e);
         }
     }

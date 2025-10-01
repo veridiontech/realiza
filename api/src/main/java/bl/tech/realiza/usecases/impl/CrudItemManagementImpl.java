@@ -27,6 +27,7 @@ import bl.tech.realiza.gateways.repositories.users.UserClientRepository;
 import bl.tech.realiza.gateways.repositories.users.UserManagerRepository;
 import bl.tech.realiza.gateways.repositories.users.UserRepository;
 import bl.tech.realiza.gateways.requests.services.email.EmailEnterpriseInviteRequestDto;
+import bl.tech.realiza.gateways.requests.services.email.EmailNewUserRequestDto;
 import bl.tech.realiza.gateways.requests.services.email.EmailRegistrationDeniedRequestDto;
 import bl.tech.realiza.gateways.requests.services.itemManagement.ItemManagementContractRequestDto;
 import bl.tech.realiza.gateways.requests.services.itemManagement.ItemManagementDocumentRequestDto;
@@ -42,6 +43,8 @@ import bl.tech.realiza.gateways.responses.services.itemManagement.user.ItemManag
 import bl.tech.realiza.gateways.responses.services.itemManagement.user.ItemManagementUserResponseDto;
 import bl.tech.realiza.gateways.responses.users.UserResponseDto;
 import bl.tech.realiza.services.auth.JwtService;
+import bl.tech.realiza.services.auth.PasswordEncryptionService;
+import bl.tech.realiza.services.auth.RandomPasswordService;
 import bl.tech.realiza.services.auth.TokenManagerService;
 import bl.tech.realiza.services.email.EmailSender;
 import bl.tech.realiza.usecases.interfaces.CrudItemManagement;
@@ -88,6 +91,8 @@ public class CrudItemManagementImpl implements CrudItemManagement {
     private final ContractProviderSubcontractorRepository contractProviderSubcontractorRepository;
     private final EmployeeRepository employeeRepository;
     private final ContractEmployeeRepository contractEmployeeRepository;
+    private final PasswordEncryptionService passwordEncryptionService;
+    private final RandomPasswordService randomPasswordService;
 
     @Override
     public ItemManagementUserResponseDto saveUserSolicitation(ItemManagementUserRequestDto itemManagementUserRequestDto) {
@@ -132,7 +137,7 @@ public class CrudItemManagementImpl implements CrudItemManagement {
 
         return toItemManagementUserDetailsResponseDto(itemManagement);
     }
-    // já finalizado, verificar as rotas e depois as chamadas
+
     @Override
     public ItemManagementProviderResponseDto saveProviderSolicitation(ItemManagementProviderRequestDto itemManagementProviderRequestDto) {
 
@@ -190,14 +195,22 @@ public class CrudItemManagementImpl implements CrudItemManagement {
                 .orElseThrow(() -> new NotFoundException("Solicitation not found"));
 
         if (solicitation.getNewUser() != null) {
-            UserClient userClient = userClientRepository.findById(solicitation.getNewUser().getIdUser())
+            String userId = solicitation.getNewUser().getIdUser();
+            UserClient userClient = userClientRepository.findById(userId)
                     .orElseThrow(() -> new NotFoundException("User not found"));
 
+            String randomPassword = randomPasswordService.generateRandomPassword();
+            String encryptedPassword = passwordEncryptionService.encryptPassword(randomPassword);
+            userClient.setPassword(encryptedPassword);
             userClient.setIsActive(true);
 
             userClientRepository.save(userClient);
 
-            // enviar e-mail convite pedindo para finalizar cadastro
+            emailSender.sendNewUserEmail(EmailNewUserRequestDto.builder()
+                            .email(userClient.getEmail())
+                            .nameUser(userClient.getFirstName() + " " + userClient.getSurname())
+                            .password(randomPassword)
+                    .build());
         } else if (solicitation.getNewProvider() != null) {
 
             Provider providerProxy = providerRepository.findById(solicitation.getNewProvider().getIdProvider())
@@ -625,7 +638,7 @@ public class CrudItemManagementImpl implements CrudItemManagement {
 
         if (solicitation.getInvitationToken() != null) {
             tokenManagerService.revokeToken(solicitation.getInvitationToken());
-            solicitation.setInvitationToken(null); // limpa do banco também
+            solicitation.setInvitationToken(null);
         }
 
 
