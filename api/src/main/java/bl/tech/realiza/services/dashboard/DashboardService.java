@@ -1036,7 +1036,7 @@ public class DashboardService {
         List<DashboardGeneralDetailsResponseDto.TypeStatus> documentStatus = new ArrayList<>();
         List<DashboardGeneralDetailsResponseDto.Exemption> documentExemption = new ArrayList<>();
 
-        if (filters != null && filters.getDocumentTypes() != null && filters.getDocumentTypes().isEmpty()) {
+        if (!(filters != null && filters.getDocumentTypes() != null && filters.getDocumentTypes().isEmpty())) {
             documentTypes = documentRepository.findDistinctDocumentType();
         }
         for (String type : documentTypes) {
@@ -1081,6 +1081,8 @@ public class DashboardService {
                     .status(statusList)
                     .build());
         }
+
+//        List<ContractDocument> contractDocuments = contractDocumentRepository.findAllByStatus(ISENCAO_PENDENTE)
 
         // ranking de pendencias
         List<DashboardGeneralDetailsResponseDto.Pending> pendingRanking = new ArrayList<>();
@@ -2992,17 +2994,26 @@ public class DashboardService {
                             ? supplier.getProviderSupplier().getCorporateName()
                             : null)
                     .build());
-            providerCnpjResponse.add(supplier.getProviderSupplier() != null
-                    ? supplier.getProviderSupplier().getCnpj()
-                    : null);
-            responsibleResponse.add(FilterList.builder()
-                    .id(supplier.getResponsible() != null
-                            ? supplier.getResponsible().getIdUser()
-                            : null)
-                    .name(supplier.getResponsible() != null
-                            ? supplier.getResponsible().getFullName()
-                            : null)
-                    .build());
+            if (providerCnpjResponse.stream()
+                    .noneMatch(cnpj ->
+                            cnpj.equals(supplier.getProviderSupplier().getCnpj()))) {
+                providerCnpjResponse.add(supplier.getProviderSupplier() != null
+                        ? supplier.getProviderSupplier().getCnpj()
+                        : null);
+            }
+            if (responsibleResponse.stream()
+                    .noneMatch(responsible ->
+                            responsible.getId()
+                                    .equals(supplier.getResponsible().getIdUser()))) {
+                responsibleResponse.add(FilterList.builder()
+                        .id(supplier.getResponsible() != null
+                                ? supplier.getResponsible().getIdUser()
+                                : null)
+                        .name(supplier.getResponsible() != null
+                                ? supplier.getResponsible().getFullName()
+                                : null)
+                        .build());
+            }
             contractResponse.add(FilterList.builder()
                     .id(supplier.getIdContract())
                     .name(supplier.getContractReference())
@@ -3011,12 +3022,17 @@ public class DashboardService {
                     .stream().map(ContractEmployee::getEmployee)
                     .toList();
             for (Employee employee : employees) {
-                employeesResponse.add(FilterList.builder()
-                                .id(employee.getIdEmployee())
-                                .name(employee.getFullName())
+                if (employeesResponse.stream()
+                        .noneMatch(filterList ->
+                                filterList.getId()
+                                        .equalsIgnoreCase(employee.getIdEmployee()))) {
+                    employeesResponse.add(FilterList.builder()
+                            .id(employee.getIdEmployee())
+                            .name(employee.getFullName())
                         .build());
-                if (employee instanceof EmployeeBrazilian brazilian) {
-                    employeeCpfsResponse.add(brazilian.getCpf());
+                    if (employee instanceof EmployeeBrazilian brazilian) {
+                        employeeCpfsResponse.add(brazilian.getCpf());
+                    }
                 }
             }
         }
@@ -3029,17 +3045,26 @@ public class DashboardService {
                             ? subcontractor.getProviderSubcontractor().getCorporateName()
                             : null)
                     .build());
-            providerCnpjResponse.add(subcontractor.getProviderSupplier() != null
-                    ? subcontractor.getProviderSupplier().getCnpj()
-                    : null);
-            responsibleResponse.add(FilterList.builder()
-                    .id(subcontractor.getResponsible() != null
-                            ? subcontractor.getResponsible().getIdUser()
-                            : null)
-                    .name(subcontractor.getResponsible() != null
-                            ? subcontractor.getResponsible().getFullName()
-                            : null)
-                    .build());
+            if (providerCnpjResponse.stream()
+                    .noneMatch(cnpj ->
+                            cnpj.equals(subcontractor.getProviderSubcontractor().getCnpj()))) {
+                providerCnpjResponse.add(subcontractor.getProviderSubcontractor() != null
+                        ? subcontractor.getProviderSubcontractor().getCnpj()
+                        : null);
+            }
+            if (responsibleResponse.stream()
+                    .noneMatch(responsible ->
+                            responsible.getId()
+                                    .equals(subcontractor.getResponsible().getIdUser()))) {
+                responsibleResponse.add(FilterList.builder()
+                        .id(subcontractor.getResponsible() != null
+                                ? subcontractor.getResponsible().getIdUser()
+                                : null)
+                        .name(subcontractor.getResponsible() != null
+                                ? subcontractor.getResponsible().getFullName()
+                                : null)
+                        .build());
+            }
             contractResponse.add(FilterList.builder()
                     .id(subcontractor.getIdContract())
                     .name(subcontractor.getContractReference())
@@ -3048,12 +3073,17 @@ public class DashboardService {
                     .stream().map(ContractEmployee::getEmployee)
                     .toList();
             for (Employee employee : employees) {
-                employeesResponse.add(FilterList.builder()
-                        .id(employee.getIdEmployee())
-                        .name(employee.getFullName())
-                        .build());
-                if (employee instanceof EmployeeBrazilian brazilian) {
-                    employeeCpfsResponse.add(brazilian.getCpf());
+                if (employeesResponse.stream()
+                        .noneMatch(filterList ->
+                                filterList.getId()
+                                        .equalsIgnoreCase(employee.getIdEmployee()))) {
+                    employeesResponse.add(FilterList.builder()
+                            .id(employee.getIdEmployee())
+                            .name(employee.getFullName())
+                            .build());
+                    if (employee instanceof EmployeeBrazilian brazilian) {
+                        employeeCpfsResponse.add(brazilian.getCpf());
+                    }
                 }
             }
         }

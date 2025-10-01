@@ -89,7 +89,7 @@ public class ContractProviderSupplierControllerImpl implements ContractProviderS
                                                                                                @RequestParam(defaultValue = "contractReference") String sort,
                                                                                                @RequestParam(defaultValue = "ASC") Sort.Direction direction,
                                                                                                @RequestParam String idSearch,
-                                                                                               @RequestParam(required = false) List<ContractStatusEnum> status) {
+                                                                                               @RequestBody(required = false) List<ContractStatusEnum> status) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(direction,sort));
 
         Page<ContractResponseDto> pageContractSupplier = crudContractSupplier.findAllBySupplier(idSearch, status, pageable);
