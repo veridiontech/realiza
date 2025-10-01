@@ -84,6 +84,50 @@ const monthMap: { [key: string]: string } = {
   DECEMBER: "Dez",
 };
 
+const contractStatusMap: { [key: string]: string } = {
+  PENDING: "Pendente",
+  DENIED: "Negado",
+  ACTIVE: "Ativo",
+  FINISHED: "Finalizado",
+  FINISH_REQUESTED: "Solicitação de Finalização",
+  SUSPENDED: "Suspenso",
+  SUSPEND_REQUESTED: "Solicitação de Suspensão",
+  REACTIVATION_REQUESTED: "Solicitação de Reativação",
+};
+
+const docValidityMap: { [key: string]: string } = {
+  INDEFINITE: "Indefinido",
+  WEEKLY: "Semanal",
+  MONTHLY: "Mensal",
+  ANNUAL: "Anual",
+};
+
+const docTypeMap: { [key: string]: string } = {
+  thirdCompany: "Empresa Terceirizada",
+  thirdCollaborators: "Colaboradores Terceirizados",
+  otherRequirements: "Outras Exigências",
+};
+
+const employeeSituationMap: { [key: string]: string } = {
+  ALOCADO: "Alocado",
+  DESALOCADO: "Desalocado",
+  DEMITIDO: "Demitido",
+  AFASTADO: "Afastado",
+  LICENCA_MATERNIDADE: "Licença Maternidade",
+  LICENCA_MEDICA: "Licença Médica",
+  LICENCA_MILITAR: "Licença Militar",
+};
+
+const documentStatusMap: { [key: string]: string } = {
+  PENDENTE: "Pendente",
+  EM_ANALISE: "Em Análise",
+  REPROVADO: "Reprovado",
+  APROVADO: "Aprovado",
+  REPROVADO_IA: "Reprovado (IA)",
+  APROVADO_IA: "Aprovado (IA)",
+  VENCIDO: "Vencido",
+};
+
 type Option = { value: string; label: string };
 
 type FiltersState = {
@@ -288,30 +332,6 @@ function filterDocumentStatus(
   return chartRows;
 }
 
-const contractStatusMap: { [key: string]: string } = {
-  PENDING: "Pendente",
-  DENIED: "Negado",
-  ACTIVE: "Ativo",
-  FINISHED: "Finalizado",
-  FINISH_REQUESTED: "Solicitação de Finalização",
-  SUSPENDED: "Suspenso",
-  SUSPEND_REQUESTED: "Solicitação de Suspensão",
-  REACTIVATION_REQUESTED: "Solicitação de Reativação",
-};
-
-const docValidityMap: { [key: string]: string } = {
-  INDEFINITE: "Indefinido",
-  WEEKLY: "Semanal",
-  MONTHLY: "Mensal",
-  ANNUAL: "Anual",
-};
-
-const docTypeMap: { [key: string]: string } = {
-  thirdCompany: "Empresa Terceirizada",
-  thirdCollaborators: "Colaboradores Terceirizados",
-  otherRequirements: "Outras Exigências",
-};
-
 function filterExemption(
   raw: RawExemption[],
   filters: FiltersState,
@@ -514,23 +534,35 @@ export const MonittoringBis = () => {
           documentDoesBlock = [],
           documentValidity = [],
         } = data ?? {};
+        
+        console.log("Filters Log: CPFs recebidos da API:", employeeCpfs); 
 
-        console.log("STATUS RECEBIDOS DA API:", statuses);
+        const toOptions = (arr: any[]) => {
+          const uniqueValues = Array.from(new Set(arr));
+          return uniqueValues.map((v) => ({
+            value: String(v),
+            label: String(v),
+          }));
+        };
+
+        const toOptionsIdName = (
+          arr: Array<{ id: string | number; name?: string }>
+        ) => {
+          const uniqueMap = new Map<string, Option>();
+          arr.forEach((v) => {
+            const value = String(v.id);
+            const label = v.name ?? String(v.id);
+            uniqueMap.set(value, { value, label });
+          });
+          return Array.from(uniqueMap.values());
+        };
 
         setBranchIdName(buildIdNameMap(branches));
         setProviderIdName(buildIdNameMap(providers));
         setRespIdName(buildIdNameMap(responsibles));
         setContractIdName(buildIdNameMap(contracts));
         setEmployeeIdName(buildIdNameMap(employees));
-        const toOptions = (arr: any[]) =>
-          arr.map((v) => ({ value: String(v), label: String(v) }));
-        const toOptionsIdName = (
-          arr: Array<{ id: string | number; name?: string }>
-        ) =>
-          arr.map((v) => ({
-            value: String(v.id),
-            label: v.name ?? String(v.id),
-          }));
+
         setBranchOpts(toOptionsIdName(branches));
         setProviderOpts(toOptionsIdName(providers));
         setRespOpts(toOptionsIdName(responsibles));
@@ -546,13 +578,31 @@ export const MonittoringBis = () => {
             label: contractStatusMap[s] || s,
           }))
         );
-        setStatusOpts(toOptions(statuses));
+        
+        setStatusOpts(
+          statuses.map((s: string) => ({
+            value: s,
+            label: documentStatusMap[s] || s.replace(/_/g, ' ').replace(/\w\S*/g, (txt) => {
+              return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
+            }) || s,
+          }))
+        );
+        
         setDocTitleOpts(toOptions(documentTitles));
         setProviderCnpjOpts(toOptions(providerCnpjs));
         setContractOpts(toOptionsIdName(contracts));
         setEmployeeOpts(toOptionsIdName(employees));
         setEmployeeCpfOpts(toOptions(employeeCpfs));
-        setEmployeeSituationOpts(toOptions(employeeSituations));
+        
+        setEmployeeSituationOpts(
+          employeeSituations.map((s: string) => ({
+            value: s,
+            label: employeeSituationMap[s] || s.replace(/_/g, ' ').replace(/\w\S*/g, (txt) => {
+              return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
+            }) || s,
+          }))
+        );
+        
         setDocValidityOpts(
           documentValidity.map((dv: string) => ({
             value: dv,
@@ -565,12 +615,6 @@ export const MonittoringBis = () => {
             label: v ? "Sim" : "Não",
           }))
         );
-
-        setBranchIdName(buildIdNameMap(branches));
-        setProviderIdName(buildIdNameMap(providers));
-        setRespIdName(buildIdNameMap(responsibles));
-        setContractIdName(buildIdNameMap(contracts));
-        setEmployeeIdName(buildIdNameMap(employees));
       } catch (e) {
         console.error("Filters: Erro ao carregar /filters", e);
       }
@@ -579,9 +623,6 @@ export const MonittoringBis = () => {
 
   useEffect(() => {
     if (!clientId) {
-      console.warn(
-        "General: clientId não disponível. Limpando estados de dados."
-      );
       setRawDocStatus([]);
       setRawExemption([]);
       setRawRanking([]);
@@ -604,10 +645,6 @@ export const MonittoringBis = () => {
     }
 
     if (USE_MOCK_DATA) {
-      console.log(
-        "--- USANDO DADOS MOCKADOS PARA /general (Status, Cards, etc.) ---"
-      );
-
       setTimeout(() => {
         setRawDocStatus(mockDocStatusData);
 
@@ -647,8 +684,6 @@ export const MonittoringBis = () => {
       try {
         const url = `${ip}/dashboard/${clientId}/general`;
         const requestBody = { clientId: clientId };
-        console.log(`General: Solicitando dados da URL: ${url}`);
-        console.log(`General: Corpo da requisição:`, requestBody);
         const { data } = await axios.post(url, requestBody, {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -656,7 +691,6 @@ export const MonittoringBis = () => {
             Accept: "application/json",
           },
         });
-        console.log("General: Dados recebidos com sucesso:", data);
 
         const {
           documentExemption = [],
@@ -751,7 +785,6 @@ export const MonittoringBis = () => {
   useEffect(() => {
     if (activeTab === "historico" && clientId) {
       if (USE_MOCK_DATA) {
-        console.log("--- USANDO DADOS MOCKADOS PARA O GRÁFICO ---");
         setIsLoadingHistory(true);
         setTimeout(() => {
           setHistoryData(mockHistoryData);
@@ -771,7 +804,6 @@ export const MonittoringBis = () => {
             providerCnpjs: applied.providerCnpjs,
           };
 
-          console.log("Requesting history data with body:", requestBody);
           const { data } = await axios.post(url, requestBody, {
             headers: { Authorization: `Bearer ${token}` },
           });
@@ -810,12 +842,10 @@ export const MonittoringBis = () => {
   const adherence = tableData.length > 0 ? tableData[0]?.adherence : 0;
 
   function applyFilters() {
-    console.log("Aplicando filtros:", draft);
     setApplied({ ...draft });
   }
 
   function clearFilters() {
-    console.log("Limpando filtros.");
     const empty: FiltersState = {
       branchIds: [],
       providerIds: [],
@@ -838,8 +868,6 @@ export const MonittoringBis = () => {
   }
 
   useEffect(() => {
-    console.log("Dados aplicados (applied) mudaram, aplicando filtros locais.");
-
     const branchNames = applied.branchIds.map(
       (id) => branchIdName.get(id) ?? id
     );
@@ -869,18 +897,12 @@ export const MonittoringBis = () => {
       applied,
       allNames
     );
-    console.log(
-      "Resultados do filtro de Status de Documentos:",
-      docStatusChart
-    );
     setChartData(docStatusChart);
 
     const docExFiltered = filterExemption(rawExemption, applied, allNames);
-    console.log("Resultados do filtro de Isenção:", docExFiltered);
     setDocumentExemptionData(docExFiltered);
 
     const rankingFiltered = filterRanking(rawRanking, applied, allNames);
-    console.log("Resultados do filtro de Ranking:", rankingFiltered);
     setTableData(
       rankingFiltered.map((r) => ({
         name: r.corporateName,

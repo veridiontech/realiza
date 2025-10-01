@@ -146,6 +146,7 @@ export function ConfigPanel() {
     const [description, setDescription] = useState("");
     const [isLoading, setIsLoading] = useState(false);
     const [cbos, setCbos] = useState<CBO[]>([]);
+    const [cboSearchTerm, setCboSearchTerm] = useState("");
     const [selectedCBO, setSelectedCBO] = useState<CBO | null>(null);
     const [cboCode, setCboCode] = useState("");
     const [cboTitle, setCboTitle] = useState("");
@@ -963,6 +964,20 @@ export function ConfigPanel() {
         [documents, searchTerm]
     );
 
+    const filteredCbos = useMemo(
+        () =>
+            cbos
+                .filter(
+                    (cbo) =>
+                        cbo.code.toLowerCase().includes(cboSearchTerm.toLowerCase()) ||
+                        cbo.title.toLowerCase().includes(cboSearchTerm.toLowerCase())
+                )
+                .sort((a, b) =>
+                    a.code.localeCompare(b.code, "pt-BR", { sensitivity: "base" })
+                ),
+        [cbos, cboSearchTerm]
+    );
+
     const filteredServices = useMemo(
         () =>
             services
@@ -994,6 +1009,14 @@ export function ConfigPanel() {
                     a.title.localeCompare(b.title, "pt-BR", { sensitivity: "base" })
                 ),
         [activities, activitySearchTerm, riskTranslations]
+    );
+
+    const filteredProfiles = useMemo(
+        () =>
+            profiles.filter((profile) =>
+                profile.name.toLowerCase().includes(profileSearchTerm.toLowerCase())
+            ),
+        [profiles, profileSearchTerm]
     );
 
     const [documentGroups, setDocumentGroups] = useState<any[]>([]);
@@ -1304,35 +1327,51 @@ export function ConfigPanel() {
                     <div className="flex gap-10">
                         <div className="w-1/2 space-y-4">
                             <h2 className="text-xl font-bold">CBOs</h2>
+                            <input
+                                type="text"
+                                placeholder="Buscar por código ou título..."
+                                className="w-full p-2 border rounded"
+                                value={cboSearchTerm}
+                                onChange={(e) => setCboSearchTerm(e.target.value)}
+                            />
                             <ul className="max-h-[60vh] overflow-auto space-y-2">
-                                {cbos.map((cbo) => (
-                                    <li
-                                        key={cbo.id}
-                                        className="p-3 border rounded flex justify-between"
-                                    >
-                                        <span>
-                                            <strong>{cbo.code}</strong> — {cbo.title}
-                                        </span>
-                                        <div className="flex gap-2">
-                                            <button
-                                                onClick={() => {
-                                                    setSelectedCBO(cbo);
-                                                    setCboCode(cbo.code);
-                                                    setCboTitle(cbo.title);
-                                                }}
-                                                className="text-blue-600"
-                                            >
-                                                Editar
-                                            </button>
-                                            <button
-                                                onClick={() => handleDeleteCBO(cbo.id)}
-                                                className="text-red-600"
-                                            >
-                                                Deletar
-                                            </button>
-                                        </div>
-                                    </li>
-                                ))}
+                                {filteredCbos.length > 0 ? (
+                                    filteredCbos.map((cbo) => (
+                                        <li
+                                            key={cbo.id}
+                                            className="p-3 border rounded flex justify-between items-center"
+                                        >
+                                            <span>
+                                                <strong>{cbo.code}</strong> — {cbo.title}
+                                            </span>
+                                            <div className="flex gap-2">
+                                                <button
+                                                    onClick={() => {
+                                                        setSelectedCBO(cbo);
+                                                        setCboCode(cbo.code);
+                                                        setCboTitle(cbo.title);
+                                                    }}
+                                                    className="text-blue-600"
+                                                >
+                                                    <Pencil className="w-5 h-5" />
+                                                </button>
+                                                <button
+                                                    onClick={() => handleDeleteCBO(cbo.id)}
+                                                    className="text-red-600"
+                                                >
+                                                    <Trash2 className="w-5 h-5" />
+                                                </button>
+                                            </div>
+                                        </li>
+                                    ))
+                                ) : (
+                                    <p className="text-gray-400">
+                                        {cboSearchTerm
+                                            ? "Nenhum CBO encontrado com o termo de busca."
+                                            : "Nenhum CBO cadastrado."
+                                        }
+                                    </p>
+                                )}
                             </ul>
                         </div>
                         <div className="w-1/2 border-l pl-6 space-y-4">
@@ -1390,13 +1429,13 @@ export function ConfigPanel() {
                                                 }}
                                                 className="text-blue-600"
                                             >
-                                                Editar
+                                                <Pencil className="w-5 h-5" />
                                             </button>
                                             <button
                                                 onClick={() => handleDeletePosition(pos.id)}
                                                 className="text-red-600"
                                             >
-                                                Deletar
+                                                <Trash2 className="w-5 h-5" />
                                             </button>
                                         </div>
                                     </li>
@@ -1646,8 +1685,8 @@ export function ConfigPanel() {
                                 <p className="text-gray-500">Carregando perfis...</p>
                             ) : (
                                 <ul className="space-y-2 max-h-[65vh] overflow-y-auto pr-1">
-                                    {profiles.length > 0 ? (
-                                        profiles.map((profile: any) => (
+                                    {filteredProfiles.length > 0 ? (
+                                        filteredProfiles.map((profile: any) => (
                                             <li
                                                 key={profile.id}
                                                 className="p-3 border rounded-md flex justify-between items-center"

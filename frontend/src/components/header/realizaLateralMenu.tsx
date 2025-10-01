@@ -68,7 +68,7 @@ export function LateralMenu({ onClose }: { onClose: () => void }) {
         onClick={onClose}
       />
 
-      <h3 className="pl-4 pt-6 text-xs text-white">Gestão de fornecedores</h3>
+      {/* <h3 className="pl-4 pt-6 text-xs text-white">Gestão de fornecedores</h3>
 
       <RealizaMenuItem
         to={`/sistema/table-providers/${getIdUser}`}
@@ -77,7 +77,7 @@ export function LateralMenu({ onClose }: { onClose: () => void }) {
         menuKey="fornecedores"
         setActiveMenuKey={setActiveMenuKey}
         onClick={onClose}
-      />
+      /> */}
 
       <h3 className="pl-4 pt-6 text-xs text-white">Sobre a empresa</h3>
       <RealizaMenuItem

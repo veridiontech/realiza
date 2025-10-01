@@ -275,7 +275,6 @@ export function ServicesSection() {
                         </li>
                       )}
 
-                      <span>-</span>
                       <div className="flex gap-4">
                         <select
                           value={service.risk}
