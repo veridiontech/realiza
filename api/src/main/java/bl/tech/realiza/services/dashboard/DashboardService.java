@@ -1035,11 +1035,14 @@ public class DashboardService {
         // para cada type selecionado, quantidade de documentos com status
         List<DashboardGeneralDetailsResponseDto.TypeStatus> documentStatus = new ArrayList<>();
         List<DashboardGeneralDetailsResponseDto.Exemption> documentExemption = new ArrayList<>();
+        Map<String, Integer> typeCountMap = new HashMap<>();
 
         if (!(filters != null && filters.getDocumentTypes() != null && filters.getDocumentTypes().isEmpty())) {
             documentTypes = documentRepository.findDistinctDocumentType();
         }
         for (String type : documentTypes) {
+            typeCountMap.put(type, 0);
+
             List<DashboardGeneralDetailsResponseDto.Status> statusList = new ArrayList<>();
             if (statuses.isEmpty()) {
                 statuses = Arrays.asList(Status.values());
@@ -1082,7 +1085,19 @@ public class DashboardService {
                     .build());
         }
 
-//        List<ContractDocument> contractDocuments = contractDocumentRepository.findAllByStatus(ISENCAO_PENDENTE)
+        List<ContractDocument> contractDocuments = contractDocumentRepository.findAllByStatus(ISENCAO_PENDENTE);
+
+        for (ContractDocument contractDocument : contractDocuments) {
+            String docType = contractDocument.getDocument().getType();
+            typeCountMap.put(docType, typeCountMap.getOrDefault(docType, 0) + 1);
+        }
+
+        for (Map.Entry<String, Integer> entry : typeCountMap.entrySet()) {
+            documentExemption.add(DashboardGeneralDetailsResponseDto.Exemption.builder()
+                    .name(entry.getKey())
+                    .quantity(entry.getValue())
+                    .build());
+        }
 
         // ranking de pendencias
         List<DashboardGeneralDetailsResponseDto.Pending> pendingRanking = new ArrayList<>();
