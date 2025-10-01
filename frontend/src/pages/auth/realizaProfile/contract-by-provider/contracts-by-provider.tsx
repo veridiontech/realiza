@@ -102,6 +102,7 @@ export function ContarctsByProvider() {
 
   const getContractsByProvider = async () => {
     try {
+      // Este endpoint retorna todos os contratos para o fornecedor (ativo/inativo)
       const res = await axios.get(`${ip}/contract/supplier/filtered-supplier`, {
         params: { idSearch: id },
         headers: { Authorization: `Bearer ${token}` },
@@ -154,6 +155,16 @@ export function ContarctsByProvider() {
         setSearchTerm("");
       } catch (err) {
         console.error("Error fetching all data for contract:", err);
+        // --- MELHORIA PARA TRATAR CONTRATOS INATIVOS ---
+        setDocuments([]);
+        setCollaborators([]);
+        setSubcontractors([]);
+        setSelectedContractName(serviceName); 
+        setSelectedContractId(idContract);
+        toast.error(
+          `Não foi possível carregar os detalhes do contrato "${serviceName}". Verifique o status do contrato ou a permissão no backend.`
+        );
+        // ---------------------------------------------
       }
     },
     [token]
@@ -236,8 +247,6 @@ export function ContarctsByProvider() {
         "Cargo",
         "Tipo de Contrato",
         "CPF",
-        "Pis",
-        "E-mail",
       ];
       const tableRows: (string | null)[][] = [];
 
@@ -247,8 +256,6 @@ export function ContarctsByProvider() {
           col.cboTitle || "-",
           col.contractType || "-",
           col.cpf || "-",
-          col.pis || "-",
-          col.email || "-",
         ];
         tableRows.push(collaboratorData);
       });
@@ -535,9 +542,9 @@ export function ContarctsByProvider() {
               >
                 <div
                   className="grid grid-cols-[1fr_2fr_0.5fr_1fr_1fr_1fr_0.5fr] gap-4
-                          text-sm font-semibold text-neutral-600 py-2
-                          border-b border-neutral-300 items-center
-                          sticky top-0 bg-white z-10"
+                  text-sm font-semibold text-neutral-600 py-2
+                  border-b border-neutral-300 items-center
+                  sticky top-0 bg-white z-10"
                 >
                   <div>Status</div>
                   <div>Documento</div>

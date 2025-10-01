@@ -58,10 +58,13 @@ function getContractStatusFromSupplier(
   ) {
     return ContractStatusEnum.SUSPENDED;
   }
-  if (["FINISHED", "DENIED"].includes(s)) {
+  
+  // ALTERAÇÃO AQUI: FINISH_REQUESTED agora é tratado como FINISHED (vermelho)
+  if (["FINISHED", "DENIED", "FINISH_REQUESTED"].includes(s)) {
     return ContractStatusEnum.FINISHED;
   }
-  if (["ACTIVE", "PENDING", "FINISH_REQUESTED"].includes(s)) {
+  
+  if (["ACTIVE", "PENDING"].includes(s)) {
     return ContractStatusEnum.ACTIVE;
   }
   return ContractStatusEnum.ACTIVE;
@@ -230,7 +233,6 @@ export function TableServiceProvider() {
   }, [editFormData, managers, servicesType, reset]);
 
   // --- Buscar fornecedores do back, cobrindo todos os casos
-  // --- Buscar fornecedores do back, cobrindo todos os casos
   const getSupplier = async () => {
     if (!selectedBranch?.idBranch) return;
     setLoading(true);
@@ -250,14 +252,15 @@ export function TableServiceProvider() {
       let list: any[] = [];
 
       if (statusFilter === "Todos") {
-        // ⚠️ Agora também busca explicitamente os status suspensos e finalizados
-        const [active, finished, suspended, suspendReq, reactivateReq] =
+        // Busca ativos, finalizados, solicitando finalização, suspensos e solicitando suspensão/reativação
+        const [active, finished, suspended, suspendReq, reactivateReq, finishReq] = 
           await Promise.all([
             fetchPage({ isActive: true }),
             fetchPage({ status: "FINISHED" }),
             fetchPage({ status: "SUSPENDED" }),
             fetchPage({ status: "SUSPEND_REQUESTED" }),
             fetchPage({ status: "REACTIVATION_REQUESTED" }),
+            fetchPage({ status: "FINISH_REQUESTED" }), // Chamada para FINISH_REQUESTED
           ]);
         list = uniqueBy(
           [
@@ -266,20 +269,27 @@ export function TableServiceProvider() {
             ...suspended,
             ...suspendReq,
             ...reactivateReq,
+            ...finishReq, // Adicionado 'finishReq' à lista
           ],
           (x) => x.idContract
         );
       } else if (statusFilter === "Ativo") {
+        // Busca apenas ativos (isActive: true é suficiente para 'ACTIVE' e 'PENDING')
         list = await fetchPage({ isActive: true });
       } else if (statusFilter === "Finalizado") {
-        list = await fetchPage({ status: "FINISHED" });
+        // Busca finalizados E solicitando finalização
+        const [finished, finishReq] = await Promise.all([
+            fetchPage({ status: "FINISHED" }),
+            fetchPage({ status: "FINISH_REQUESTED" }),
+        ]);
+        list = uniqueBy([...finished, ...finishReq], (x) => x.idContract);
       } else if (statusFilter === "Suspenso") {
         const [inactive, suspendReq, reactivateReq, suspended] =
           await Promise.all([
             fetchPage({ isActive: false }),
+            fetchPage({ status: "SUSPENDED" }),
             fetchPage({ status: "SUSPEND_REQUESTED" }),
             fetchPage({ status: "REACTIVATION_REQUESTED" }),
-            fetchPage({ status: "SUSPENDED" }),
           ]);
         list = uniqueBy(
           [...inactive, ...suspendReq, ...reactivateReq, ...suspended],

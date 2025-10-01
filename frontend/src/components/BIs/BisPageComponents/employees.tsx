@@ -89,7 +89,7 @@ export function Employees({ count }: EmployeeCountProps) {
                   userSelect: "none",
                 }}
               >
-                Número total de colaboradores ativos
+                Número total de colaboradores não alocados
               </div>
             )}
           </span>
