@@ -286,7 +286,7 @@ public class CrudContractImpl implements CrudContract {
                         .orElse(null);
                 if (userResponsible != null) {
                     auditLogService.createAuditLog(
-                            employee.getIdEmployee(),
+                            contract.getIdContract(),
                             CONTRACT,
                             userResponsible.getFullName() + " desalocou colaborador "
                                     + employee.getFullName()
@@ -310,7 +310,7 @@ public class CrudContractImpl implements CrudContract {
             }
         }
 
-        return "Employee added successfully";
+        return "Employee removed successfully";
     }
 
     @Override
