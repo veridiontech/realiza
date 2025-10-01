@@ -236,7 +236,7 @@ public class CrudEmployeeBrazilianImpl implements CrudEmployeeBrazilian {
                 .branch(savedEmployeeBrazilian.getBranch() != null ? savedEmployeeBrazilian.getBranch().getIdBranch() : null)
                 .supplier(savedEmployeeBrazilian.getSupplier() != null ? savedEmployeeBrazilian.getSupplier().getIdProvider() : null)
                 .subcontract(savedEmployeeBrazilian.getSubcontract() != null ? savedEmployeeBrazilian.getSubcontract().getIdProvider() : null)
-                .contracts(savedEmployeeBrazilian.getContractEmployees().stream().map(
+                .contracts(savedEmployeeBrazilian.getContractEmployees() != null ? savedEmployeeBrazilian.getContractEmployees().stream().map(
                         contract -> EmployeeResponseDto.ContractDto.builder()
                                 .idContract(contract.getContract() != null
                                         ? contract.getContract().getIdContract()
@@ -245,7 +245,8 @@ public class CrudEmployeeBrazilianImpl implements CrudEmployeeBrazilian {
                                         ? contract.getContract().getServiceName()
                                         : null)
                                 .build())
-                        .collect(Collectors.toList()))
+                        .collect(Collectors.toList())
+                        : null)
                 .build();
     }
 
