@@ -18,12 +18,34 @@ USER_LOGIN = {
 EXCEL_FILE = "SISTEMA NOVO_ITAMINAS.xlsx"  # na mesma pasta do script
 SHEET_RESULTS = "Resultado da consulta"
 
-CLIENT_ID = "b4be52d6-e9db-44f0-85a6-22d1dfae5ba3"  # caso precise
+CLIENT_ID = "be661155-c0d8-4458-a0b9-b214873cd116"  # caso precise
 REQUESTER_ID = "COLOQUE_ID_DO_REQUISITANTE"
 
 # Dicionários fornecidos por você:
 BRANCH_MAP = {
     # "Unidade X": "idBranchX",
+"Administrativa":	"9193d738-4446-4655-a650-447feec76158",
+"Compras":	"a4d2ed7d-4458-4862-b3e4-f4e1cfc7cb0d",
+"Custos, Orçamento e Contratos":	"1c661c4e-191e-4fda-82e1-752c67e94052",
+"Engenharia Elétrica e Automação":	"1cc20716-b123-43a3-b4d5-ccfcca8b8729",
+"Engenharia Mecânica":	"e460d590-0471-45eb-9604-1d7b854521e2",
+"Filtragem":	"df5696cb-daa2-499d-ae9b-5fb505764d20",
+"Engenharia de Processamento Mineral":	"95d0f9b2-a2e4-4b09-94e9-f1f604ddd6d9",
+"Geotecnia":	"57d2b987-d8c0-46d3-bb48-9c934bd21657",
+"Infraestrutura":	"5eccde13-4a0e-40fe-a829-21a817d06abb",
+"Logística":	"51417cef-364b-4668-b0a5-1f4ddf21caf5",
+"Manutenção Mecânica Industrial":	"da80c857-11dc-4398-89b1-4914f03a4862",
+"Meio Ambiente":	"a851a8bf-acc5-4a3e-9c1f-8e8e54828e49",
+"Planejamento de Lavra e Geologia":	"8fe77d13-8a0d-4fc7-b6b1-0e9da4bdaf54",
+"Segurança do Trabalho":	"f0105b97-b202-45c2-9188-72d27dce760e",
+"Recursos Humanos":	"438d2c87-7c8d-4e4b-980a-2256eb42673b",
+"Compliance":	"dd98c471-d336-4f2a-b3f3-96892789d93f",
+"Tecnologia da Informação":	"19f2ced4-a7ee-402c-b8dd-e0f349639b1e",
+"Suprimentos":	"5788eb88-44c1-4855-b4d4-7d49bbae524b",
+"Planejamento de Controle e Produção":	"15db246e-01a1-4804-8b34-01c6e6d198a9",
+"Posto de Combustível":	"5598d563-8b57-4fa4-a380-56bb337d4673",
+"Medicina do trabalho":	"d5330f51-5e5e-47f0-a9d5-ea39ffc71613",
+"Cantina":	"53b81e17-9c74-4610-85a0-27c78bb41c7b",
 }
 SERVICE_TYPE_MAP = {
     # "Tipo Serviço Y": "idServiceTypeY",

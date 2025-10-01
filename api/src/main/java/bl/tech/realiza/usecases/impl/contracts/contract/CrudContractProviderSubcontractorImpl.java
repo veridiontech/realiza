@@ -279,7 +279,9 @@ public class CrudContractProviderSubcontractorImpl implements CrudContractProvid
     private ContractSubcontractorResponseDto toContractSubcontractorResponseDto(ContractProviderSubcontractor contractProviderSubcontractor) {
             return ContractSubcontractorResponseDto.builder()
                     .idContract(contractProviderSubcontractor.getIdContract())
-                    .serviceType(contractProviderSubcontractor.getServiceTypeBranch().getIdServiceType())
+                    .serviceType(contractProviderSubcontractor.getServiceTypeBranch() != null
+                            ? contractProviderSubcontractor.getServiceTypeBranch().getIdServiceType()
+                            : null)
                     .serviceName(contractProviderSubcontractor.getServiceName())
                     .contractReference(contractProviderSubcontractor.getContractReference())
                     .description(contractProviderSubcontractor.getDescription())
@@ -299,10 +301,18 @@ public class CrudContractProviderSubcontractorImpl implements CrudContractProvid
                     .isActive(contractProviderSubcontractor.getIsActive())
                     .activities(contractProviderSubcontractor.getActivities()
                             .stream().map(Activity::getIdActivity).toList())
-                    .idSupplier(contractProviderSubcontractor.getContractProviderSupplier().getIdContract())
-                    .nameSupplier(contractProviderSubcontractor.getProviderSubcontractor().getCorporateName())
-                    .idSubcontractor(contractProviderSubcontractor.getProviderSubcontractor().getIdProvider())
-                    .nameSubcontractor(contractProviderSubcontractor.getProviderSubcontractor().getCorporateName())
+                    .idSupplier(contractProviderSubcontractor.getContractProviderSupplier().getIdContract() != null
+                            ? contractProviderSubcontractor.getContractProviderSupplier().getIdContract()
+                            : null)
+                    .nameSupplier(contractProviderSubcontractor.getProviderSubcontractor().getCorporateName() != null
+                            ? contractProviderSubcontractor.getProviderSubcontractor().getCorporateName()
+                            : null)
+                    .idSubcontractor(contractProviderSubcontractor.getProviderSubcontractor().getIdProvider() != null
+                            ? contractProviderSubcontractor.getProviderSubcontractor().getIdProvider()
+                            : null)
+                    .nameSubcontractor(contractProviderSubcontractor.getProviderSubcontractor().getCorporateName() != null
+                            ? contractProviderSubcontractor.getProviderSubcontractor().getCorporateName()
+                            : null)
                     .build();
     }
 

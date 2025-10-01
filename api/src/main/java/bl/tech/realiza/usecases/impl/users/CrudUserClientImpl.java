@@ -51,9 +51,6 @@ public class CrudUserClientImpl implements CrudUserClient {
                 .noneMatch(role -> role.name().equals(userClientRequestDto.getRole().name()))) {
             throw new BadRequestException("Invalid Role");
         }
-        if (userClientRequestDto.getPassword() == null || userClientRequestDto.getPassword().isEmpty()) {
-            throw new BadRequestException("Invalid password");
-        }
         if (userClientRequestDto.getBranch() == null || userClientRequestDto.getBranch().isEmpty()) {
             throw new BadRequestException("Invalid branch");
         }
@@ -84,7 +81,6 @@ public class CrudUserClientImpl implements CrudUserClient {
         UserClient newUserClient = UserClient.builder()
                 .cpf(userClientRequestDto.getCpf())
                 .description(userClientRequestDto.getDescription())
-                .password(passwordEncryptionService.encryptPassword(userClientRequestDto.getPassword()))
                 .position(userClientRequestDto.getPosition())
                 .role(userClientRequestDto.getRole())
                 .firstName(userClientRequestDto.getFirstName())
@@ -105,8 +101,8 @@ public class CrudUserClientImpl implements CrudUserClient {
 
         crudItemManagement.saveUserSolicitation(ItemManagementUserRequestDto.builder()
                 .solicitationType(ItemManagement.SolicitationType.CREATION)
-                .idRequester(savedUserClient.getIdUser())
-                .idNewUser(userClient.getIdUser())
+                .idRequester(userClient.getIdUser())
+                .idNewUser(savedUserClient.getIdUser())
                 .build());
 
         return UserResponseDto.builder()

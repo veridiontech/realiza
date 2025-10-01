@@ -42,4 +42,12 @@ public class UserControllerImpl implements UserController {
     public ResponseEntity<String> changeUserProfile(@PathVariable String userId, @RequestParam String profileId) {
         return ResponseEntity.ok(crudUser.changeUserProfile(userId, profileId));
     }
+
+    @PatchMapping("/{userId}/remove-profile-picture")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @Override
+    public ResponseEntity<Void> removeProfilePicture(@PathVariable String userId) {
+        crudUser.removeProfilePicture(userId);
+        return ResponseEntity.noContent().build();
+    }
 }
