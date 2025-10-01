@@ -6,10 +6,13 @@ import bl.tech.realiza.exceptions.NotFoundException;
 import bl.tech.realiza.gateways.repositories.users.UserRepository;
 import bl.tech.realiza.gateways.repositories.users.security.ProfileRepository;
 import bl.tech.realiza.gateways.responses.users.UserEmailListResponse;
+import bl.tech.realiza.services.GoogleCloudService;
 import bl.tech.realiza.usecases.interfaces.users.CrudUser;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -21,6 +24,7 @@ public class CrudUserImpl implements CrudUser {
 
     private final UserRepository userRepository;
     private final ProfileRepository profileRepository;
+    private final GoogleCloudService googleCloudService;
 
     @Override
     public String userActivation(String userId, Boolean activation) {
@@ -76,5 +80,22 @@ public class CrudUserImpl implements CrudUser {
         user.setProfile(profile);
         userRepository.save(user);
         return "Profile changed for user with id " + userId;
+    }
+
+    @Override
+    public void removeProfilePicture(String userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException("user not found"));
+        try {
+            if (user.getProfilePicture() != null) {
+                googleCloudService.deleteFile(user.getProfilePicture().getUrl());
+            }
+        } catch (IOException e) {
+            System.out.println(e.getMessage());
+            throw new EntityNotFoundException(e);
+        } finally {
+            user.setProfilePicture(null);
+            userRepository.save(user);
+        }
     }
 }

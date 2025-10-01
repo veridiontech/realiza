@@ -9,4 +9,5 @@ public interface CrudUser {
     void fourDigitCodeCheck();
     List<UserEmailListResponse> findByProfile(String profileId);
     String changeUserProfile(String userId, String profileId);
+    void removeProfilePicture(String userId);
 }
