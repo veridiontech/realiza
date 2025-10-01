@@ -16,6 +16,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.mail.MailException;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.nio.charset.StandardCharsets;
@@ -30,6 +31,7 @@ public class EmailSender {
     private final TokenManagerService tokenManagerService;
     private final UserRepository userRepository;
 
+    @Async
     public void sendNewProviderEmail(EmailEnterpriseInviteRequestDto emailEnterpriseInviteRequestDto, String token) {
         String email = emailEnterpriseInviteRequestDto.getEmail();
         log.info("Starting to send email to {}", email);
@@ -93,6 +95,7 @@ public class EmailSender {
         }
     }
 
+    @Async
     public void sendNewUserEmail(EmailNewUserRequestDto emailNewUserRequestDto) {
         String email = emailNewUserRequestDto.getEmail();
         log.info("Starting to send email to {}", email);
@@ -132,6 +135,7 @@ public class EmailSender {
         }
     }
 
+    @Async
     public void sendRegistrationCompleteEmail(EmailRegistrationCompleteRequestDto emailRegistrationCompleteRequestDto) {
         String email = emailRegistrationCompleteRequestDto.getEmail();
         String responsibleName = emailRegistrationCompleteRequestDto.getResponsibleName();
@@ -166,6 +170,7 @@ public class EmailSender {
         }
     }
 
+    @Async
     public void sendNewProviderDeniedEmail(EmailRegistrationDeniedRequestDto emailRegistrationDeniedRequestDto) {
         String email = emailRegistrationDeniedRequestDto.getEmail();
         String responsibleName = emailRegistrationDeniedRequestDto.getResponsibleName();
@@ -202,6 +207,7 @@ public class EmailSender {
         }
     }
 
+    @Async
     public void sendPasswordRecoveryEmail(String email, String fourDigitCode) {
         User user = userRepository.findByEmailAndForgotPasswordCodeAndIsActiveIsTrue(email, fourDigitCode+email)
                 .orElseThrow(() -> new NotFoundException("User not found"));

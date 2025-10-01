@@ -51,6 +51,7 @@ import bl.tech.realiza.usecases.interfaces.CrudItemManagement;
 import bl.tech.realiza.usecases.interfaces.auditLogs.AuditLogService;
 import bl.tech.realiza.usecases.interfaces.users.CrudNotification;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.hibernate.Hibernate;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -69,6 +70,7 @@ import static bl.tech.realiza.domains.enums.AuditLogActionsEnum.*;
 import static bl.tech.realiza.domains.enums.AuditLogTypeEnum.CONTRACT;
 import static bl.tech.realiza.domains.enums.AuditLogTypeEnum.DOCUMENT;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class CrudItemManagementImpl implements CrudItemManagement {
@@ -579,12 +581,15 @@ public class CrudItemManagementImpl implements CrudItemManagement {
 
             userClientRepository.save(userClient);
         } else if (solicitation.getNewProvider() != null) {
-            Provider provider = providerRepository.findById(solicitation.getNewProvider().getIdProvider())
+            Provider unproxiedProvider = providerRepository.findById(solicitation.getNewProvider().getIdProvider())
                     .orElseThrow(() -> new NotFoundException("Provider not found"));
 
-            provider.setDenied(true);
+            unproxiedProvider.setDenied(true);
 
-            providerRepository.save(provider);
+            providerRepository.save(unproxiedProvider);
+            Object provider = Hibernate.unproxy(unproxiedProvider);
+
+            log.info("A classe do unproxiedProvider é: {}", unproxiedProvider.getClass().getName());
 
             Contract contract = null;
             if (provider instanceof ProviderSupplier providerSupplier) {
@@ -595,6 +600,10 @@ public class CrudItemManagementImpl implements CrudItemManagement {
                 contract = providerSubcontractor.getContractsSubcontractor().stream()
                         .max(Comparator.comparing(Contract::getCreationDate))
                         .orElseThrow(() -> new NotFoundException("Contract not found"));
+            } else {
+                // Se o unproxiedProvider não for de nenhum dos tipos esperados, trate o erro aqui
+                log.error("Tipo de unproxiedProvider inesperado: {}", provider.getClass().getName());
+                throw new IllegalStateException("Tipo de unproxiedProvider não suportado para esta operação: " + unproxiedProvider.getClass().getName());
             }
 
             assert contract != null;
@@ -604,11 +613,11 @@ public class CrudItemManagementImpl implements CrudItemManagement {
             String token = tokenManagerService.generateToken();
             solicitation.setInvitationToken(token);
 
-            if (provider.getEmail() != null) {
+            if (unproxiedProvider.getEmail() != null) {
                 emailSender.sendNewProviderDeniedEmail(EmailRegistrationDeniedRequestDto.builder()
-                        .email(provider.getEmail())
+                        .email(unproxiedProvider.getEmail())
                         .responsibleName(contract.getResponsible().getFullName())
-                        .enterpriseName(provider.getCorporateName())
+                        .enterpriseName(unproxiedProvider.getCorporateName())
                         // adicionar motivos ao sistema
                         .reason(null)
                         .build());
