@@ -1082,6 +1082,8 @@ public class DashboardService {
                     .build());
         }
 
+//        List<ContractDocument> contractDocuments = contractDocumentRepository.findAllByStatus(ISENCAO_PENDENTE)
+
         // ranking de pendencias
         List<DashboardGeneralDetailsResponseDto.Pending> pendingRanking = new ArrayList<>();
         List<String> allBranchIds = branchRepository.findAllBranchIdsByClientId(clientId);
