@@ -9,10 +9,13 @@ import bl.tech.realiza.exceptions.NotFoundException;
 import bl.tech.realiza.gateways.repositories.providers.ProviderSupplierRepository;
 import bl.tech.realiza.gateways.repositories.services.FileRepository;
 import bl.tech.realiza.gateways.repositories.users.UserProviderSupplierRepository;
+import bl.tech.realiza.gateways.requests.services.email.EmailNewUserRequestDto;
 import bl.tech.realiza.gateways.requests.users.UserProviderSupplierRequestDto;
 import bl.tech.realiza.gateways.responses.users.UserResponseDto;
 import bl.tech.realiza.services.GoogleCloudService;
 import bl.tech.realiza.services.auth.PasswordEncryptionService;
+import bl.tech.realiza.services.auth.RandomPasswordService;
+import bl.tech.realiza.services.email.EmailSender;
 import bl.tech.realiza.usecases.interfaces.users.CrudUserProviderSupplier;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -36,6 +39,8 @@ public class CrudUserProviderSupplierImpl implements CrudUserProviderSupplier {
     private final FileRepository fileRepository;
     private final ReturnTypeParser genericReturnTypeParser;
     private final GoogleCloudService googleCloudService;
+    private final RandomPasswordService randomPasswordService;
+    private final EmailSender emailSender;
 
     @Override
     public UserResponseDto save(UserProviderSupplierRequestDto userProviderSupplierRequestDto) {
@@ -52,7 +57,8 @@ public class CrudUserProviderSupplierImpl implements CrudUserProviderSupplier {
         ProviderSupplier providerSupplier = providerSupplierRepository.findById(userProviderSupplierRequestDto.getSupplier())
                 .orElseThrow(() -> new NotFoundException("Supplier not found"));
 
-        String encryptedPassword = passwordEncryptionService.encryptPassword(userProviderSupplierRequestDto.getPassword());
+        String randomPassword = randomPasswordService.generateRandomPassword();
+        String encryptedPassword = passwordEncryptionService.encryptPassword(randomPassword);
 
         UserProviderSupplier newUserSupplier = UserProviderSupplier.builder()
                 .cpf(userProviderSupplierRequestDto.getCpf())
@@ -69,6 +75,12 @@ public class CrudUserProviderSupplierImpl implements CrudUserProviderSupplier {
                 .build();
 
         UserProviderSupplier savedUserSupplier = userSupplierRepository.save(newUserSupplier);
+
+        emailSender.sendNewUserEmail(EmailNewUserRequestDto.builder()
+                .email(savedUserSupplier.getEmail())
+                .password(randomPassword)
+                .nameUser(savedUserSupplier.getFullName())
+                .build());
 
         return UserResponseDto.builder()
                 .cpf(savedUserSupplier.getCpf())

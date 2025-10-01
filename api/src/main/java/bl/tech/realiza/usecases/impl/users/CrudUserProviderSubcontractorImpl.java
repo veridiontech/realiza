@@ -9,10 +9,12 @@ import bl.tech.realiza.exceptions.NotFoundException;
 import bl.tech.realiza.gateways.repositories.providers.ProviderSubcontractorRepository;
 import bl.tech.realiza.gateways.repositories.services.FileRepository;
 import bl.tech.realiza.gateways.repositories.users.UserProviderSubcontractorRepository;
+import bl.tech.realiza.gateways.requests.services.email.EmailNewUserRequestDto;
 import bl.tech.realiza.gateways.requests.users.UserProviderSubcontractorRequestDto;
 import bl.tech.realiza.gateways.responses.users.UserResponseDto;
 import bl.tech.realiza.services.GoogleCloudService;
 import bl.tech.realiza.services.auth.PasswordEncryptionService;
+import bl.tech.realiza.services.auth.RandomPasswordService;
 import bl.tech.realiza.services.email.EmailSender;
 import bl.tech.realiza.usecases.interfaces.users.CrudUserProviderSubcontractor;
 import jakarta.persistence.EntityNotFoundException;
@@ -36,6 +38,7 @@ public class CrudUserProviderSubcontractorImpl implements CrudUserProviderSubcon
     private final PasswordEncryptionService passwordEncryptionService;
     private final FileRepository fileRepository;
     private final GoogleCloudService googleCloudService;
+    private final RandomPasswordService randomPasswordService;
 
     @Override
     public UserResponseDto save(UserProviderSubcontractorRequestDto userProviderSubcontractorRequestDto) {
@@ -53,7 +56,8 @@ public class CrudUserProviderSubcontractorImpl implements CrudUserProviderSubcon
         ProviderSubcontractor providerSubcontractor = providerSubcontractorRepository.findById(userProviderSubcontractorRequestDto.getSubcontractor())
                 .orElseThrow(() -> new NotFoundException("Subcontractor not found"));
 
-        String encryptedPassword = passwordEncryptionService.encryptPassword(userProviderSubcontractorRequestDto.getPassword());
+        String randomPassword = randomPasswordService.generateRandomPassword();
+        String encryptedPassword = passwordEncryptionService.encryptPassword(randomPassword);
 
         UserProviderSubcontractor newUserSubcontractor = UserProviderSubcontractor.builder()
                 .cpf(userProviderSubcontractorRequestDto.getCpf())
@@ -70,6 +74,12 @@ public class CrudUserProviderSubcontractorImpl implements CrudUserProviderSubcon
                 .build();
 
         UserProviderSubcontractor savedUserSubcontractor = userSubcontractorRepository.save(newUserSubcontractor);
+
+        emailSender.sendNewUserEmail(EmailNewUserRequestDto.builder()
+                .email(savedUserSubcontractor.getEmail())
+                .password(randomPassword)
+                .nameUser(savedUserSubcontractor.getFullName())
+                .build());
 
         return UserResponseDto.builder()
                 .cpf(savedUserSubcontractor.getCpf())

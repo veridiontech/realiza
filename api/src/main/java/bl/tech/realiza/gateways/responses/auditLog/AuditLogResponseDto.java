@@ -21,6 +21,7 @@ public class AuditLogResponseDto {
     private String notes;
     private AuditLogActionsEnum action;
     private LocalDateTime createdAt;
+    private LocalDateTime date;
     private String userResponsibleId;
     private String userResponsibleCpf;
     private String userResponsibleFullName;
