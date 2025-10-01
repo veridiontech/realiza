@@ -16,6 +16,7 @@ import bl.tech.realiza.gateways.responses.employees.EmployeeResponseDto;
 import bl.tech.realiza.services.GoogleCloudService;
 import bl.tech.realiza.usecases.interfaces.employees.CrudEmployee;
 import lombok.RequiredArgsConstructor;
+import org.hibernate.Hibernate;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -202,15 +203,17 @@ public class CrudEmployeeImpl implements CrudEmployee {
         Contract contract = contractRepository.findById(idContract)
                 .orElseThrow(() -> new NotFoundException("Contract not found"));
 
-        List<Employee> employees = contract.getEmployeeContracts().stream().map(ContractEmployee::getEmployee).collect(Collectors.toList());
+        List<Employee> employees = contract.getEmployeeContracts().stream().map(ContractEmployee::getEmployee).toList();
 
         List<EmployeeBrazilian> brazilians = new ArrayList<>();
         List<EmployeeForeigner> foreigners = new ArrayList<>();
 
         for (Employee emp : employees) {
-            if (emp instanceof EmployeeBrazilian eb) {
+            Object unproxiedEmployee = Hibernate.unproxy(emp);
+
+            if (unproxiedEmployee instanceof EmployeeBrazilian eb) {
                 brazilians.add(eb);
-            } else if (emp instanceof EmployeeForeigner ef) {
+            } else if (unproxiedEmployee instanceof EmployeeForeigner ef) {
                 foreigners.add(ef);
             }
         }
