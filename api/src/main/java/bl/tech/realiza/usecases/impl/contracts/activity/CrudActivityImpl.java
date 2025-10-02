@@ -477,7 +477,7 @@ public class CrudActivityImpl implements CrudActivity {
             List<Activity> activitiesInBranch = activityRepository.findAllByBranch_IdBranch(branch.getIdBranch());
             for (ActivityRepo repo : repos) {
                 if (activitiesInBranch.stream()
-                        .noneMatch(activity ->
+                        .noneMatch(activity -> activity.getActivityRepo() != null &&
                                 activity.getActivityRepo().getIdActivity()
                                         .equals(repo.getIdActivity()))) {
                     newActivities.add(Activity.builder()
