@@ -15,57 +15,64 @@ type Filters = {
   statuses?: string[];
   documentTitles?: string[];
 };
-type ApiItem = Record<string, any>;
+
+type ApiItem = {
+  corporateName: string;
+  cnpj: string;
+  totalDocumentQuantity: number;
+  adherenceQuantity: number;
+  nonAdherenceQuantity: number;
+  conformityQuantity: number;
+  nonConformityQuantity: number;
+  adherence: number;
+  conformity: number;
+  conformityRange: string;
+  employeeQuantity: number;
+};
+
 
 type Row = {
   id: string;
-  filial: string;
-  cnpjFilial: string;
   fornecedor: string;
-  cnpjFornecedor: string;
-  documento: string;
-  tipoDocumento: string;
-  status: string;
-  responsavel?: string;
-  emailResponsavel?: string;
-  conformidade?: string;
-  criadoEm?: string;
-  ultimaChecagem?: string;
-  validade?: string;
+  cnpj: string;
+  totalDocumentos: number;
+  aderencia: string;
+  conformidade: string;
+  risco: string;
+  totalFuncionarios: number;
 };
 
-function formatDate(v?: string) {
-  if (!v) return "—";
-  const d = new Date(v);
-  if (isNaN(+d)) return v;
-  return d.toLocaleDateString("pt-BR");
+function translateRisk(risk: string): string {
+  if (!risk) return "Não definido";
+  const lowerCaseRisk = risk.toLowerCase();
+  switch (lowerCaseRisk) {
+    case "risky":
+      return "Crítico";
+    case "high":
+      return "Alto";
+    case "medium":
+      return "Médio";
+    case "low":
+      return "Baixo";
+    default:
+      return risk; 
+  }
 }
 
-function mapItemToRow(it: ApiItem, idx: number): Row {
+function mapItemToRow(it: ApiItem): Row {
   return {
-    id: String(it.id ?? idx),
-    filial: it.branchName ?? "—",
-    cnpjFilial: it.branchCnpj ?? "—",
-    fornecedor: it.supplierName ?? "—",
-    cnpjFornecedor: it.supplierCnpj ?? "—",
-    documento: it.documentTitle ?? "—",
-    tipoDocumento: it.documentType ?? it.contractType ?? "—",
-    status: it.status ?? it.documentStatus ?? it.contractStatus ?? "—",
-    responsavel: it.responsibleFullName ?? it.employeeFullName ?? "—",
-    emailResponsavel: it.responsibleEmail ?? it.employeeEmail ?? "—",
-    conformidade:
-      typeof it.conforming === "boolean"
-        ? it.conforming
-          ? "Conforme"
-          : "Não conforme"
-        : "—",
-    criadoEm: formatDate(it.createdAt ?? it.contractAt ?? it.serviceStartAt),
-    ultimaChecagem: formatDate(it.lastCheck ?? it.checkedAt),
-    validade: formatDate(it.expirationDate ?? it.validUntil),
+    id: it.cnpj,
+    fornecedor: it.corporateName ?? "—",
+    cnpj: it.cnpj ?? "—",
+    totalDocumentos: it.totalDocumentQuantity ?? 0,
+    aderencia: `${(it.adherence ?? 0).toFixed(1)}%`,
+    conformidade: `${(it.conformity ?? 0).toFixed(1)}%`,
+    risco: translateRisk(it.conformityRange),
+    totalFuncionarios: it.employeeQuantity ?? 0,
   };
 }
 
-async function fetchDocumentDetails(clientId: string, filters: Filters) {
+async function fetchProviders(clientId: string, filters: Filters) {
   const body = {
     branchIds: filters.branchIds ?? [],
     providerIds: filters.providerIds ?? [],
@@ -77,50 +84,47 @@ async function fetchDocumentDetails(clientId: string, filters: Filters) {
   };
 
   const { data } = await axios.post(
-    `${ip}/dashboard/${clientId}/document/details`,
+    `${ip}/dashboard/${clientId}/provider`,
     body,
     {
       headers: {
         Authorization: `Bearer ${token}`,
       },
-    }
+    },
   );
   const content = Array.isArray(data?.content)
     ? data.content
     : Array.isArray(data)
-    ? data
-    : [];
+      ? data
+      : [];
   return content as ApiItem[];
 }
+
 
 const generatePDF = (data: Row[]) => {
   const doc = new jsPDF({ orientation: "landscape" });
 
   doc.setFontSize(16);
-  doc.text("Relatório de Documentos de Fornecedores", 14, 22);
+  doc.text("Relatório - Dashboard de Fornecedores", 14, 22);
 
   const tableHeaders = [
     "Fornecedor",
     "CNPJ",
-    "Filial",
-    "Documento",
-    "Status",
+    "Total Docs",
+    "Aderência",
     "Conformidade",
-    "Validade",
-    "Responsável",
-    "Última Checagem",
+    "Risco",
+    "Funcionários",
   ];
 
   const tableBody = data.map((row) => [
-    row.fornecedor ?? "—",
-    row.cnpjFornecedor ?? "—",
-    row.filial ?? "—",
-    row.documento ?? "—",
-    row.status ?? "—",
-    row.conformidade ?? "—",
-    row.validade ?? "—",
-    row.responsavel ?? "—",
-    row.ultimaChecagem ?? "—",
+    row.fornecedor,
+    row.cnpj,
+    row.totalDocumentos,
+    row.aderencia,
+    row.conformidade,
+    row.risco,
+    row.totalFuncionarios,
   ]);
 
   autoTable(doc, {
@@ -139,12 +143,10 @@ const generatePDF = (data: Row[]) => {
     columnStyles: {
       0: { cellWidth: "auto" },
       1: { cellWidth: 35 },
-      2: { cellWidth: "auto" },
-      3: { cellWidth: "auto" },
     },
   });
 
-  doc.save("relatorio_documentos.pdf");
+  doc.save("relatorio_fornecedores.pdf");
 };
 
 type Props = {
@@ -152,16 +154,19 @@ type Props = {
   filters?: Filters;
 };
 
-const getStatusBadgeClasses = (status: string): string => {
-  const s = status.toLowerCase();
-  if (s.includes("pend")) {
+const getRiskBadgeClasses = (risk: string): string => {
+  const r = risk.toLowerCase();
+  if (r === "crítico") {
+    return "bg-red-100 text-red-800 border-red-200";
+  }
+  if (r === "alto") {
     return "bg-orange-100 text-orange-800 border-orange-200";
   }
-  if (s.includes("aprov")) {
-    return "bg-green-100 text-green-800 border-green-200";
+  if (r === "médio") {
+    return "bg-yellow-100 text-yellow-800 border-yellow-200";
   }
-  if (s.includes("reprov")) {
-    return "bg-red-100 text-red-800 border-red-200";
+  if (r === "baixo") {
+    return "bg-green-100 text-green-800 border-green-200";
   }
   return "bg-gray-100 text-gray-800 border-gray-200";
 };
@@ -195,51 +200,51 @@ const SortIcon = ({ direction }: { direction: "asc" | "desc" | null }) => {
   );
 };
 
-export default function FornecedoresTable({ clientId, filters = {} }: Props) {
-  const USE_MOCK_DATA = true;
 
+export default function DashboardFornecedoresTable({
+  clientId,
+  filters = {},
+}: Props) {
+  const USE_MOCK_DATA = true;
   const mockApiData: ApiItem[] = [
     {
-      id: 1,
-      branchName: "Matriz - São Paulo",
-      branchCnpj: "01.234.567/0001-88",
-      supplierName: "Tech Solutions Ltda",
-      supplierCnpj: "12.345.678/0001-99",
-      documentTitle: "Contrato Social",
-      documentType: "Cadastro",
-      status: "APROVADO",
-      responsibleFullName: "Juliana Martins",
-      conforming: true,
-      lastCheck: "2025-09-15T11:00:00Z",
-      expirationDate: "2030-01-01T00:00:00Z",
+      corporateName: "Tech Solutions Ltda",
+      cnpj: "12.345.678/0001-99",
+      totalDocumentQuantity: 50,
+      adherenceQuantity: 45,
+      nonAdherenceQuantity: 5,
+      conformityQuantity: 48,
+      nonConformityQuantity: 2,
+      adherence: 90.0,
+      conformity: 96.0,
+      conformityRange: "LOW", 
+      employeeQuantity: 120,
     },
     {
-      id: 2,
-      branchName: "Filial - Rio de Janeiro",
-      branchCnpj: "01.234.567/0002-69",
-      supplierName: "Inovação e Cia",
-      supplierCnpj: "98.765.432/0001-11",
-      documentTitle: "Licença de Operação",
-      documentType: "Certidão",
-      status: "PENDENTE",
-      responsibleFullName: "Ricardo Alves",
-      conforming: false,
-      lastCheck: "2025-09-20T15:00:00Z",
-      expirationDate: "2025-11-25T00:00:00Z",
+      corporateName: "Inovação e Cia",
+      cnpj: "98.765.432/0001-11",
+      totalDocumentQuantity: 30,
+      adherenceQuantity: 20,
+      nonAdherenceQuantity: 10,
+      conformityQuantity: 15,
+      nonConformityQuantity: 15,
+      adherence: 66.7,
+      conformity: 50.0,
+      conformityRange: "RISKY", 
+      employeeQuantity: 45,
     },
     {
-      id: 3,
-      branchName: "Matriz - São Paulo",
-      branchCnpj: "01.234.567/0001-88",
-      supplierName: "Serviços Gerais Express",
-      supplierCnpj: "55.555.555/0001-55",
-      documentTitle: "CIPA - Relatório Anual",
-      documentType: "Segurança do Trabalho",
-      status: "REPROVADO",
-      responsibleFullName: "Fernanda Lima",
-      conforming: false,
-      lastCheck: "2025-09-28T09:30:00Z",
-      expirationDate: "2025-10-10T00:00:00Z",
+      corporateName: "Serviços Gerais Express",
+      cnpj: "55.555.555/0001-55",
+      totalDocumentQuantity: 80,
+      adherenceQuantity: 75,
+      nonAdherenceQuantity: 5,
+      conformityQuantity: 68,
+      nonConformityQuantity: 12,
+      adherence: 93.8,
+      conformity: 85.0,
+      conformityRange: "Medium", 
+      employeeQuantity: 250,
     },
   ];
 
@@ -264,7 +269,7 @@ export default function FornecedoresTable({ clientId, filters = {} }: Props) {
         }, 500);
       } else {
         try {
-          const items = await fetchDocumentDetails(clientId, filters);
+          const items = await fetchProviders(clientId, filters);
           if (alive) {
             setRows(items.map(mapItemToRow));
           }
@@ -289,10 +294,15 @@ export default function FornecedoresTable({ clientId, filters = {} }: Props) {
   const sorted = useMemo(() => {
     const copy = [...rows];
     copy.sort((a, b) => {
-      const va = (a[sortKey] ?? "").toString().toLowerCase();
-      const vb = (b[sortKey] ?? "").toString().toLowerCase();
-      if (va < vb) return sortDir === "asc" ? -1 : 1;
-      if (va > vb) return sortDir === "asc" ? 1 : -1;
+      const va = a[sortKey];
+      const vb = b[sortKey];
+      if (typeof va === "number" && typeof vb === "number") {
+        return sortDir === "asc" ? va - vb : vb - va;
+      }
+      const sa = (va ?? "").toString().toLowerCase();
+      const sb = (vb ?? "").toString().toLowerCase();
+      if (sa < sb) return sortDir === "asc" ? -1 : 1;
+      if (sa > sb) return sortDir === "asc" ? 1 : -1;
       return 0;
     });
     return copy;
@@ -310,7 +320,7 @@ export default function FornecedoresTable({ clientId, filters = {} }: Props) {
     <div className="w-full overflow-x-auto rounded-lg border border-gray-200 bg-white shadow-sm">
       <div className="flex justify-between items-center p-6 border-b border-gray-200">
         <h2 className="text-lg font-semibold text-gray-800">
-          Documentos de Fornecedores
+          Dashboard de Fornecedores
         </h2>
         <button
           onClick={() => generatePDF(sorted)}
@@ -339,14 +349,12 @@ export default function FornecedoresTable({ clientId, filters = {} }: Props) {
             <tr>
               {[
                 ["fornecedor", "Fornecedor"],
-                ["cnpjFornecedor", "CNPJ"],
-                ["filial", "Filial"],
-                ["documento", "Documento"],
-                ["status", "Status"],
+                ["cnpj", "CNPJ"],
+                ["totalDocumentos", "Total Docs"],
+                ["aderencia", "Aderência"],
                 ["conformidade", "Conformidade"],
-                ["validade", "Validade"],
-                ["responsavel", "Responsável"],
-                ["ultimaChecagem", "Última checagem"],
+                ["risco", "Risco"],
+                ["totalFuncionarios", "Funcionários"],
               ].map(([key, label]) => (
                 <th
                   key={key}
@@ -366,10 +374,10 @@ export default function FornecedoresTable({ clientId, filters = {} }: Props) {
             {sorted.length === 0 ? (
               <tr>
                 <td
-                  colSpan={9}
+                  colSpan={7}
                   className="px-6 py-12 text-center text-gray-500"
                 >
-                  Nenhum documento encontrado para os filtros selecionados.
+                  Nenhum fornecedor encontrado para os filtros selecionados.
                 </td>
               </tr>
             ) : (
@@ -382,34 +390,28 @@ export default function FornecedoresTable({ clientId, filters = {} }: Props) {
                     {r.fornecedor}
                   </td>
                   <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-600">
-                    {r.cnpjFornecedor}
+                    {r.cnpj}
                   </td>
                   <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-600">
-                    {r.filial}
+                    {r.totalDocumentos}
                   </td>
                   <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-600">
-                    {r.documento}
-                  </td>
-                  <td className="px-6 py-4 text-sm">
-                    <span
-                      className={`inline-block rounded-full border px-3 py-1 text-xs font-semibold ${getStatusBadgeClasses(
-                        r.status
-                      )}`}
-                    >
-                      {r.status}
-                    </span>
+                    {r.aderencia}
                   </td>
                   <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-600">
                     {r.conformidade}
                   </td>
-                  <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-600">
-                    {r.validade}
+                  <td className="px-6 py-4 text-sm">
+                    <span
+                      className={`inline-block rounded-full border px-3 py-1 text-xs font-semibold ${getRiskBadgeClasses(
+                        r.risco,
+                      )}`}
+                    >
+                      {r.risco}
+                    </span>
                   </td>
                   <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-600">
-                    {r.responsavel}
-                  </td>
-                  <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-600">
-                    {r.ultimaChecagem}
+                    {r.totalFuncionarios}
                   </td>
                 </tr>
               ))

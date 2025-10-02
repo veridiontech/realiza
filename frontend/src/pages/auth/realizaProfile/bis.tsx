@@ -25,6 +25,13 @@ import { saveAs } from "file-saver";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 
+import DatePicker, { registerLocale } from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
+import { ptBR } from "date-fns/locale/pt-BR";
+
+registerLocale("pt-BR", ptBR);
+
+
 const mockHistoryData = [
   { mes: "Mai/25", Aderência: 83.04, Conformidade: 79.34 },
   { mes: "Jun/25", Aderência: 86.52, Conformidade: 82.0 },
@@ -146,6 +153,8 @@ type FiltersState = {
   employeeSituations: string[];
   documentDoesBlock: boolean[];
   documentValidity: string[];
+
+  documentUploadDate: string[];
 };
 
 type RawDocumentStatus = {
@@ -413,6 +422,29 @@ export const MonittoringBis = () => {
 
   const USE_MOCK_DATA = true;
 
+  const [dateRange, setDateRange] = useState<[Date | null, Date | null]>([
+    null,
+    null,
+  ]);
+
+  const emptyFilters: FiltersState = {
+    branchIds: [],
+    providerIds: [],
+    documentTypes: [],
+    responsibleIds: [],
+    activeContract: [],
+    statuses: [],
+    documentTitles: [],
+    providerCnpjs: [],
+    contractIds: [],
+    employeeIds: [],
+    employeeCpfs: [],
+    employeeSituations: [],
+    documentDoesBlock: [],
+    documentValidity: [],
+    documentUploadDate: [],
+  };
+
   const [branchOpts, setBranchOpts] = useState<Option[]>([]);
   const [providerOpts, setProviderOpts] = useState<Option[]>([]);
   const [docTypeOpts, setDocTypeOpts] = useState<Option[]>([]);
@@ -449,12 +481,6 @@ export const MonittoringBis = () => {
   const [historyData, setHistoryData] = useState<any[]>([]);
   const [isLoadingHistory, setIsLoadingHistory] = useState(false);
 
-  const [historyPeriod] = useState({
-    startMonth: "JANEIRO",
-    startYear: 2025,
-    endMonth: "DEZEMBRO",
-    endYear: 2025,
-  });
 
   const [draft, setDraft] = useState<FiltersState>({
     branchIds: [],
@@ -472,6 +498,7 @@ export const MonittoringBis = () => {
     employeeSituations: [],
     documentDoesBlock: [],
     documentValidity: [],
+    documentUploadDate: [], 
   });
   const [applied, setApplied] = useState<FiltersState>({ ...draft });
 
@@ -486,6 +513,8 @@ export const MonittoringBis = () => {
   });
 
   const [totalDocuments, setTotalDocuments] = useState(0);
+  const [conformingDocumentsCount, setConformingDocumentsCount] = useState(0);
+  const [adheringDocumentsCount, setAdheringDocumentsCount] = useState(0);
 
   const [chartData, setChartData] = useState<ChartData[]>([]);
   const [documentExemptionData, setDocumentExemptionData] = useState<
@@ -534,8 +563,8 @@ export const MonittoringBis = () => {
           documentDoesBlock = [],
           documentValidity = [],
         } = data ?? {};
-        
-        console.log("Filters Log: CPFs recebidos da API:", employeeCpfs); 
+
+        console.log("Filters Log: CPFs recebidos da API:", employeeCpfs);
 
         const toOptions = (arr: any[]) => {
           const uniqueValues = Array.from(new Set(arr));
@@ -578,31 +607,41 @@ export const MonittoringBis = () => {
             label: contractStatusMap[s] || s,
           }))
         );
-        
+
         setStatusOpts(
           statuses.map((s: string) => ({
             value: s,
-            label: documentStatusMap[s] || s.replace(/_/g, ' ').replace(/\w\S*/g, (txt) => {
-              return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
-            }) || s,
+            label:
+              documentStatusMap[s] ||
+              s.replace(/_/g, " ").replace(/\w\S*/g, (txt) => {
+                return (
+                  txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase()
+                );
+              }) ||
+              s,
           }))
         );
-        
+
         setDocTitleOpts(toOptions(documentTitles));
         setProviderCnpjOpts(toOptions(providerCnpjs));
         setContractOpts(toOptionsIdName(contracts));
         setEmployeeOpts(toOptionsIdName(employees));
         setEmployeeCpfOpts(toOptions(employeeCpfs));
-        
+
         setEmployeeSituationOpts(
           employeeSituations.map((s: string) => ({
             value: s,
-            label: employeeSituationMap[s] || s.replace(/_/g, ' ').replace(/\w\S*/g, (txt) => {
-              return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
-            }) || s,
+            label:
+              employeeSituationMap[s] ||
+              s.replace(/_/g, " ").replace(/\w\S*/g, (txt) => {
+                return (
+                  txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase()
+                );
+              }) ||
+              s,
           }))
         );
-        
+
         setDocValidityOpts(
           documentValidity.map((dv: string) => ({
             value: dv,
@@ -763,6 +802,41 @@ export const MonittoringBis = () => {
   }, [clientId, token, USE_MOCK_DATA]);
 
   useEffect(() => {
+    if (!rawDocStatus || rawDocStatus.length === 0) {
+      setTotalDocuments(0);
+      setConformingDocumentsCount(0);
+      setAdheringDocumentsCount(0);
+      return;
+    }
+
+    let total = 0;
+    let conforming = 0;
+    let adhering = 0;
+
+    const conformingStatuses = ["APROVADO", "APROVADO_IA"];
+    const pendingStatuses = ["PENDENTE", "EM_ANALISE"];
+
+    rawDocStatus.forEach((documentType) => {
+      documentType.status.forEach((s) => {
+        const quantity = s.quantity || 0;
+        total += quantity;
+
+        if (conformingStatuses.includes(s.status)) {
+          conforming += quantity;
+        }
+
+        if (!pendingStatuses.includes(s.status)) {
+          adhering += quantity;
+        }
+      });
+    });
+
+    setTotalDocuments(total);
+    setConformingDocumentsCount(conforming);
+    setAdheringDocumentsCount(adhering);
+  }, [rawDocStatus]);
+
+  useEffect(() => {
     const calculateTotal = () => {
       if (!rawDocStatus || rawDocStatus.length === 0) {
         return 0;
@@ -798,10 +872,10 @@ export const MonittoringBis = () => {
         try {
           const url = `${ip}/dashboard/${clientId}/history`;
           const requestBody = {
-            ...historyPeriod,
             branchIds: applied.branchIds,
             providerIds: applied.providerIds,
             providerCnpjs: applied.providerCnpjs,
+            documentUploadDate: applied.documentUploadDate,
           };
 
           const { data } = await axios.post(url, requestBody, {
@@ -835,36 +909,36 @@ export const MonittoringBis = () => {
 
       fetchHistoryData();
     }
-  }, [activeTab, clientId, token, applied, historyPeriod]);
+  }, [activeTab, clientId, token, applied]);
 
-  const conformity = tableData.length > 0 ? tableData[0]?.conformity : 0;
-
-  const adherence = tableData.length > 0 ? tableData[0]?.adherence : 0;
+  const conformityPercentage =
+    totalDocuments > 0 ? (conformingDocumentsCount / totalDocuments) * 100 : 0;
+  const adherencePercentage =
+    totalDocuments > 0 ? (adheringDocumentsCount / totalDocuments) * 100 : 0;
 
   function applyFilters() {
-    setApplied({ ...draft });
+    const [startDate, endDate] = dateRange;
+    const formattedDates: string[] = [];
+    
+    // Helper para formatar Date para 'YYYY-MM-DD'
+    const formatDate = (date: Date) => date.toISOString().split('T')[0];
+
+    if (startDate) {
+      formattedDates.push(formatDate(startDate));
+    }
+    // Adiciona a data final apenas se for um intervalo
+    if (endDate && startDate !== endDate) {
+      formattedDates.push(formatDate(endDate));
+    }
+
+    setApplied({ ...draft, documentUploadDate: formattedDates });
   }
 
-  function clearFilters() {
-    const empty: FiltersState = {
-      branchIds: [],
-      providerIds: [],
-      documentTypes: [],
-      responsibleIds: [],
-      activeContract: [],
-      statuses: [],
-      documentTitles: [],
-
-      providerCnpjs: [],
-      contractIds: [],
-      employeeIds: [],
-      employeeCpfs: [],
-      employeeSituations: [],
-      documentDoesBlock: [],
-      documentValidity: [],
-    };
-    setDraft(empty);
-    setApplied(empty);
+   function clearFilters() {
+    setDraft(emptyFilters);
+    setApplied(emptyFilters);
+    // Limpa também o estado do date picker
+    setDateRange([null, null]);
   }
 
   useEffect(() => {
@@ -1091,9 +1165,7 @@ export const MonittoringBis = () => {
       .map((id) => branchIdName.get(id) || id)
       .join(", ");
     const branchText = selectedBranchNames || "Todas as Filiais";
-    const safeBranchName = branchText
-      .replace(/[^a-z0-9]/gi, "_")
-      .toLowerCase();
+    const safeBranchName = branchText.replace(/[^a-z0-9]/gi, "_").toLowerCase();
     const fileName = `historico_${safeBranchName}`;
 
     const fileType =
@@ -1305,13 +1377,17 @@ export const MonittoringBis = () => {
 
             <div className="grid grid-cols-1 py-5 gap-6 md:grid-cols-2">
               <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm h-[30vh]">
-                <ConformityGaugeChart percentage={conformity} />
+                <ConformityGaugeChart percentage={conformityPercentage}
+                  count={conformingDocumentsCount}
+                  total={totalDocuments} />
               </div>
 
               <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm h-[30vh]">
                 <ConformityGaugeChart
-                  title="Aderência"
-                  percentage={adherence}
+                   title="Aderência"
+                  percentage={adherencePercentage}
+                  count={adheringDocumentsCount}
+                  total={totalDocuments}
                 />
               </div>
             </div>
@@ -1569,6 +1645,22 @@ export const MonittoringBis = () => {
                     setDraft((s) => ({ ...s, activeContract: v }))
                   }
                 />
+
+                 <div className="w-full">
+                  <DatePicker
+                    locale="pt-BR"
+                    selectsRange={true}
+                    startDate={dateRange[0]}
+                    endDate={dateRange[1]}
+                    onChange={(update) => {
+                      setDateRange(update as [Date | null, Date | null]);
+                    }}
+                    isClearable={true}
+                    dateFormat="dd/MM/yyyy"
+                    placeholderText="Período de Upload"
+                    className="w-full border border-gray-300 rounded-md px-3 py-2 text-left h-full"
+                  />
+                </div>
               </div>
               <div className="mt-6 flex justify-end gap-3 border-t border-gray-200 pt-4">
                 <button
@@ -1581,9 +1673,9 @@ export const MonittoringBis = () => {
                 <button
                   type="button"
                   onClick={applyFilters}
-                  disabled={!canApply}
+                  disabled={!canApply && dateRange[0] === null}
                   className={`rounded-md px-4 py-2 text-sm font-medium text-white shadow-sm ${
-                    canApply
+                    canApply || dateRange[0] !== null
                       ? "bg-blue-600 hover:bg-blue-700"
                       : "cursor-not-allowed bg-blue-300"
                   }`}
