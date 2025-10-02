@@ -4,6 +4,7 @@ import bl.tech.realiza.gateways.requests.users.security.ProfileRepoRequestDto;
 import bl.tech.realiza.gateways.requests.users.security.ProfileRequestDto;
 import bl.tech.realiza.gateways.responses.users.profile.ProfileNameResponseDto;
 import bl.tech.realiza.gateways.responses.users.profile.ProfileRepoResponseDto;
+import bl.tech.realiza.gateways.responses.users.profile.ProfileResponse;
 import bl.tech.realiza.gateways.responses.users.profile.ProfileResponseDto;
 import org.springframework.http.ResponseEntity;
 
@@ -21,6 +22,7 @@ public interface ProfileController {
     // client related
     ResponseEntity<ProfileResponseDto> createProfile(ProfileRequestDto profileRequestDto);
     ResponseEntity<ProfileResponseDto> getOneProfile(String id);
+    ResponseEntity<ProfileResponse> getOneFullProfile(String id);
     ResponseEntity<List<ProfileResponseDto>> getAllProfiles();
     ResponseEntity<List<ProfileNameResponseDto>> getAllProfileNamesByClientId(String clientId);
     ResponseEntity<ProfileResponseDto> updateProfile(String id, ProfileRequestDto profileRequestDto);
