@@ -24,30 +24,9 @@ type Permissions = {
     documentDetail: boolean;
   };
   document: {
-    view: {
-      laboral: boolean;
-      workplaceSafety: boolean;
-      registrationAndCertificates: boolean;
-      general: boolean;
-      health: boolean;
-      environment: boolean;
-    };
-    upload: {
-      laboral: boolean;
-      workplaceSafety: boolean;
-      registrationAndCertificates: boolean;
-      general: boolean;
-      health: boolean;
-      environment: boolean;
-    };
-    exempt: {
-      laboral: boolean;
-      workplaceSafety: boolean;
-      registrationAndCertificates: boolean;
-      general: boolean;
-      health: boolean;
-      environment: boolean;
-    };
+    view: { laboral: boolean; workplaceSafety: boolean; registrationAndCertificates: boolean; general: boolean; health: boolean; environment: boolean; };
+    upload: { laboral: boolean; workplaceSafety: boolean; registrationAndCertificates: boolean; general: boolean; health: boolean; environment: boolean; };
+    exempt: { laboral: boolean; workplaceSafety: boolean; registrationAndCertificates: boolean; general: boolean; health: boolean; environment: boolean; };
   };
   contract: {
     finish: boolean;
@@ -77,6 +56,17 @@ const endpoints = {
     `${ip}/user/${userId}/change-profile?profileId=${newProfileId}`,
 };
 
+const defaultPermissions: Permissions = {
+  dashboard: { general: false, provider: false, document: false, documentDetail: false },
+  document: {
+    view: { laboral: false, workplaceSafety: false, registrationAndCertificates: false, general: false, health: false, environment: false },
+    upload: { laboral: false, workplaceSafety: false, registrationAndCertificates: false, general: false, health: false, environment: false },
+    exempt: { laboral: false, workplaceSafety: false, registrationAndCertificates: false, general: false, health: false, environment: false },
+  },
+  contract: { finish: false, suspend: false, create: false },
+  reception: false,
+};
+
 export function ProfilesSection() {
   const { client } = useClient();
   const clientId = client?.idClient;
@@ -92,158 +82,110 @@ export function ProfilesSection() {
   const [associatedUsers, setAssociatedUsers] = useState<User[]>([]);
   const [individualAssignments, setIndividualAssignments] = useState<Record<string, string>>({});
 
-  // FORM (create/edit)
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [admin, setAdmin] = useState(false);
-  const [permissions, setPermissions] = useState<Permissions>({
-    dashboard: { general: false, provider: false, document: false, documentDetail: false },
-    document: {
-      view: { laboral: false, workplaceSafety: false, registrationAndCertificates: false, general: false, health: false, environment: false },
-      upload: { laboral: false, workplaceSafety: false, registrationAndCertificates: false, general: false, health: false, environment: false },
-      exempt: { laboral: false, workplaceSafety: false, registrationAndCertificates: false, general: false, health: false, environment: false },
-    },
-    contract: { finish: false, suspend: false, create: false },
-    reception: false,
-  });
+  const [permissions, setPermissions] = useState<Permissions>(defaultPermissions);
 
-  // EDIÇÃO
   const [isEditing, setIsEditing] = useState(false);
   const [editingProfileId, setEditingProfileId] = useState<string | null>(null);
 
   const resetForm = () => {
-    console.log("LOG: resetForm - Resetando o formulário.");
     setName("");
     setDescription("");
     setAdmin(false);
-    setPermissions({
-      dashboard: { general: false, provider: false, document: false, documentDetail: false },
-      document: {
-        view: { laboral: false, workplaceSafety: false, registrationAndCertificates: false, general: false, health: false, environment: false },
-        upload: { laboral: false, workplaceSafety: false, registrationAndCertificates: false, general: false, health: false, environment: false },
-        exempt: { laboral: false, workplaceSafety: false, registrationAndCertificates: false, general: false, health: false, environment: false },
-      },
-      contract: { finish: false, suspend: false, create: false },
-      reception: false,
-    });
+    setPermissions(defaultPermissions);
   };
 
   const fetchProfiles = async () => {
-    console.log("LOG: fetchProfiles - Iniciando carregamento de perfis.");
     if (!clientId) {
-      console.log("LOG: fetchProfiles - clientId não está definido. Abortando.");
       return;
     }
     setLoading(true);
     const token = localStorage.getItem("tokenClient");
     try {
-      console.log(`LOG: fetchProfiles - Chamando API: ${endpoints.listByClient(clientId)}`);
       const { data } = await axios.get(endpoints.listByClient(clientId), {
         headers: { Authorization: `Bearer ${token}` },
       });
       const arr = Array.isArray(data) ? data : [];
       const sorted = arr.sort((a: Profile, b: Profile) => a.profileName.localeCompare(b.profileName));
       setProfiles(sorted);
-      console.log(`LOG: fetchProfiles - Perfis carregados com sucesso: ${sorted.length} perfis.`);
     } catch (err) {
-      console.error("LOG: fetchProfiles - Erro ao carregar perfis:", err);
       toast.error("Erro ao carregar a lista de perfis.");
     } finally {
       setLoading(false);
-      console.log("LOG: fetchProfiles - Finalizado. Loading = false.");
     }
   };
 
   const handleAttemptDelete = async (profileId: string) => {
-    console.log(`LOG: handleAttemptDelete - Tentativa de exclusão do Perfil ID: ${profileId}`);
     setIndividualAssignments({});
     setLoading(true);
     const token = localStorage.getItem("tokenClient");
     try {
-      console.log(`LOG: handleAttemptDelete - Buscando detalhes do perfil: ${endpoints.getOne(profileId)}`);
       const details = await axios.get(endpoints.getOne(profileId), {
         headers: { Authorization: `Bearer ${token}` },
       });
       setSelectedProfileDetails(details.data);
-      console.log("LOG: handleAttemptDelete - Detalhes do perfil carregados.");
 
-      console.log(`LOG: handleAttemptDelete - Buscando usuários associados: ${endpoints.usersByProfile(profileId)}`);
       const users = await axios.get(endpoints.usersByProfile(profileId), {
         headers: { Authorization: `Bearer ${token}` },
       });
       setAssociatedUsers(users.data);
-      console.log(`LOG: handleAttemptDelete - ${users.data.length} usuários encontrados.`);
 
       setIsDeleteModalOpen(true);
-      console.log("LOG: handleAttemptDelete - Modal de deleção aberto.");
     } catch (err) {
-      console.error("LOG: handleAttemptDelete - Erro na verificação de usuários:", err);
       toast.error("Não foi possível verificar os usuários vinculados.");
     } finally {
       setLoading(false);
-      console.log("LOG: handleAttemptDelete - Finalizado. Loading = false.");
     }
   };
 
   const handleConfirmDelete = async () => {
     if (!selectedProfileDetails) return;
-    console.log(`LOG: handleConfirmDelete - Confirmação de exclusão (sem usuários): Perfil ID: ${selectedProfileDetails.id}`);
     setLoading(true);
     const token = localStorage.getItem("tokenClient");
     try {
-      console.log(`LOG: handleConfirmDelete - Chamando API DELETE: ${endpoints.remove(selectedProfileDetails.id)}`);
       await axios.delete(endpoints.remove(selectedProfileDetails.id), {
         headers: { Authorization: `Bearer ${token}` },
       });
       toast.success("Perfil excluído com sucesso!");
-      console.log("LOG: handleConfirmDelete - Perfil excluído com sucesso. Fechando modal e recarregando.");
       setIsDeleteModalOpen(false);
       setSelectedProfileDetails(null);
       fetchProfiles();
     } catch (err) {
-      console.error("LOG: handleConfirmDelete - Erro ao excluir perfil:", err);
       toast.error("Erro ao excluir o perfil.");
     } finally {
       setLoading(false);
-      console.log("LOG: handleConfirmDelete - Finalizado. Loading = false.");
     }
   };
 
   const handleIndividualAssignmentChange = (userId: string, newProfileId: string) => {
-    console.log(`LOG: handleIndividualAssignmentChange - Usuário ${userId} reatribuído para Perfil ${newProfileId}`);
     setIndividualAssignments((prev) => ({ ...prev, [userId]: newProfileId }));
   };
 
   const handleOpenFinalConfirm = () => {
-    console.log("LOG: handleOpenFinalConfirm - Tentativa de abrir a confirmação final.");
     if (Object.keys(individualAssignments).length !== associatedUsers.length) {
-      console.log("LOG: handleOpenFinalConfirm - Falha: Nem todos os usuários foram reatribuídos.");
       toast.error("Por favor, atribua um novo perfil para cada usuário.");
       return;
     }
-    console.log("LOG: handleOpenFinalConfirm - Confirmação final aberta.");
     setIsFinalConfirmModalOpen(true);
   };
 
   const handleReassignAndDelete = async () => {
     if (!selectedProfileDetails) return;
-    console.log(`LOG: handleReassignAndDelete - Iniciando reatribuição de ${associatedUsers.length} usuários e exclusão do perfil ID: ${selectedProfileDetails.id}`);
     setLoading(true);
     const token = localStorage.getItem("tokenClient");
     try {
       const reassigns = Object.entries(individualAssignments).map(([userId, profileId]) => {
-        console.log(`LOG: Reatribuição - Usuário ${userId} -> Perfil ${profileId}`);
         return axios.post(endpoints.changeUserProfile(userId, profileId), null, { headers: { Authorization: `Bearer ${token}` } });
       });
       await Promise.all(reassigns);
       toast.success(`${associatedUsers.length} usuário(s) foram reatribuídos.`);
 
-      console.log(`LOG: handleReassignAndDelete - Usuários reatribuídos. Chamando API DELETE para o perfil: ${endpoints.remove(selectedProfileDetails.id)}`);
       await axios.delete(endpoints.remove(selectedProfileDetails.id), {
         headers: { Authorization: `Bearer ${token}` },
       });
       toast.success(`O perfil "${selectedProfileDetails.name}" foi excluído.`);
-      console.log("LOG: handleReassignAndDelete - Perfil excluído com sucesso. Fechando modais e recarregando.");
 
       setIsFinalConfirmModalOpen(false);
       setIsDeleteModalOpen(false);
@@ -251,18 +193,14 @@ export function ProfilesSection() {
       setIndividualAssignments({});
       fetchProfiles();
     } catch (err) {
-      console.error("LOG: handleReassignAndDelete - Erro durante a reatribuição ou exclusão:", err);
       toast.error("Ocorreu um erro durante a operação.");
     } finally {
       setLoading(false);
-      console.log("LOG: handleReassignAndDelete - Finalizado. Loading = false.");
     }
   };
 
   const handleCreateProfile = async () => {
-    console.log("LOG: handleCreateProfile - Iniciando criação de perfil.");
     if (!clientId || !name.trim()) {
-      console.log("LOG: handleCreateProfile - Validação falhou: Nome ou clientId ausente.");
       toast.warning("O nome do perfil é obrigatório.");
       return;
     }
@@ -270,7 +208,6 @@ export function ProfilesSection() {
 
     let profilePermissions = permissions;
     if (admin) {
-      console.log("LOG: handleCreateProfile - Perfil marcado como Admin: todas as permissões ativadas.");
       profilePermissions = {
         dashboard: { general: true, provider: true, document: true, documentDetail: true },
         document: {
@@ -287,41 +224,38 @@ export function ProfilesSection() {
       name,
       description,
       admin,
-      ...profilePermissions,
+      dashboard: profilePermissions.dashboard,
+      document: profilePermissions.document,
+      contract: profilePermissions.contract,
+      reception: profilePermissions.reception,
       clientId,
       branchIds: [],
       contractIds: [],
     };
 
-    console.log("LOG: handleCreateProfile - Payload da criação:", body);
-
     const token = localStorage.getItem("tokenClient");
     try {
-      console.log(`LOG: handleCreateProfile - Chamando API POST: ${endpoints.create()}`);
       await axios.post(endpoints.create(), body, { headers: { Authorization: `Bearer ${token}` } });
       toast.success("Perfil criado com sucesso!");
-      console.log("LOG: handleCreateProfile - Sucesso. Resetando formulário e recarregando perfis.");
       resetForm();
       fetchProfiles();
     } catch (err) {
-      console.error("LOG: handleCreateProfile - Erro na criação do perfil:", err);
       toast.error("Erro ao criar o perfil.");
     } finally {
       setIsCreating(false);
     }
   };
 
-  // ABRIR EDIÇÃO (GET /profile/{id})
   const handleOpenEdit = async (profileId: string) => {
-    console.log(`LOG: handleOpenEdit - Iniciando abertura de edição para Perfil ID: ${profileId}`);
     const token = localStorage.getItem("tokenClient");
     try {
       setLoading(true);
-      console.log(`LOG: handleOpenEdit - Chamando API GET: ${endpoints.getOne(profileId)}`);
       const { data } = await axios.get(endpoints.getOne(profileId), {
         headers: { Authorization: `Bearer ${token}` },
       });
-      console.log("LOG: handleOpenEdit - Dados recebidos para edição:", data);
+
+      // LOG DE DIAGNÓSTICO 1: Resposta completa da API
+      console.log("LOG 1 (API DATA COMPLETA):", data);
 
       setEditingProfileId(profileId);
       setIsEditing(true);
@@ -331,53 +265,71 @@ export function ProfilesSection() {
       const isAdmin = Boolean(data.admin);
       setAdmin(isAdmin);
       
-      // ################### LÓGICA DE CARREGAMENTO DE PERMISSÕES CORRIGIDA ###################
-      console.log("LOG: handleOpenEdit - Permissões do perfil na API (data.permissions):", data.permissions);
-      
-      if (!isAdmin) { 
-          // 1. Tenta carregar de data.permissions (estrutura ideal)
-          const permissionsFromAPI = data.permissions || {
-              // 2. Ou tenta carregar as chaves de permissão diretamente de 'data',
-              // que parece ser como a API está retornando para perfis não-admin.
-              dashboard: data.dashboard,
-              document: data.document,
-              contract: data.contract,
-              reception: data.reception
-          };
+      if (!isAdmin) {
+          
+          const apiPermissionsSource = data.permissions || data;
+          
+          // LOG DE DIAGNÓSTICO 2: Fonte de permissões (data.permissions ou data)
+          console.log("LOG 2 (API PERMISSIONS SOURCE):", apiPermissionsSource);
 
-          // 3. Verifica se as chaves principais de permissão existem (pelo menos 'dashboard' como teste)
-          // Isso evita setar permissões se o objeto 'data' for apenas { id, name, admin: false }
-          if (permissionsFromAPI.dashboard || permissionsFromAPI.document) {
-              setPermissions(permissionsFromAPI as Permissions); 
-              console.log("LOG: handleOpenEdit - Permissões carregadas com sucesso no estado 'permissions'.");
-          } else {
-              console.log("LOG: handleOpenEdit - FALHA: Nenhuma estrutura de permissão foi encontrada no objeto retornado pela API. Mantendo estado default.");
-          }
+          // Garante que 'apiDocumentPermissions' é um objeto (mesmo que vazio)
+          const apiDocumentPermissions = apiPermissionsSource.document || {};
+
+          const loadedPermissions: Permissions = {
+              ...defaultPermissions,
+              // Mapeia Dashboard
+              dashboard: { 
+                  ...defaultPermissions.dashboard, 
+                  ...(apiPermissionsSource.dashboard || {}) 
+              },
+              // Mapeia Contrato
+              contract: { 
+                  ...defaultPermissions.contract, 
+                  ...(apiPermissionsSource.contract || {}) 
+              },
+              // Mapeia Recepção
+              reception: apiPermissionsSource.reception ?? defaultPermissions.reception,
+              // Mapeia Documentos e seus subníveis (view, upload, exempt)
+              document: {
+                  ...defaultPermissions.document,
+                  view: { 
+                      ...defaultPermissions.document.view, 
+                      // Aplica as permissões específicas sobre os defaults
+                      ...(apiDocumentPermissions.view || {}) 
+                  },
+                  upload: { 
+                      ...defaultPermissions.document.upload, 
+                      ...(apiDocumentPermissions.upload || {}) 
+                  },
+                  exempt: { 
+                      ...defaultPermissions.document.exempt, 
+                      ...(apiDocumentPermissions.exempt || {}) 
+                  },
+              }
+          };
+          
+          // LOG DE DIAGNÓSTICO 3: Permissões prontas para serem setadas no estado
+          console.log("LOG 3 (LOADED PERMISSIONS - FINAL STATE):", loadedPermissions);
+
+          setPermissions(loadedPermissions);
+          
       } else {
-          console.log("LOG: handleOpenEdit - Perfil Admin, a UI de permissões não será usada.");
+          setPermissions(defaultPermissions); 
       }
-      // ################### FIM DA LÓGICA DE CARREGAMENTO DE PERMISSÕES ###################
 
       toast.message("Editando perfil: " + (data.name ?? ""));
-      console.log("LOG: handleOpenEdit - Edição iniciada com sucesso.");
     } catch (err) {
-      console.error("LOG: handleOpenEdit - Erro ao carregar perfil para edição:", err);
       toast.error("Não foi possível carregar o perfil para edição.");
     } finally {
       setLoading(false);
-      console.log("LOG: handleOpenEdit - Finalizado. Loading = false.");
     }
   };
 
-  // SALVAR EDIÇÃO (PUT /profile/{id})
   const handleUpdateProfile = async () => {
-    console.log(`LOG: handleUpdateProfile - Iniciando atualização para Perfil ID: ${editingProfileId}`);
     if (!editingProfileId) {
-        console.log("LOG: handleUpdateProfile - Falha: editingProfileId ausente.");
         return;
     }
     if (!name.trim()) {
-      console.log("LOG: handleUpdateProfile - Validação falhou: Nome ausente.");
       toast.warning("O nome do perfil é obrigatório.");
       return;
     }
@@ -407,38 +359,30 @@ export function ProfilesSection() {
           reception: permissions.reception,
         };
     
-    console.log("LOG: handleUpdateProfile - Payload da atualização:", payload);
-
     try {
       setLoading(true);
-      console.log(`LOG: handleUpdateProfile - Chamando API PUT: ${endpoints.update(editingProfileId)}`);
       await axios.put(endpoints.update(editingProfileId), payload, {
         headers: { Authorization: `Bearer ${token}` },
       });
       toast.success("Perfil atualizado com sucesso!");
-      console.log("LOG: handleUpdateProfile - Sucesso. Fechando edição e recarregando perfis.");
       setIsEditing(false);
       setEditingProfileId(null);
       resetForm();
       fetchProfiles();
     } catch (err) {
-      console.error("LOG: handleUpdateProfile - Erro ao atualizar o perfil:", err);
       toast.error("Erro ao atualizar o perfil.");
     } finally {
       setLoading(false);
-      console.log("LOG: handleUpdateProfile - Finalizado. Loading = false.");
     }
   };
 
   const handleCancelEdit = () => {
-    console.log("LOG: handleCancelEdit - Cancelamento de edição.");
     setIsEditing(false);
     setEditingProfileId(null);
     resetForm();
   };
 
   const handlePermissionChange = (path: string, type: "view" | "upload" | "exempt" | null = null) => {
-    console.log(`LOG: handlePermissionChange - Alterando permissão: ${path}, Tipo: ${type || 'N/A'}`);
     setPermissions((prev) => {
       let newState = { ...prev };
       const [mainKey, subKey] = path.split(".");
@@ -469,13 +413,11 @@ export function ProfilesSection() {
         currentLevel[lastKey] = !currentLevel[lastKey];
       }
       
-      console.log("LOG: handlePermissionChange - Novo estado de permissões para:", path, (newState as any)[mainKey]);
       return newState;
     });
   };
 
   useEffect(() => {
-    console.log(`LOG: useEffect - O componente montou. clientId: ${clientId}`);
     if (clientId) fetchProfiles();
   }, [clientId]);
 
