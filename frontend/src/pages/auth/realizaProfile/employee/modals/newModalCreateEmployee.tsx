@@ -25,8 +25,7 @@ import { z } from "zod";
 
 function validarCPF(cpf: string): boolean {
   const cleaned = cpf.replace(/\D/g, "");
-  if (!cleaned || cleaned.length !== 11 || /^(\d)\1+$/.test(cleaned))
-    return false;
+  if (!cleaned || cleaned.length !== 11 || /^(\d)\1+$/.test(cleaned)) return false;
 
   let soma = 0;
   for (let i = 0; i < 9; i++) soma += parseInt(cleaned[i]) * (10 - i);
@@ -117,7 +116,6 @@ const createNewEmployeeFormSchema = z.object({
     .refine((val) => !val || validarNumerosRepetidos(val), {
       message: "Telefone inválido: não pode ter números repetidos",
     }),
-
   mobile: z
     .string()
     .optional()
@@ -138,7 +136,7 @@ const createNewEmployeeFormSchema = z.object({
   passport: z.string().optional(),
 });
 
-// Apenas um schema é necessário, renomeado para 'schemaEmployee' ou mantido como o original
+// Apenas um schema é necessário
 const schemaEmployee = createNewEmployeeFormSchema;
 type CreateNewEmpoloyeeFormSchema = z.infer<typeof createNewEmployeeFormSchema>;
 
@@ -146,19 +144,14 @@ interface NewModalCreateEmployeeProps {
   onEmployeeCreated: () => void;
 }
 
-export function NewModalCreateEmployee({
-  onEmployeeCreated,
-}: NewModalCreateEmployeeProps) {
+export function NewModalCreateEmployee({ onEmployeeCreated }: NewModalCreateEmployeeProps) {
   const [isLoading, setIsLoading] = useState(false);
   const { supplier } = useSupplier();
-  const [cbos, setCbos] = useState<
-    { id: string; title: string; code: string }[]
-  >([]);
+  const [cbos, setCbos] = useState<{ id: string; title: string; code: string }[]>([]);
   const [positions, setPositions] = useState<Position[]>([]);
   const [searchCbo, setSearchCbo] = useState("");
   // Estados de modal de seleção e estrangeiro removidos
-  const [isBrazilianEmployeeModalOpen, setIsBrazilianEmployeeModalOpen] =
-    useState(false);
+  const [isBrazilianEmployeeModalOpen, setIsBrazilianEmployeeModalOpen] = useState(false);
   // Estado para tipo de colaborador removido
   const [cepValue, setCepValue] = useState("");
   const [phoneValue, setPhoneValue] = useState("");
@@ -173,14 +166,12 @@ export function NewModalCreateEmployee({
     reset,
     formState: { errors },
   } = useForm<CreateNewEmpoloyeeFormSchema>({
-    // Usando apenas o schema para colaboradores brasileiros
     resolver: zodResolver(schemaEmployee),
   });
 
   useEffect(() => {
     const rawCEP = getValues("cep") || "";
     const rawPhone = getValues("phone") || "";
-
     setCepValue(formatCEP(rawCEP));
     setPhoneValue(formatPhone(rawPhone));
   }, [getValues]);
@@ -238,28 +229,19 @@ export function NewModalCreateEmployee({
 
   const formatPhone = (value: string) => {
     const digits = value.replace(/\D/g, "");
-
     if (digits.length <= 2) {
       return digits;
     } else if (digits.length <= 6) {
       return `(${digits.slice(0, 2)}) ${digits.slice(2)}`;
     } else if (digits.length <= 10) {
-      return `(${digits.slice(0, 2)}) ${digits.slice(2, 6)}-${digits.slice(
-        6
-      )}`;
+      return `(${digits.slice(0, 2)}) ${digits.slice(2, 6)}-${digits.slice(6)}`;
     } else {
-      return `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(
-        7,
-        11
-      )}`;
+      return `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7, 11)}`;
     }
   };
 
   const formatCEP = (value: string) => {
-    return value
-      .replace(/\D/g, "")
-      .replace(/(\d{5})(\d)/, "$1-$2")
-      .slice(0, 9);
+    return value.replace(/\D/g, "").replace(/(\d{5})(\d)/, "$1-$2").slice(0, 9);
   };
 
   const formatSalary = (value: string) => {
@@ -278,9 +260,7 @@ export function NewModalCreateEmployee({
     return parseFloat(value.replace(/\./g, "").replace(",", "."));
   };
 
-  const sendEmployeeData = async (
-    data: CreateNewEmpoloyeeFormSchema
-  ) => {
+  const sendEmployeeData = async (data: CreateNewEmpoloyeeFormSchema) => {
     setIsLoading(true);
 
     const payload: any = {
@@ -289,18 +269,14 @@ export function NewModalCreateEmployee({
       salary: normalizeSalary(data.salary),
     };
 
-    // Lógica específica para estrangeiro removida. O endpoint será sempre o brasileiro.
-
     if (!payload.cpf) {
-      toast.error("CPF é obrigatório para colaboradores."); // Mensagem ajustada
+      toast.error("CPF é obrigatório para colaboradores.");
       setIsLoading(false);
       return;
     }
 
-
     try {
       const tokenFromStorage = localStorage.getItem("tokenClient");
-      // O endpoint é fixo para brasileiro, já que removemos a opção de estrangeiro
       await axios.post(`${ip}/employee/brazilian`, payload, {
         headers: { Authorization: `Bearer ${tokenFromStorage}` },
       });
@@ -312,29 +288,18 @@ export function NewModalCreateEmployee({
       setShowSuccessModal(true);
 
       onEmployeeCreated();
-      reset();
-      setCpfValue("");
-      setCepValue("");
-      setPhoneValue("");
-      setCpfValue("");
 
-      // Fechar apenas o modal de cadastro de brasileiro
+      // Também limpamos após sucesso
+      clearBrazilianEmployeeForm();
+      // E fechamos a modal principal
       setIsBrazilianEmployeeModalOpen(false);
     } catch (err) {
       if (axios.isAxiosError(err)) {
         const errorMsg = err.response?.data?.message || "";
-
-        if (
-          errorMsg.toLowerCase().includes("duplicate entry") &&
-          errorMsg.toLowerCase().includes("cpf")
-        ) {
+        if (errorMsg.toLowerCase().includes("duplicate entry") && errorMsg.toLowerCase().includes("cpf")) {
           toast.error("Já existe um colaborador com esse CPF cadastrado.");
         } else {
-          toast.error(
-            `Erro ${err.response?.status}: ${
-              errorMsg || "Erro ao cadastrar colaborador"
-            }`
-          );
+          toast.error(`Erro ${err.response?.status}: ${errorMsg || "Erro ao cadastrar colaborador"}`);
         }
       } else {
         toast.error("Erro inesperado. Tente novamente.");
@@ -344,20 +309,14 @@ export function NewModalCreateEmployee({
     }
   };
 
-  const handleSubmitEmployee = async (
-    data: CreateNewEmpoloyeeFormSchema
-  ) => {
+  const handleSubmitEmployee = async (data: CreateNewEmpoloyeeFormSchema) => {
     await sendEmployeeData(data);
   };
-
-  // Funções handle de estrangeiro e seleção de tipo removidas.
 
   const handleCep = async () => {
     try {
       const cleanedCep = cepValue.replace(/\D/g, "");
-      const res = await axios.get(
-        `https://viacep.com.br/ws/${cleanedCep}/json/`
-      );
+      const res = await axios.get(`https://viacep.com.br/ws/${cleanedCep}/json/`);
       if (res.data && !res.data.erro) {
         setValuesCep({
           address: res.data.logradouro,
@@ -383,25 +342,45 @@ export function NewModalCreateEmployee({
   const [employeeName, setEmployeeName] = useState("");
   const [supplierName, setSupplierName] = useState("");
 
+  // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+  // HELPER: limpa o formulário e estados controlados
+  function clearBrazilianEmployeeForm() {
+    reset(); // limpa o react-hook-form (valores e erros)
+    setCpfValue("");
+    setCepValue("");
+    setPhoneValue("");
+    setMobileValue("");
+    setSearchCbo("");
+    setIsLoading(false);
+  }
+  // <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
   return (
     <>
-      {/* O Modal de Seleção de Tipo (brasileiro/estrangeiro) foi removido. O trigger agora abre diretamente o modal de cadastro brasileiro. */}
+      {/* Trigger abre diretamente o modal de cadastro brasileiro */}
       <Dialog
         open={isBrazilianEmployeeModalOpen}
-        onOpenChange={setIsBrazilianEmployeeModalOpen}
+        onOpenChange={(open) => {
+          setIsBrazilianEmployeeModalOpen(open);
+          if (!open) {
+            // limpa sempre que fechar a modal
+            clearBrazilianEmployeeForm();
+          }
+        }}
       >
         <DialogTrigger asChild>
           <Button
             className="hidden md:block bg-realizaBlue border border-white rounded-md"
-            onClick={() => setIsBrazilianEmployeeModalOpen(true)} // Abrir diretamente
+            onClick={() => setIsBrazilianEmployeeModalOpen(true)}
           >
             Cadastrar novo colaborador +
           </Button>
         </DialogTrigger>
+
         <DialogTrigger asChild>
           <Button
             className="md:hidden bg-realizaBlue"
-            onClick={() => setIsBrazilianEmployeeModalOpen(true)} // Abrir diretamente
+            onClick={() => setIsBrazilianEmployeeModalOpen(true)}
           >
             +
           </Button>
@@ -409,7 +388,7 @@ export function NewModalCreateEmployee({
 
         <DialogContent
           className="max-w-[90vw] sm:max-w-[45vw] md:max-w-[45vw] p-5"
-          style={{ backgroundImage: `url(${bgModalRealiza})` }} // Adicionei o background que estava no outro modal para o estilo ser consistente
+          style={{ backgroundImage: `url(${bgModalRealiza})` }}
         >
           <DialogHeader>
             <DialogTitle
@@ -419,11 +398,12 @@ export function NewModalCreateEmployee({
               <IdCard color="#C0B15B" />
               Cadastrar novo colaborador
             </DialogTitle>
+
             <ScrollArea className="h-[75vh]">
               <div>
                 <form
                   action=""
-                  className="flex flex-col gap-5 bg-slate-50 p-5" // Removi a cor de fundo cinza, mas mantive a estrutura. Se quiser voltar a cor cinza, remova `bg-slate-50`
+                  className="flex flex-col gap-5 bg-slate-50 p-5"
                   onSubmit={handleSubmit(
                     handleSubmitEmployee,
                     (errors) => {
@@ -438,12 +418,9 @@ export function NewModalCreateEmployee({
                       placeholder="Digite seu nome"
                       {...register("name")}
                     />
-                    {errors.name && (
-                      <span className="text-sm text-red-600">
-                        {errors.name.message}
-                      </span>
-                    )}
+                    {errors.name && <span className="text-sm text-red-600">{errors.name.message}</span>}
                   </div>
+
                   <div>
                     <Label>Sobrenome</Label>
                     <Input
@@ -451,12 +428,9 @@ export function NewModalCreateEmployee({
                       placeholder="Digite seu sobrenome"
                       {...register("surname")}
                     />
-                    {errors.surname && (
-                      <span className="text-sm text-red-600">
-                        {errors.surname.message}
-                      </span>
-                    )}
+                    {errors.surname && <span className="text-sm text-red-600">{errors.surname.message}</span>}
                   </div>
+
                   <div>
                     <Label>Data de nascimento</Label>
                     <Input
@@ -464,12 +438,9 @@ export function NewModalCreateEmployee({
                       placeholder="Digite a data de nascimento"
                       {...register("birthDate")}
                     />
-                    {errors.birthDate && (
-                      <span className="text-sm text-red-600">
-                        {errors.birthDate.message}
-                      </span>
-                    )}
+                    {errors.birthDate && <span className="text-sm text-red-600">{errors.birthDate.message}</span>}
                   </div>
+
                   <div>
                     <Label>Estado civil</Label>
                     <select
@@ -481,17 +452,14 @@ export function NewModalCreateEmployee({
                       <option value="SOLTEIRO">Solteiro</option>
                       <option value="DIVORCIADO">Divorciado</option>
                       <option value="VIUVO">Viúvo </option>
-                      <option value="SEPARADO_JUDICIALMENTE">
-                        Separado judicialmente{" "}
-                      </option>
+                      <option value="SEPARADO_JUDICIALMENTE">Separado judicialmente</option>
                       <option value="UNIAO_ESTAVEL">União estável</option>
                     </select>
                     {errors.maritalStatus && (
-                      <span className="text-sm text-red-600">
-                        {errors.maritalStatus.message}
-                      </span>
+                      <span className="text-sm text-red-600">{errors.maritalStatus.message}</span>
                     )}
                   </div>
+
                   <div>
                     <Label>Tipo de contrato</Label>
                     <select
@@ -500,34 +468,22 @@ export function NewModalCreateEmployee({
                     >
                       <option value="">Selecione um tipo de contrato</option>
                       <option value="AUTONOMO">Autônomo</option>
-                      <option value="AVULSO_SINDICATO">
-                        Avulso (Sindicato)
-                      </option>
+                      <option value="AVULSO_SINDICATO">Avulso (Sindicato)</option>
                       <option value="CLT_HORISTA">CLT - Horista</option>
-                      <option value="CLT_TEMPO_DETERMINADO">
-                        CLT - Tempo Determinado
-                      </option>
-                      <option value="CLT_TEMPO_INDETERMINADO">
-                        CLT - Tempo Indeterminado
-                      </option>
+                      <option value="CLT_TEMPO_DETERMINADO">CLT - Tempo Determinado</option>
+                      <option value="CLT_TEMPO_INDETERMINADO">CLT - Tempo Indeterminado</option>
                       <option value="COOPERADO">Cooperado</option>
                       <option value="ESTAGIO_BOLSA">Estágio / Bolsa</option>
-                      {/* Removidos os tipos de contrato específicos de estrangeiros, mas pode ser necessário mantê-los se o backend usar. MANTIVE para evitar erros no backend, mas você pode removê-los do <select> se o seu backend permitir */}
-                      <option value="ESTRANGEIRO_IMIGRANTE">
-                        Estrangeiro - Imigrante
-                      </option>
-                      <option value="ESTRANGEIRO_TEMPORARIO">
-                        Estrangeiro - Temporário
-                      </option>
+                      {/* Mantidos para compatibilidade com backend, se necessário */}
+                      <option value="ESTRANGEIRO_IMIGRANTE">Estrangeiro - Imigrante</option>
+                      <option value="ESTRANGEIRO_TEMPORARIO">Estrangeiro - Temporário</option>
                       <option value="INTERMITENTE">Intermitente</option>
                       <option value="JOVEM_APRENDIZ">Jovem Aprendiz</option>
                       <option value="SOCIO">Sócio</option>
                       <option value="TEMPORARIO">Temporário</option>
                     </select>
                     {errors.contractType && (
-                      <span className="text-sm text-red-600">
-                        {errors.contractType.message}
-                      </span>
+                      <span className="text-sm text-red-600">{errors.contractType.message}</span>
                     )}
                   </div>
 
@@ -544,16 +500,14 @@ export function NewModalCreateEmployee({
                       placeholder="000.000.000-00"
                       maxLength={14}
                     />
-                    {errors.cpf && (
-                      <span className="text-sm text-red-600">
-                        {errors.cpf.message}
-                      </span>
-                    )}
+                    {errors.cpf && <span className="text-sm text-red-600">{errors.cpf.message}</span>}
                   </div>
+
                   <div>
                     <Label>Data de admissão</Label>
                     <Input type="date" {...register("admissionDate")} />
                   </div>
+
                   <div>
                     <Label>Salário:</Label>
                     <Input
@@ -565,12 +519,9 @@ export function NewModalCreateEmployee({
                       }}
                       placeholder="000.000,00"
                     />
-                    {errors.salary && (
-                      <span className="text-sm text-red-600">
-                        {errors.salary.message}
-                      </span>
-                    )}
+                    {errors.salary && <span className="text-sm text-red-600">{errors.salary.message}</span>}
                   </div>
+
                   <div>
                     <Label>Sexo</Label>
                     <select
@@ -581,11 +532,7 @@ export function NewModalCreateEmployee({
                       <option value="Masculino">Masculino</option>
                       <option value="Feminino">Feminino</option>
                     </select>
-                    {errors.gender && (
-                      <span className="text-red-600">
-                        {errors.gender.message}
-                      </span>
-                    )}
+                    {errors.gender && <span className="text-red-600">{errors.gender.message}</span>}
                   </div>
 
                   <div>
@@ -597,9 +544,7 @@ export function NewModalCreateEmployee({
                         onChange={(e) => {
                           const formattedCEP = formatCEP(e.target.value);
                           setCepValue(formattedCEP);
-                          setValue("cep", formattedCEP, {
-                            shouldValidate: true,
-                          });
+                          setValue("cep", formattedCEP, { shouldValidate: true });
                         }}
                         placeholder="00000-000"
                         maxLength={9}
@@ -611,67 +556,38 @@ export function NewModalCreateEmployee({
                         <Search className="w-5 h-5" />
                       </div>
                     </div>
-                    {errors.cep && (
-                      <span className="text-sm text-red-600">
-                        {errors.cep.message}
-                      </span>
-                    )}
+                    {errors.cep && <span className="text-sm text-red-600">{errors.cep.message}</span>}
                   </div>
+
                   <div>
                     <Label>Estado</Label>
-                    <Input
-                      placeholder="Digite seu estado"
-                      {...register("state")}
-                    />
-                    {errors.state && (
-                      <span className="text-sm text-red-600">
-                        {errors.state.message}
-                      </span>
-                    )}
+                    <Input placeholder="Digite seu estado" {...register("state")} />
+                    {errors.state && <span className="text-sm text-red-600">{errors.state.message}</span>}
                   </div>
+
                   <div>
                     <Label>Cidade</Label>
-                    <Input
-                      placeholder="Digite sua cidade"
-                      {...register("city")}
-                    />
-                    {errors.city && (
-                      <span className="text-sm text-red-600">
-                        {errors.city.message}
-                      </span>
-                    )}
+                    <Input placeholder="Digite sua cidade" {...register("city")} />
+                    {errors.city && <span className="text-sm text-red-600">{errors.city.message}</span>}
                   </div>
+
                   <div>
                     <Label>Endereco</Label>
-                    <Input
-                      placeholder="Digite seu endereço"
-                      {...register("address")}
-                    />
-                    {errors.address && (
-                      <span className="text-sm text-red-600">
-                        {errors.address.message}
-                      </span>
-                    )}
+                    <Input placeholder="Digite seu endereço" {...register("address")} />
+                    {errors.address && <span className="text-sm text-red-600">{errors.address.message}</span>}
                   </div>
+
                   <div>
                     <Label>Número</Label>
-                    <Input
-                      placeholder="Digite o número"
-                      {...register("number")}
-                    />
-                    {errors.number && (
-                      <span className="text-sm text-red-600">
-                        {errors.number.message}
-                      </span>
-                    )}
+                    <Input placeholder="Digite o número" {...register("number")} />
+                    {errors.number && <span className="text-sm text-red-600">{errors.number.message}</span>}
                   </div>
+
                   <div>
                     <Label>Complemento</Label>
-                    <Input
-                      placeholder="Digite o complemento"
-                      {...register("complement")}
-                    />
+                    <Input placeholder="Digite o complemento" {...register("complement")} />
                   </div>
+
                   <div className="flex flex-col gap-2">
                     <Label>Telefone</Label>
                     <Input
@@ -680,19 +596,14 @@ export function NewModalCreateEmployee({
                       onChange={(e) => {
                         const formattedPhone = formatPhone(e.target.value);
                         setPhoneValue(formattedPhone);
-                        setValue("phone", formattedPhone, {
-                          shouldValidate: true,
-                        });
+                        setValue("phone", formattedPhone, { shouldValidate: true });
                       }}
                       placeholder="(00) 00000-0000"
                       maxLength={15}
                     />
-                    {errors.phone && (
-                      <span className="text-sm text-red-600">
-                        {errors.phone.message}
-                      </span>
-                    )}
+                    {errors.phone && <span className="text-sm text-red-600">{errors.phone.message}</span>}
                   </div>
+
                   <div className="flex flex-col gap-2">
                     <Label>Celular</Label>
                     <Input
@@ -701,18 +612,12 @@ export function NewModalCreateEmployee({
                       onChange={(e) => {
                         const formattedPhone = formatPhone(e.target.value);
                         setMobileValue(formattedPhone);
-                        setValue("mobile", formattedPhone, {
-                          shouldValidate: true,
-                        });
+                        setValue("mobile", formattedPhone, { shouldValidate: true });
                       }}
                       placeholder="(00) 00000-0000"
                       maxLength={15}
                     />
-                    {errors.mobile && (
-                      <span className="text-sm text-red-600">
-                        {errors.mobile.message}
-                      </span>
-                    )}
+                    {errors.mobile && <span className="text-sm text-red-600">{errors.mobile.message}</span>}
                   </div>
 
                   <div>
@@ -728,12 +633,9 @@ export function NewModalCreateEmployee({
                         </option>
                       ))}
                     </select>
-                    {errors.positionId && (
-                      <span className="text-red-600">
-                        {errors.positionId.message}
-                      </span>
-                    )}
+                    {errors.positionId && <span className="text-red-600">{errors.positionId.message}</span>}
                   </div>
+
                   <div>
                     <Label>CBO</Label>
                     <div className="border border-neutral-400 flex items-center gap-2 rounded-md px-2 py-1 bg-white shadow-sm">
@@ -758,6 +660,7 @@ export function NewModalCreateEmployee({
                       ))}
                     </select>
                   </div>
+
                   <div className="flex flex-col gap-2">
                     <Label>Graduação</Label>
                     <select
@@ -765,61 +668,27 @@ export function NewModalCreateEmployee({
                       className="flex flex-col rounded-md border p-2"
                     >
                       <option value="">Selecione</option>
-                      <option value="Ensino Fundamental Incompleto">
-                        Ensino Fundamental Incompleto
-                      </option>
-                      <option value="Ensino Fundamental Completo">
-                        Ensino Fundamental Completo
-                      </option>
-                      <option value="Fundamental I incompleto">
-                        Ensino Fundamental I incompleto
-                      </option>
-                      <option value="Fundamental I completo">
-                        Ensino Fundamental I completo
-                      </option>
-                      <option value="Fundamental II incompleto">
-                        Ensino Fundamental II incompleto
-                      </option>
-                      <option value="Fundamental II completo">
-                        Ensino Fundamental II completo
-                      </option>
-                      <option value="Ensino Médio Incompleto">
-                        Ensino Médio Incompleto
-                      </option>
-                      <option value="Ensino Médio Completo">
-                        Ensino Médio Completo
-                      </option>
-                      <option value="Ensino Superior Incompleto">
-                        Ensino Superior Incompleto
-                      </option>
-                      <option value="Ensino Superior Completo">
-                        Ensino Superior Completo
-                      </option>
+                      <option value="Ensino Fundamental Incompleto">Ensino Fundamental Incompleto</option>
+                      <option value="Ensino Fundamental Completo">Ensino Fundamental Completo</option>
+                      <option value="Fundamental I incompleto">Ensino Fundamental I incompleto</option>
+                      <option value="Fundamental I completo">Ensino Fundamental I completo</option>
+                      <option value="Fundamental II incompleto">Ensino Fundamental II incompleto</option>
+                      <option value="Fundamental II completo">Ensino Fundamental II completo</option>
+                      <option value="Ensino Médio Incompleto">Ensino Médio Incompleto</option>
+                      <option value="Ensino Médio Completo">Ensino Médio Completo</option>
+                      <option value="Ensino Superior Incompleto">Ensino Superior Incompleto</option>
+                      <option value="Ensino Superior Completo">Ensino Superior Completo</option>
                       <option value="Pós-graduação">Pós-graduação</option>
                       <option value="Mestrado">Mestrado</option>
                       <option value="Doutorado">Doutorado</option>
                       <option value="Ph.D">Ph.D</option>
                     </select>
-                    {errors.education && (
-                      <span className="text-red-600">
-                        {errors.education.message}
-                      </span>
-                    )}
+                    {errors.education && <span className="text-red-600">{errors.education.message}</span>}
                   </div>
 
-                  <Button
-                    type="submit"
-                    className="bg-realizaBlue"
-                    disabled={isLoading}
-                  >
+                  <Button type="submit" className="bg-realizaBlue" disabled={isLoading}>
                     {isLoading ? (
-                      <Oval
-                        visible={true}
-                        height={20}
-                        width={20}
-                        color="#fff"
-                        ariaLabel="oval-loading"
-                      />
+                      <Oval visible={true} height={20} width={20} color="#fff" ariaLabel="oval-loading" />
                     ) : (
                       "Cadastrar"
                     )}
@@ -831,8 +700,7 @@ export function NewModalCreateEmployee({
         </DialogContent>
       </Dialog>
 
-      {/* O Modal de Cadastro de Estrangeiro (Dialog para isForeignerEmployeeModalOpen) foi removido. */}
-
+      {/* Modal de sucesso independente */}
       <Dialog open={showSuccessModal} onOpenChange={setShowSuccessModal}>
         <DialogContent className="max-w-[700px] p-6 text-center">
           <DialogHeader>
@@ -844,18 +712,14 @@ export function NewModalCreateEmployee({
           <div className="flex ">
             <div className="flex flex-col items-center justify-center gap-4 py-4 w-[100%]">
               <p className="text-md text-gray-700 text-start">
-                Colaborador <strong>"{employeeName}"</strong> adicionado com
-                sucesso à aba de colaboradores. Se deseja visualizar este
-                colaborador, acesse a aba de colaboradores vinculados ao
-                fornecedor <strong>"{supplierName}"</strong>.
+                Colaborador <strong>"{employeeName}"</strong> adicionado com sucesso à aba de colaboradores.
+                Se deseja visualizar este colaborador, acesse a aba de colaboradores vinculados ao fornecedor{" "}
+                <strong>"{supplierName}"</strong>.
               </p>
             </div>
           </div>
           <DialogFooter className="flex justify-center">
-            <Button
-              onClick={() => setShowSuccessModal(false)}
-              className="bg-realizaBlue"
-            >
+            <Button onClick={() => setShowSuccessModal(false)} className="bg-realizaBlue">
               Fechar
             </Button>
           </DialogFooter>
