@@ -5,6 +5,7 @@ import bl.tech.realiza.gateways.requests.users.security.ProfileRepoRequestDto;
 import bl.tech.realiza.gateways.requests.users.security.ProfileRequestDto;
 import bl.tech.realiza.gateways.responses.users.profile.ProfileNameResponseDto;
 import bl.tech.realiza.gateways.responses.users.profile.ProfileRepoResponseDto;
+import bl.tech.realiza.gateways.responses.users.profile.ProfileResponse;
 import bl.tech.realiza.gateways.responses.users.profile.ProfileResponseDto;
 import bl.tech.realiza.usecases.interfaces.users.security.CrudProfile;
 import bl.tech.realiza.usecases.interfaces.users.security.CrudProfileRepo;
@@ -80,6 +81,13 @@ public class ProfileControllerImpl implements ProfileController {
     @Override
     public ResponseEntity<ProfileResponseDto> getOneProfile(@PathVariable String id) {
         return ResponseEntity.ok(crudProfile.findOne(id));
+    }
+
+    @GetMapping("/{id}/full")
+    @ResponseStatus(HttpStatus.OK)
+    @Override
+    public ResponseEntity<ProfileResponse> getOneFullProfile(@PathVariable String id) {
+        return ResponseEntity.ok(crudProfile.findOneFull(id));
     }
 
     @GetMapping

@@ -15,6 +15,7 @@ import bl.tech.realiza.gateways.repositories.users.security.ProfileRepository;
 import bl.tech.realiza.gateways.requests.users.security.ProfileRequestDto;
 import bl.tech.realiza.gateways.responses.users.profile.PermissionResponse;
 import bl.tech.realiza.gateways.responses.users.profile.ProfileNameResponseDto;
+import bl.tech.realiza.gateways.responses.users.profile.ProfileResponse;
 import bl.tech.realiza.gateways.responses.users.profile.ProfileResponseDto;
 import bl.tech.realiza.usecases.interfaces.users.security.CrudProfile;
 import lombok.RequiredArgsConstructor;
@@ -319,6 +320,140 @@ public class CrudProfileImpl implements CrudProfile {
             profileRepository.saveAll(profiles);
         }
         log.info("Finished setup client profiles ✔️ {}", clientId);
+    }
+
+    @Override
+    public ProfileResponse findOneFull(String id) {
+        Profile profile = profileRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Profile not found"));
+        ProfileResponse response = ProfileResponse.builder().build();
+        ProfileResponse.DashboardResponse dashboard = ProfileResponse.DashboardResponse.builder().build();
+        ProfileResponse.DocumentResponse document = ProfileResponse.DocumentResponse.builder().build();
+        ProfileResponse.ContractResponse contract = ProfileResponse.ContractResponse.builder().build();
+        response.setDashboard(dashboard);
+        response.setDocument(document);
+        response.setContract(contract);
+        ProfileResponse.DocumentType view = ProfileResponse.DocumentType.builder().build();
+        ProfileResponse.DocumentType upload = ProfileResponse.DocumentType.builder().build();
+        ProfileResponse.DocumentType exempt = ProfileResponse.DocumentType.builder().build();
+        response.getDocument().setView(view);
+        response.getDocument().setUpload(upload);
+        response.getDocument().setExempt(exempt);
+        for (Permission permission : profile.getPermissions()) {
+            switch (permission.getType()) {
+                case ADM -> {
+                    response.setAdmin(Boolean.TRUE);
+                }
+                case CONTRACT -> {
+                    switch (permission.getSubtype()) {
+                        case FINISH -> {
+                            response.getContract().setFinish(Boolean.TRUE);
+                        }
+                        case SUSPEND -> {
+                            response.getContract().setSuspend(Boolean.TRUE);
+                        }
+                        case CREATE -> {
+                            response.getContract().setCreate(Boolean.TRUE);
+                        }
+                    }
+                }
+                case DASHBOARD -> {
+                    switch (permission.getSubtype()) {
+                        case GENERAL -> {
+                            response.getDashboard().setGeneral(Boolean.TRUE);
+                        }
+                        case PROVIDER -> {
+                            response.getDashboard().setProvider(Boolean.TRUE);
+                        }
+                        case DOCUMENT -> {
+                            response.getDashboard().setDocument(Boolean.TRUE);
+                        }
+                        case DOCUMENT_DETAIL -> {
+                            response.getDashboard().setDocumentDetail(Boolean.TRUE);
+                        }
+                        default -> throw new IllegalStateException("Unexpected value: " + permission.getSubtype());
+                    }
+                }
+                case DOCUMENT -> {
+                    switch (permission.getSubtype()) {
+                        case VIEW -> {
+                            switch (permission.getDocumentType()) {
+                                case LABORAL -> {
+                                    response.getDocument().getView().setLaboral(Boolean.TRUE);
+                                }
+                                case WORKPLACE_SAFETY -> {
+                                    response.getDocument().getView().setWorkplaceSafety(Boolean.TRUE);
+                                }
+                                case REGISTRATION_AND_CERTIFICATES -> {
+                                    response.getDocument().getView().setRegistrationAndCertificates(Boolean.TRUE);
+                                }
+                                case GENERAL -> {
+                                    response.getDocument().getView().setGeneral(Boolean.TRUE);
+                                }
+                                case HEALTH -> {
+                                    response.getDocument().getView().setHealth(Boolean.TRUE);
+                                }
+                                case ENVIRONMENT -> {
+                                    response.getDocument().getView().setEnvironment(Boolean.TRUE);
+                                }
+                                default -> throw new IllegalStateException("Unexpected value: " + permission.getDocumentType());
+                            }
+                        }
+                        case UPLOAD -> {
+                            switch (permission.getDocumentType()) {
+                                case LABORAL -> {
+                                    response.getDocument().getUpload().setLaboral(Boolean.TRUE);
+                                }
+                                case WORKPLACE_SAFETY -> {
+                                    response.getDocument().getUpload().setWorkplaceSafety(Boolean.TRUE);
+                                }
+                                case REGISTRATION_AND_CERTIFICATES -> {
+                                    response.getDocument().getUpload().setRegistrationAndCertificates(Boolean.TRUE);
+                                }
+                                case GENERAL -> {
+                                    response.getDocument().getUpload().setGeneral(Boolean.TRUE);
+                                }
+                                case HEALTH -> {
+                                    response.getDocument().getUpload().setHealth(Boolean.TRUE);
+                                }
+                                case ENVIRONMENT -> {
+                                    response.getDocument().getUpload().setEnvironment(Boolean.TRUE);
+                                }
+                                default -> throw new IllegalStateException("Unexpected value: " + permission.getDocumentType());
+                            }
+                        }
+                        case EXEMPT -> {
+                            switch (permission.getDocumentType()) {
+                                case LABORAL -> {
+                                    response.getDocument().getExempt().setLaboral(Boolean.TRUE);
+                                }
+                                case WORKPLACE_SAFETY -> {
+                                    response.getDocument().getExempt().setWorkplaceSafety(Boolean.TRUE);
+                                }
+                                case REGISTRATION_AND_CERTIFICATES -> {
+                                    response.getDocument().getExempt().setRegistrationAndCertificates(Boolean.TRUE);
+                                }
+                                case GENERAL -> {
+                                    response.getDocument().getExempt().setGeneral(Boolean.TRUE);
+                                }
+                                case HEALTH -> {
+                                    response.getDocument().getExempt().setHealth(Boolean.TRUE);
+                                }
+                                case ENVIRONMENT -> {
+                                    response.getDocument().getExempt().setEnvironment(Boolean.TRUE);
+                                }
+                                default -> throw new IllegalStateException("Unexpected value: " + permission.getDocumentType());
+                            }
+                        }
+                        default -> throw new IllegalStateException("Unexpected value: " + permission.getSubtype());
+                    }
+                }
+                case RECEPTION -> {
+                    response.setReception(Boolean.TRUE);
+                }
+            }
+        }
+        return response;
     }
 
     private ProfileResponseDto toDto(Profile profile) {
