@@ -325,7 +325,15 @@ public class CrudProfileImpl implements CrudProfile {
     @Override
     public ProfileResponse findOneFull(String id) {
         Profile profile = profileRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Profile not found"));
+                .orElse(null);
+        Set<Permission> permissions = null;
+        if (profile != null) {
+            permissions = profile.getPermissions();
+        } else {
+            ProfileRepo profileRepo = profileRepoRepository.findById(id)
+                    .orElseThrow(() -> new NotFoundException("Profile not found"));
+            permissions = profileRepo.getPermissions();
+        }
         ProfileResponse response = ProfileResponse.builder().build();
         ProfileResponse.DashboardResponse dashboard = ProfileResponse.DashboardResponse.builder().build();
         ProfileResponse.DocumentResponse document = ProfileResponse.DocumentResponse.builder().build();
@@ -339,7 +347,7 @@ public class CrudProfileImpl implements CrudProfile {
         response.getDocument().setView(view);
         response.getDocument().setUpload(upload);
         response.getDocument().setExempt(exempt);
-        for (Permission permission : profile.getPermissions()) {
+        for (Permission permission : permissions) {
             switch (permission.getType()) {
                 case ADM -> {
                     response.setAdmin(Boolean.TRUE);
