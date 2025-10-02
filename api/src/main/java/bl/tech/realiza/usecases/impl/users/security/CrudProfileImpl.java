@@ -13,6 +13,7 @@ import bl.tech.realiza.gateways.repositories.users.security.PermissionRepository
 import bl.tech.realiza.gateways.repositories.users.security.ProfileRepoRepository;
 import bl.tech.realiza.gateways.repositories.users.security.ProfileRepository;
 import bl.tech.realiza.gateways.requests.users.security.ProfileRequestDto;
+import bl.tech.realiza.gateways.responses.users.profile.PermissionResponse;
 import bl.tech.realiza.gateways.responses.users.profile.ProfileNameResponseDto;
 import bl.tech.realiza.gateways.responses.users.profile.ProfileResponseDto;
 import bl.tech.realiza.usecases.interfaces.users.security.CrudProfile;
@@ -25,6 +26,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -324,6 +326,7 @@ public class CrudProfileImpl implements CrudProfile {
                 .id(profile.getId())
                 .name(profile.getName())
                 .admin(profile.getAdmin())
+                .permissions(toPermissionDto(profile.getPermissions()))
                 .clientId(profile.getClient() != null
                         ? profile.getClient().getIdClient()
                         : null)
@@ -332,5 +335,18 @@ public class CrudProfileImpl implements CrudProfile {
 
     private List<ProfileResponseDto> toDto(List<Profile> profiles) {
         return profiles.stream().map(this::toDto).toList();
+    }
+
+    private PermissionResponse toPermissionDto(Permission permission) {
+        return PermissionResponse.builder()
+                .id(permission.getId())
+                .type(permission.getType())
+                .subType(permission.getSubtype())
+                .documentType(permission.getDocumentType())
+                .build();
+    }
+
+    private Set<PermissionResponse> toPermissionDto(Set<Permission> permissions) {
+        return permissions.stream().map(this::toPermissionDto).collect(Collectors.toSet());
     }
 }

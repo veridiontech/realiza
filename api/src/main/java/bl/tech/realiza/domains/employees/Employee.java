@@ -2,8 +2,6 @@ package bl.tech.realiza.domains.employees;
 
 import bl.tech.realiza.domains.auditLogs.employee.AuditLogEmployee;
 import bl.tech.realiza.domains.clients.Branch;
-import bl.tech.realiza.domains.contract.Contract;
-import bl.tech.realiza.domains.contract.ContractDocument;
 import bl.tech.realiza.domains.contract.ContractEmployee;
 import bl.tech.realiza.domains.documents.employee.DocumentEmployee;
 import bl.tech.realiza.domains.providers.ProviderSubcontractor;
@@ -13,7 +11,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
-import org.hibernate.validator.constraints.br.CPF;
 
 import java.sql.Date;
 import java.time.LocalDateTime;
