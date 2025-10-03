@@ -3,6 +3,9 @@ import axios from "axios";
 import { useEffect, useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
+
 interface Filters {
   branchIds: string[];
   providerIds: string[];
@@ -144,13 +147,50 @@ export function GeneralDocumentsTable({
     setPage((prevPage) => Math.min(prevPage + 1, totalPages - 1));
   };
 
+  const handleDownloadPdf = () => {
+    if (documentos.length === 0) {
+      alert("Não há dados na tabela para gerar um PDF.");
+      return;
+    }
+    const doc = new jsPDF();
+    doc.text("Documentos Gerais", 14, 16);
+
+    autoTable(doc, {
+      head: [
+        [
+          "Documento",
+          "Grupo",
+          "Status",
+          "Validade",
+          "Bloqueia?",
+          "Fornecedor",
+        ],
+      ],
+      body: documentos.map((d) => [
+        d.documentTitle,
+        d.documentGroupName,
+        d.status,
+        new Date(d.expirationDate).toLocaleDateString(),
+        d.doesBlock ? "Sim" : "Não",
+        d.supplierName,
+      ]),
+      startY: 20,
+    });
+
+    doc.save("documentos-gerais.pdf");
+  };
+
+
   return (
     <div className="mt-6 rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-lg font-semibold text-gray-800">
           Documentos Gerais
         </h2>
-        <button className="rounded-md bg-gray-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-gray-700">
+       <button
+          onClick={handleDownloadPdf}
+          className="rounded-md bg-gray-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-gray-700"
+        >
           Baixar PDF
         </button>
       </div>
