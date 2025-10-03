@@ -54,6 +54,8 @@ public class CrudDocumentMatrixImpl implements CrudDocumentMatrix {
                 .isDocumentUnique(documentMatrixRequestDto.getIsDocumentUnique())
                 .isValidityFixed(documentMatrixRequestDto.getIsValidityFixed())
                 .fixedValidityAt(parseDayMonth(documentMatrixRequestDto.getFixedValidityAt()))
+                        .expirationDateAmount(documentMatrixRequestDto.getExpirationDateAmount())
+                        .expirationDateUnit(documentMatrixRequestDto.getExpirationDateUnit())
                 .group(documentMatrixGroup)
 //                .subGroup(documentMatrixSubgroup)
                 .build());
