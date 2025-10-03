@@ -725,7 +725,7 @@ public class SetupService {
                     .title(document.getTitle())
                     .type(document.getType())
                     .status(Document.Status.PENDENTE)
-                    .isActive(true)
+                    .isActive(false)
                     .branch(branch)
                     .documentMatrix(document.getDocumentMatrix())
                     .validity(document.getValidity())
