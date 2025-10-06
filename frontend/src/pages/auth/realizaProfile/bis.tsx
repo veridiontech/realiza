@@ -456,7 +456,7 @@ export const MonittoringBis = () => {
   const [providerCnpjOpts, setProviderCnpjOpts] = useState<Option[]>([]);
   const [contractOpts, setContractOpts] = useState<Option[]>([]);
   const [employeeOpts, setEmployeeOpts] = useState<Option[]>([]);
-  const [employeeCpfOpts, setEmployeeCpfOpts] = useState<Option[]>([]);
+  // const [employeeCpfOpts, setEmployeeCpfOpts] = useState<Option[]>([]);
   const [employeeSituationOpts, setEmployeeSituationOpts] = useState<Option[]>(
     []
   );
@@ -626,7 +626,7 @@ export const MonittoringBis = () => {
         setProviderCnpjOpts(toOptions(providerCnpjs));
         setContractOpts(toOptionsIdName(contracts));
         setEmployeeOpts(toOptionsIdName(employees));
-        setEmployeeCpfOpts(toOptions(employeeCpfs));
+        // setEmployeeCpfOpts(toOptions(employeeCpfs));
 
         setEmployeeSituationOpts(
           employeeSituations.map((s: string) => ({
@@ -1291,12 +1291,7 @@ export const MonittoringBis = () => {
                   onChange={(v) => setDraft((s) => ({ ...s, employeeIds: v }))}
                 />
 
-                <MultiSelectDropdown
-                  label="CPF do Funcionário"
-                  options={employeeCpfOpts}
-                  values={draft.employeeCpfs}
-                  onChange={(v) => setDraft((s) => ({ ...s, employeeCpfs: v }))}
-                />
+              
                 <MultiSelectDropdown
                   label="Situação do Funcionário"
                   options={employeeSituationOpts}
@@ -1503,12 +1498,7 @@ export const MonittoringBis = () => {
                   onChange={(v) => setDraft((s) => ({ ...s, employeeIds: v }))}
                 />
 
-                <MultiSelectDropdown
-                  label="CPF do Funcionário"
-                  options={employeeCpfOpts}
-                  values={draft.employeeCpfs}
-                  onChange={(v) => setDraft((s) => ({ ...s, employeeCpfs: v }))}
-                />
+               
                 <MultiSelectDropdown
                   label="Situação do Funcionário"
                   options={employeeSituationOpts}
