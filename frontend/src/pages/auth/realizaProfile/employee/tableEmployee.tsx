@@ -12,29 +12,35 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Link } from "react-router-dom";
-import { useUser } from "@/context/user-provider"; // 👈 importa o contexto do usuário
+import { useUser } from "@/context/user-provider";
 
 interface TableEmployeeProps {
-  idProvider: string | null;
+  idTarget: string | null;
+  targetType: "supplier" | "subcontractor"; // 👈 novo: controla SUPPLIER/SUBCONTRACTOR
 }
 
-export function TableEmployee({ idProvider }: TableEmployeeProps) {
+export function TableEmployee({ idTarget, targetType }: TableEmployeeProps) {
   const [employees, setEmployee] = useState<any[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [detailsContract, setDetailsContract] = useState<any>(null);
 
-  const { user } = useUser(); // 👈 pega o usuário logado
+  const { user } = useUser();
 
   const page = 0;
   const limit = 10;
 
   const getEmployee = async () => {
+    if (!idTarget) {
+      setEmployee([]);
+      return;
+    }
     setIsLoading(true);
     try {
       const tokenFromStorage = localStorage.getItem("tokenClient");
+      const enterprise = targetType === "supplier" ? "SUPPLIER" : "SUBCONTRACTOR";
       const res = await axios.get(
-        `${ip}/employee?idSearch=${idProvider}&enterprise=SUPPLIER`,
+        `${ip}/employee?idSearch=${idTarget}&enterprise=${enterprise}`,
         {
           params: { page, limit },
           headers: { Authorization: `Bearer ${tokenFromStorage}` },
@@ -49,9 +55,7 @@ export function TableEmployee({ idProvider }: TableEmployeeProps) {
   };
 
   const filteredEmployees = employees.filter((employee: any) =>
-    `${employee.name} ${employee.surname}`
-      .toLowerCase()
-      .includes(searchTerm.toLowerCase())
+    `${employee.name} ${employee.surname}`.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -59,20 +63,16 @@ export function TableEmployee({ idProvider }: TableEmployeeProps) {
   };
 
   useEffect(() => {
-    if (idProvider) {
-      getEmployee();
-    } else {
-      setEmployee([]);
-    }
-  }, [idProvider]);
+    getEmployee();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [idTarget, targetType]);
 
   const getMoreDetailsDocument = async (id: string) => {
     const tokenFromStorage = localStorage.getItem("tokenClient");
     try {
+      // Mantido como supplier; ajuste se houver endpoint específico para subcontratado
       const res = await axios.get(`${ip}/contract/supplier/${id}`, {
-        headers: {
-          Authorization: `Bearer ${tokenFromStorage}`,
-        },
+        headers: { Authorization: `Bearer ${tokenFromStorage}` },
       });
       setDetailsContract(res.data);
     } catch (err: any) {
@@ -92,7 +92,6 @@ export function TableEmployee({ idProvider }: TableEmployeeProps) {
     return "border-b-gray-400";
   };
 
-  // 🔥 Decide o prefixo da rota de acordo com a role
   const getEmployeeLink = (id: string) => {
     if (
       user?.role === "ROLE_SUPPLIER_MANAGER" ||
@@ -159,11 +158,7 @@ export function TableEmployee({ idProvider }: TableEmployeeProps) {
                             {contract.serviceName}
                           </h2>
                           <Dialog>
-                            <DialogTrigger
-                              onClick={() =>
-                                getMoreDetailsDocument(contract.idContract)
-                              }
-                            >
+                            <DialogTrigger onClick={() => getMoreDetailsDocument(contract.idContract)}>
                               <Eye height={20} width={20} />
                             </DialogTrigger>
                             <DialogContent>
@@ -182,17 +177,14 @@ export function TableEmployee({ idProvider }: TableEmployeeProps) {
                                       {detailsContract.contractReference}
                                     </h3>
                                     <span>
-                                      <strong>Tipo de despesa:</strong>{" "}
-                                      {detailsContract.expenseType}
+                                      <strong>Tipo de despesa:</strong> {detailsContract.expenseType}
                                     </span>
                                     <span>
                                       <strong>Data de início: </strong>
                                       {detailsContract.dateStart}
                                     </span>
                                     <h2>
-                                      Responsável do serviço:{" "}
-                                      {detailsContract.responsible ||
-                                        "Não informado"}
+                                      Responsável do serviço: {detailsContract.responsible || "Não informado"}
                                     </h2>
                                   </div>
                                 )}
@@ -203,16 +195,11 @@ export function TableEmployee({ idProvider }: TableEmployeeProps) {
                       ))}
                     </div>
                   </div>
-                  <Button className="bg-realizaBlue">
-                    Ver todos os contratos
-                  </Button>
+                  <Button className="bg-realizaBlue">Ver todos os contratos</Button>
                 </div>
 
                 {/* COLUNA COLABORADOR */}
-                <Link
-                  to={getEmployeeLink(employee.idEmployee)} // 👈 rota dinâmica
-                  className="w-full md:w-1/2 p-3 bg-white"
-                >
+                <Link to={getEmployeeLink(employee.idEmployee)} className="w-full md:w-1/2 p-3 bg-white">
                   <div className="flex flex-col gap-5">
                     <div className="flex gap-2">
                       <div className="rounded-md bg-neutral-200 p-2">
@@ -222,16 +209,12 @@ export function TableEmployee({ idProvider }: TableEmployeeProps) {
                         <h3 className="font-medium">
                           {employee.name} {employee.surname}
                         </h3>
-                        <p className="text-[12px] text-sky-950 underline">
-                          {employee.position}
-                        </p>
+                        <p className="text-[12px] text-sky-950 underline">{employee.position}</p>
                       </div>
                     </div>
 
                     <div className="flex flex-col gap-5">
-                      <span className="text-[14px] font-medium text-sky-950">
-                        Informações do colaborador
-                      </span>
+                      <span className="text-[14px] font-medium text-sky-950">Informações do colaborador</span>
                       <div className="flex items-center gap-1 text-[14px]">
                         <p>Tipo de contrato:</p>
                         <p>{employee.contractType}</p>
@@ -242,11 +225,7 @@ export function TableEmployee({ idProvider }: TableEmployeeProps) {
                       </div>
                       <div className="relative flex py-2 items-center overflow-hidden gap-1 text-[14px]">
                         <p>Status:</p>
-                        <p
-                          className={`font-semibold ${getStatusClass(
-                            employee.situation
-                          )}`}
-                        >
+                        <p className={`font-semibold ${getStatusClass(employee.situation)}`}>
                           {employee.situation}
                         </p>
                         <div
@@ -266,3 +245,5 @@ export function TableEmployee({ idProvider }: TableEmployeeProps) {
     </div>
   );
 }
+
+export default TableEmployee;
