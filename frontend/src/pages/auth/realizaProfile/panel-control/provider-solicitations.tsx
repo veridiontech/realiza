@@ -2,39 +2,27 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import { Ban, CheckCircle, Rotate3D } from "lucide-react";
 import { ip } from "@/utils/ip";
-
 import { CardPanelControlProvider } from "@/components/cardPanelControlProvider";
 import { ColumnPanelControl } from "@/components/column-panel-control";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
-// Interface simplificada para refletir a resposta real da API
 export interface Solicitation {
   idSolicitation: string;
   creationDate: string;
-  status: string;
-  
-  // Campos que a API está retornando no nível superior:
-  requesterName: string; // Vindo como "realiza Assessoria"
+  status: "APPROVED" | "DENIED" | "PENDING" | string;
+  requesterName: string; 
   requesterEmail: string; 
   solicitationType: string; 
-  
-  // O nome da empresa deve estar vindo como "enterpriseName" no JSON
   enterpriseName?: string; 
-  
   clientCnpj: string;
   clientName: string;
-  branchName: boolean;
-  
-  // Removido: 'requester' e 'newProvider' complexos, pois não estão no JSON
-  // Os campos abaixo (do newUser) parecem não estar sendo usados ou não vêm no JSON real
-  // newUser: { ... }; 
+  branchName: string;
 }
 
 interface ApiResponse {
   content: Solicitation[];
   totalPages: number;
 }
-
 
 export function ProviderSolicitations() {
   const [solicitations, setSolicitations] = useState<Solicitation[]>([]);
@@ -65,9 +53,11 @@ export function ProviderSolicitations() {
     fetchSolicitations();
   }, []);
 
-  const removeSolicitation = (idSolicitation: string) => {
+  const updateSolicitationStatus = (idSolicitation: string, newStatus: "APPROVED" | "DENIED") => {
     setSolicitations((prev) =>
-      prev.filter((s) => s.idSolicitation !== idSolicitation)
+      prev.map((s) =>
+        s.idSolicitation === idSolicitation ? { ...s, status: newStatus } : s
+      )
     );
   };
 
@@ -76,8 +66,6 @@ export function ProviderSolicitations() {
       (solicitation) => solicitation.status === status
     ).length;
   };
-
-  // Funções getRequesterName e getEnterpriseName foram removidas, pois os dados estão no nível superior.
 
   return (
     <div className="flex h-full w-full flex-col items-center justify-center gap-9 p-4">
@@ -106,17 +94,15 @@ export function ProviderSolicitations() {
                         <CardPanelControlProvider
                           branchName={solicitation.branchName}
                           key={solicitation.idSolicitation}
-                          // Mapeamento Direto: Usa o campo que veio no JSON
                           requesterName={solicitation.requesterName} 
                           creationDate={solicitation.creationDate}
-                          // Mapeamento Direto: Usa o campo que veio no JSON
                           enterpriseName={solicitation.enterpriseName} 
                           idSolicitation={solicitation.idSolicitation}
                           requesterEmail={solicitation.requesterEmail}
                           solicitationType={solicitation.solicitationType}
                           clientCnpj={solicitation.clientCnpj}
                           clientName={solicitation.clientName}
-                          onActionCompleted={removeSolicitation}
+                          onActionCompleted={updateSolicitationStatus}
                           status="PENDING"
                         />
                       ))}

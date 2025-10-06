@@ -1,5 +1,5 @@
 import { useBranch } from "@/context/Branch-provider";
-import { useEffect, useState, useMemo } from "react"; // Importei useMemo
+import { useEffect, useState, useMemo } from "react";
 import axios from "axios";
 import { ip } from "@/utils/ip";
 import { BoxActivities } from "../new-documents-page/box-activitie";
@@ -11,7 +11,7 @@ import { Blocks } from "react-loader-spinner";
 export function ActivitiesBox() {
   const [activitieSelected, setActivitieSelected] = useState<any>(null);
   const [activities, setActivities] = useState<any[]>([]);
-  const [documentsByActivitie, setDocumentsByActivitie] = useState<any[]>([]); // Tipagem melhorada
+  const [documentsByActivitie, setDocumentsByActivitie] = useState<any[]>([]);
   const { selectedBranch, branch } = useBranch();
   const [loadingDocumentId, setLoadingDocumentId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -19,7 +19,6 @@ export function ActivitiesBox() {
   const [pendingOperation, setPendingOperation] = useState<any>(null);
   const [selectedBranches, setSelectedBranches] = useState<string[]>([]);
   const [replicate, setReplicate] = useState(false);
-  // Novo estado para o termo de pesquisa
   const [searchTerm, setSearchTerm] = useState("");
 
   const getActivitie = async () => {
@@ -33,6 +32,7 @@ export function ActivitiesBox() {
         }
       );
       setActivities(resSelected.data);
+      console.log("Atividades buscadas com sucesso.");
     } catch (err) {
       console.log("erro ao buscar atividades:", err);
     } finally {
@@ -44,22 +44,28 @@ export function ActivitiesBox() {
     setIsLoading(true);
     try {
       const tokenFromStorage = localStorage.getItem("tokenClient");
+      const idBranch = selectedBranch?.idBranch;
+      const isSelected = true;
+      if (!idBranch) {
+        console.log("ID da filial não encontrado.");
+        setIsLoading(false);
+        return;
+      }
       const res = await axios.get(
-        `${ip}/contract/activity/find-document-by-activity/${activitieSelected?.idActivity}`,
+        `${ip}/document/branch/document-matrix/${idBranch}?isSelected=${isSelected}`,
         {
           headers: { Authorization: `Bearer ${tokenFromStorage}` },
         }
       );
       setDocumentsByActivitie(res.data);
-      setSearchTerm(""); // Limpa o termo de pesquisa ao carregar novos documentos
+      setSearchTerm("");
+      console.log("Documentos da matriz buscados com sucesso:", res.data);
     } catch (err) {
       console.log("Erro ao buscar documentos da atividade:", err);
     } finally {
       setIsLoading(false);
     }
   };
-
-  // Funções removeDocumentByActivitie e addDocumentByActivitie permanecem inalteradas...
 
   const removeDocumentByActivitie = async (
     idActivity: string,
@@ -78,6 +84,7 @@ export function ActivitiesBox() {
           },
         }
       );
+      console.log("Documento removido com sucesso.");
     } catch (err: any) {
       console.log("Erro ao remover documento:", err);
       throw err;
@@ -101,6 +108,7 @@ export function ActivitiesBox() {
           },
         }
       );
+      console.log("Documento adicionado com sucesso.");
     } catch (err: any) {
       console.log("Erro ao adicionar documento:", err);
       throw err;
@@ -137,6 +145,7 @@ export function ActivitiesBox() {
             doc.idDocument === idDocumentBranch ? { ...doc, selected: false } : doc
           )
         );
+        console.log("Confirmação de remoção concluída.");
       } else {
         await addDocumentByActivitie(idActivity, idDocumentBranch, selectedBranches, confirmed);
         setDocumentsByActivitie((prevDocs: any) =>
@@ -144,6 +153,7 @@ export function ActivitiesBox() {
             doc.idDocument === idDocumentBranch ? { ...doc, selected: true } : doc
           )
         );
+        console.log("Confirmação de adição concluída.");
       }
       toast.success("Operação realizada com sucesso!");
     } catch (err) {
@@ -165,7 +175,6 @@ export function ActivitiesBox() {
     }
   };
 
-  // 1. Função de filtro: usa useMemo para otimizar a filtragem
   const filteredDocuments = useMemo(() => {
     if (!searchTerm) {
       return documentsByActivitie;
@@ -200,7 +209,6 @@ export function ActivitiesBox() {
 
       <div>
         <div className="w-[35vw] border p-5 shadow-md">
-          {/* 2. Input de Pesquisa atualizado com estado e onChange */}
           <div className="flex items-center gap-2 rounded-md border p-2">
             <Search />
             <input
@@ -217,7 +225,6 @@ export function ActivitiesBox() {
               </div>
             ) : (
               <div>
-                {/* 3. Renderiza a lista filtrada */}
                 {filteredDocuments.length > 0 ? (
                   filteredDocuments.map((document: any) => (
                     <div
@@ -234,11 +241,10 @@ export function ActivitiesBox() {
                           className="cursor-pointer"
                         />
                       )}
-                      <span>{document.documentTitle || "Documento sem título"}</span>
+                      <span>{document.title || "Documento sem título"}</span>
                     </div>
                   ))
                 ) : (
-                  // Mensagem para quando não houver resultados
                   <p className="p-4 text-center text-gray-500">
                     {searchTerm
                       ? "Nenhum documento encontrado com este termo."
@@ -251,7 +257,6 @@ export function ActivitiesBox() {
         </div>
       </div>
 
-      {/* Seu Modal de Confirmação de Replicação permanece inalterado */}
       {showReplicateConfirmation && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white p-6 rounded-lg shadow-lg max-w-md w-full max-h-[80vh] overflow-hidden flex flex-col">

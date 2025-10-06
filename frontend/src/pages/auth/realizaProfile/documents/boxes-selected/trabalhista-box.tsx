@@ -27,6 +27,9 @@ export function TrabalhistaBox() {
   const [replicate, setReplicate] = useState(false);
   const [selectedBranches, setSelectedBranches] = useState<string[]>([]);
 
+  // ⭐️ NOVO ESTADO: Gatilho para forçar o refresh do ValidateSection ⭐️
+  const [refreshTrigger, setRefreshTrigger] = useState(0); 
+
   const getDocument = async () => {
     const tokenFromStorage = localStorage.getItem("tokenClient");
 
@@ -90,6 +93,10 @@ export function TrabalhistaBox() {
 
       clearArray();
       await pullDatas();
+      
+      // ⭐️ DISPARO DO GATILHO: Incrementa o estado após a operação de alocação/desalocação ⭐️
+      setRefreshTrigger(prev => prev + 1); 
+      
     } catch (err) {
       console.log("erro ao enviar documento", err);
     } finally {
@@ -339,6 +346,8 @@ export function TrabalhistaBox() {
             idBranch={selectedBranch?.idBranch!}
             documentTypeName="TRABALHISTA"
             isSelected={true}
+            // ⭐️ PASSA O GATILHO DE ATUALIZAÇÃO ⭐️
+            refreshTrigger={refreshTrigger} 
           />
         </div>
       </div>

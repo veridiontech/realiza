@@ -28,11 +28,32 @@ interface CardPanelControlProps {
   solicitationType: string;
   enterpriseName?: string | undefined;
   clientName: string;
-  branchName: boolean;
+  branchName: string;
   clientCnpj: string;
-  onActionCompleted?: (idSolicitation: string) => void;
+  onActionCompleted?: (idSolicitation: string, newStatus: "APPROVED" | "DENIED") => void;
   status: string;
 }
+
+const formatCnpj = (cnpj: string) => {
+  if (!cnpj) return "";
+  const numericCnpj = cnpj.replace(/[^\d]/g, "");
+  return numericCnpj.replace(
+    /^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/,
+    "$1.$2.$3/$4-$5"
+  );
+};
+
+const DetailItem: React.FC<{ label: string; value: string | boolean | undefined }> = ({ label, value }) => {
+  if (!value) return null;
+  const displayValue = typeof value === 'boolean' ? (value ? 'Sim' : 'Não') : value;
+  return (
+    <div className="flex items-center gap-1">
+      <strong className="text-gray-700">{label}:</strong>
+      <span className="text-gray-600">{displayValue}</span>
+    </div>
+  );
+};
+
 
 export function CardPanelControlProvider({
   idSolicitation,
@@ -42,12 +63,14 @@ export function CardPanelControlProvider({
   requesterName,
   clientName,
   clientCnpj,
-  branchName, 
+  branchName,
   solicitationType,
   onActionCompleted,
   status,
 }: CardPanelControlProps) {
   const [isLoading, setIsLoading] = useState(false);
+
+  const formattedCnpj = formatCnpj(clientCnpj);
 
   const client = {
     cnpj: clientCnpj,
@@ -85,7 +108,7 @@ export function CardPanelControlProvider({
       toast.success("Solicitação aprovada com sucesso!");
 
       if (onActionCompleted) {
-        onActionCompleted(idSolicitation);
+        onActionCompleted(idSolicitation, "APPROVED");
       }
     } catch (error) {
       console.error("Erro ao aprovar solicitação:", error);
@@ -110,7 +133,7 @@ export function CardPanelControlProvider({
       toast.success("Solicitação dispensada com sucesso!");
 
       if (onActionCompleted) {
-        onActionCompleted(idSolicitation);
+        onActionCompleted(idSolicitation, "DENIED");
       }
     } catch (error) {
       console.error("Erro ao negar solicitação:", error);
@@ -184,39 +207,33 @@ export function CardPanelControlProvider({
         />
       </div>
       <div className="flex flex-col gap-2">
-        <hr />
+        <hr className="border-gray-200" />
         <div className="flex items-center gap-1">
-          <span className="text-[18px] font-semibold">Motivo: </span>
+          <span className="text-[16px] font-bold text-gray-800">Motivo:</span>
           {solicitationType === "CREATION" && (
-            <p className="text-[15px]">CADASTRO da empresa</p>
+            <p className="text-[15px] text-gray-600">CADASTRO da empresa</p>
           )}
           {solicitationType === "EXCLUSION" && (
-            <div>
-              <span>Inativação da empresa</span>
-            </div>
+            <p className="text-[15px] text-gray-600">Inativação da empresa</p>
+          )}
+          {solicitationType === "CHANGE_ACTIVITY" && (
+            <p className="text-[15px] text-gray-600">Formação/Alteração teste de atividades</p>
+          )}
+          {solicitationType === "TEST_CLIENT_CREATION" && (
+            <p className="text-[15px] text-gray-600">TESTE DE CRIAÇÃO DE CLIENTE</p>
           )}
         </div>
         <div className="flex flex-col gap-1 text-[14px]">
-          <div className="flex items-center gap-1">
-            <strong>Nome da empresa: </strong>
-            <span>{enterpriseName}</span>
-          </div>
+          <DetailItem label="Nome da empresa" value={enterpriseName} />
+          <DetailItem label="Cliente" value={clientName} />
+          {formattedCnpj && <DetailItem label="CNPJ" value={formattedCnpj} />}
+          <DetailItem label="Filial" value={branchName} />
         </div>
-        <div className="flex flex-col gap-1 text-[14px]">
-          <div className="flex items-center gap-1">
-            <strong>Cliente: </strong>
-            <span>{clientName}</span>
-          </div>
-          <div className="flex items-center ">
-            <strong>Filial: </strong>
-            <span>{branchName}</span>
-          </div>
-        </div>
-        <hr />
+        <hr className="border-gray-200" />
       </div>
       <div className="row flex-col w-full items-center">
         <div className="flex flex-row items-center justify-start gap-2 mb-5">
-          <CalendarDays color="#3F3F46" />
+          <CalendarDays color="#3F3F46" size={20} />
           <span className="text-normal text-[#3F3F46]">{formattedDate}</span>
         </div>
         {status === "PENDING" && (

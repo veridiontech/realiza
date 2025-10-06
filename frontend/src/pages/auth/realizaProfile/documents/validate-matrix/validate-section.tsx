@@ -14,12 +14,15 @@ interface ValidateSectionProps {
   idBranch: string;
   documentTypeName: string;
   isSelected: boolean;
+  // NOVO: Propriedade para forçar a atualização da lista
+  refreshTrigger?: number; 
 }
 
 export function ValidateSection({
   idBranch,
   documentTypeName,
   isSelected,
+  refreshTrigger, // NOVO: Receber a nova prop
 }: ValidateSectionProps) {
   const [expirationList, setExpirationList] = useState<ExpirationItem[]>([]);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -41,7 +44,9 @@ export function ValidateSection({
         `${ip}/document/branch/document-matrix/expiration/${idBranch}`,
         {
           headers: { Authorization: `Bearer ${token}` },
-          params: { documentTypeName, isSelected: true, replicate: false, _ts: Date.now() },
+          // Adicionamos um _ts para garantir que o navegador não use cache,
+          // embora a dependência do useEffect já ajude nisso.
+          params: { documentTypeName, isSelected: true, replicate: false, _ts: Date.now() }, 
         }
       );
 
@@ -58,9 +63,10 @@ export function ValidateSection({
     }
   };
 
+  // 🚨 ATUALIZADO: Adicionando 'refreshTrigger' nas dependências 🚨
   useEffect(() => {
     fetchExpirations();
-  }, [idBranch, documentTypeName, isSelected]);
+  }, [idBranch, documentTypeName, isSelected, refreshTrigger]); // Agora a busca é refeita sempre que refreshTrigger mudar
 
   const handleEditClick = (doc: ExpirationItem) => {
     setEditingId(doc.idDocument);
@@ -92,7 +98,8 @@ export function ValidateSection({
         }
       );
 
-      await fetchExpirations();
+      // A lista será atualizada aqui também, garantindo que o estado local reflita a mudança
+      await fetchExpirations(); 
       setEditingId(null);
     } catch (err: any) {
       console.error("Erro ao salvar validade:", err);

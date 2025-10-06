@@ -53,7 +53,6 @@ export function BranchesTable() {
     <div>
       <div className="flex flex-col gap-5">
         {/* Bloco para visualização em telas pequenas (mobile) */}
-        {/* ALTURA AJUSTADA AQUI: de h-[500px] para h-[300px] */}
         <div className="block h-[300px] space-y-4 overflow-y-auto md:hidden">
           {loading ? (
             <p className="text-center text-gray-600">Carregando...</p>
@@ -92,13 +91,13 @@ export function BranchesTable() {
               className="outline-none"
             />
           </div>
-          {/* ALTURA AJUSTADA AQUI: de max-h-[500px] para max-h-[300px] */}
           <div className="mt-4 max-h-[300px] overflow-y-auto rounded-lg">
             <table className="w-full border-collapse border border-gray-300">
               <thead>
-                <tr className="sticky top-0 bg-[#345D5C33]">
-                  <th className="border px-4 py-2 text-start">Filiais</th>
-                  <th className="border">CNPJ</th>
+                {/* FINAL: Cabeçalho opaco (bg-gray-200), fixo (sticky top-0) e acima do conteúdo (z-10) */}
+                <tr className="sticky top-0 bg-gray-200 z-10">
+                  <th className="px-4 py-2 text-start">Filiais</th>
+                  <th className="px-4 py-2 text-start">CNPJ</th>
                 </tr>
               </thead>
               <tbody>
@@ -117,7 +116,7 @@ export function BranchesTable() {
                       <td className="px-4 py-2">
                         <li className="text-realizaBlue">{branch.name}</li>
                       </td>
-                      <td className="text-center">{branch.cnpj}</td>
+                      <td className="text-start px-4 py-2">{branch.cnpj}</td>
                     </tr>
                   ))
                 ) : (
