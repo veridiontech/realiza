@@ -64,7 +64,7 @@ public interface DocumentBranchRepository extends JpaRepository<DocumentBranch, 
     FROM DocumentBranch d
     JOIN d.documentMatrix m
     WHERE d.branch.idBranch = :idBranch
-      AND LOWER(m.type) = LOWER(:documentTypeName)
+      AND (:documentTypeName IS NULL OR LOWER(m.type) = LOWER(:documentTypeName))
       AND d.isActive = :isSelected
       AND (:required IS NULL OR m.required = :required)
     ORDER BY LOWER(d.title)

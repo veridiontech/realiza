@@ -132,7 +132,7 @@ public class DocumentBranchControllerImpl implements DocumentBranchControlller {
     @Override
     public ResponseEntity<List<DocumentSummarizedResponseDto>> getAllFilteredDocumentBranch(
             @PathVariable String idBranch,
-            @RequestParam String documentTypeName,
+            @RequestParam(required = false) String documentTypeName,
             @RequestParam Boolean isSelected,
             @RequestParam(required = false) Boolean required) {
         return ResponseEntity.ok(crudDocumentBranch.findAllFilteredDocuments(idBranch,documentTypeName,isSelected, required));
