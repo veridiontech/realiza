@@ -29,6 +29,8 @@ public class DocumentMatrix {
     private String type;
     @Builder.Default
     private Boolean doesBlock = false;
+    @Builder.Default
+    private Boolean required = false;
     // se um documento é unico entre todos os contratos isDocumentUnique = true, caso seja por contrato = false
     @Builder.Default
     private Boolean isDocumentUnique = true;

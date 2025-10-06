@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.Collection;
 import java.util.List;
 
 public interface DocumentProviderSupplierRepository extends JpaRepository<DocumentProviderSupplier, String> {
@@ -61,4 +62,5 @@ public interface DocumentProviderSupplierRepository extends JpaRepository<Docume
     WHERE b.idBranch = :branchId
 """)
     Long countByBranchId(@Param("branchId") String branchId);
+    List<DocumentProviderSupplier> findAllByProviderSupplier_IdProviderAndRequired(String idProvider, Boolean required);
 }

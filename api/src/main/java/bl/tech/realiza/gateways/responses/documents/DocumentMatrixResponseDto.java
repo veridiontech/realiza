@@ -19,6 +19,7 @@ public class DocumentMatrixResponseDto {
     private Integer expirationDateAmount;
     private String type;
     private Boolean doesBlock;
+    private Boolean required;
     private Boolean isDocumentUnique;
     private Boolean isValidityFixed;
     private String fixedValidityAt;
