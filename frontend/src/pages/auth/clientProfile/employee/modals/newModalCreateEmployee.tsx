@@ -130,23 +130,33 @@ const createNewEmployeeFormSchema = z.object({
   cboId: z.string().optional(),
   admissionDate: z.string().optional(),
   birthDate: z.string().nonempty("Data de nascimento é obrigatória"),
-  // Mantidos no schema como opcionais (não exibidos no formulário)
   rneRnmFederalPoliceProtocol: z.string().optional(),
   brazilEntryDate: z.string().optional(),
   passport: z.string().optional(),
 });
 
-// Apenas um schema é necessário
 const schemaEmployee = createNewEmployeeFormSchema;
 type CreateNewEmpoloyeeFormSchema = z.infer<typeof createNewEmployeeFormSchema>;
 
+/** NOVAS PROPS para suportar fornecedor/subcontratado */
 interface NewModalCreateEmployeeProps {
   onEmployeeCreated: () => void;
+  targetType: "supplier" | "subcontractor";
+  supplierId?: string | null;
+  subcontractId?: string | null;
+  targetName?: string;
 }
 
-export function NewModalCreateEmployee({ onEmployeeCreated }: NewModalCreateEmployeeProps) {
+export function NewModalCreateEmployee({
+  onEmployeeCreated,
+  targetType,
+  supplierId,
+  subcontractId,
+  targetName,
+}: NewModalCreateEmployeeProps) {
   const [isLoading, setIsLoading] = useState(false);
-  const { supplier } = useSupplier();
+  const { supplier } = useSupplier(); // só para fallback de nome do fornecedor
+
   const [cbos, setCbos] = useState<{ id: string; title: string; code: string }[]>([]);
   const [positions, setPositions] = useState<Position[]>([]);
   const [searchCbo, setSearchCbo] = useState("");
@@ -218,58 +228,61 @@ export function NewModalCreateEmployee({ onEmployeeCreated }: NewModalCreateEmpl
       cbo.code.toLowerCase().includes(searchCbo.toLowerCase())
   );
 
-  const formatCPF = (value: string) => {
-    return value
+  const formatCPF = (value: string) =>
+    value
       .replace(/\D/g, "")
       .replace(/(\d{3})(\d)/, "$1.$2")
       .replace(/(\d{3})(\d)/, "$1.$2")
       .replace(/(\d{3})(\d{1,2})$/, "$1-$2")
       .slice(0, 14);
-  };
 
   const formatPhone = (value: string) => {
     const digits = value.replace(/\D/g, "");
-    if (digits.length <= 2) {
-      return digits;
-    } else if (digits.length <= 6) {
-      return `(${digits.slice(0, 2)}) ${digits.slice(2)}`;
-    } else if (digits.length <= 10) {
-      return `(${digits.slice(0, 2)}) ${digits.slice(2, 6)}-${digits.slice(6)}`;
-    } else {
-      return `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7, 11)}`;
-    }
+    if (digits.length <= 2) return digits;
+    if (digits.length <= 6) return `(${digits.slice(0, 2)}) ${digits.slice(2)}`;
+    if (digits.length <= 10) return `(${digits.slice(0, 2)}) ${digits.slice(2, 6)}-${digits.slice(6)}`;
+    return `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7, 11)}`;
   };
 
-  const formatCEP = (value: string) => {
-    return value.replace(/\D/g, "").replace(/(\d{5})(\d)/, "$1-$2").slice(0, 9);
-  };
+  const formatCEP = (value: string) => value.replace(/\D/g, "").replace(/(\d{5})(\d)/, "$1-$2").slice(0, 9);
 
   const formatSalary = (value: string) => {
     const number = Number(value.replace(/\D/g, "")) / 100;
     return number
-      .toLocaleString("pt-BR", {
-        style: "currency",
-        currency: "BRL",
-        minimumFractionDigits: 2,
-      })
+      .toLocaleString("pt-BR", { style: "currency", currency: "BRL", minimumFractionDigits: 2 })
       .replace("R$", "")
       .trim();
   };
 
-  const normalizeSalary = (value: string) => {
-    return parseFloat(value.replace(/\./g, "").replace(",", "."));
-  };
+  const normalizeSalary = (value: string) => parseFloat(value.replace(/\./g, "").replace(",", "."));
+
+  const toISO = (d?: string) => (d ? new Date(d).toISOString() : undefined);
 
   const sendEmployeeData = async (data: CreateNewEmpoloyeeFormSchema) => {
     setIsLoading(true);
 
+    // id do alvo (fornecedor/subcontratado) + bloqueio
+    const targetId = targetType === "supplier" ? supplierId : subcontractId;
+    if (!targetId) {
+      toast.error(targetType === "supplier" ? "Selecione um fornecedor." : "Selecione um subcontratado.");
+      setIsLoading(false);
+      return;
+    }
+
     const payload: any = {
       ...data,
-      supplier: supplier?.idProvider,
       salary: normalizeSalary(data.salary),
+      birthDate: toISO(data.birthDate),
+      admissionDate: data.admissionDate ? toISO(data.admissionDate) : undefined,
     };
 
-    // Remover campos de estrangeiro por segurança
+    if (targetType === "supplier") {
+      payload.supplier = targetId;
+    } else {
+      payload.subcontract = targetId;
+    }
+
+    // não enviar campos de estrangeiro na rota /employee/brazilian
     delete payload.rneRnmFederalPoliceProtocol;
     delete payload.brazilEntryDate;
     delete payload.passport;
@@ -287,14 +300,13 @@ export function NewModalCreateEmployee({ onEmployeeCreated }: NewModalCreateEmpl
       });
 
       toast.success("Sucesso ao cadastrar novo colaborador!");
-
-      setEmployeeName(data.name + " " + data.surname);
-      setSupplierName(supplier?.corporateName || "Fornecedor");
+      setEmployeeName(`${data.name} ${data.surname}`);
+      setTargetDisplayName(
+        targetName || (targetType === "supplier" ? supplier?.corporateName || "Fornecedor" : "Subcontratado")
+      );
       setShowSuccessModal(true);
 
       onEmployeeCreated();
-
-      // Limpar e fechar a modal principal após sucesso
       clearBrazilianEmployeeForm();
       setIsBrazilianEmployeeModalOpen(false);
     } catch (err) {
@@ -322,11 +334,7 @@ export function NewModalCreateEmployee({ onEmployeeCreated }: NewModalCreateEmpl
       const cleanedCep = cepValue.replace(/\D/g, "");
       const res = await axios.get(`https://viacep.com.br/ws/${cleanedCep}/json/`);
       if (res.data && !res.data.erro) {
-        setValuesCep({
-          address: res.data.logradouro,
-          city: res.data.localidade,
-          state: res.data.uf,
-        });
+        setValuesCep({ address: res.data.logradouro, city: res.data.localidade, state: res.data.uf });
         toast.success("Endereço encontrado com sucesso!");
       } else {
         toast.error("CEP não encontrado!");
@@ -344,12 +352,10 @@ export function NewModalCreateEmployee({ onEmployeeCreated }: NewModalCreateEmpl
 
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [employeeName, setEmployeeName] = useState("");
-  const [supplierName, setSupplierName] = useState("");
+  const [targetDisplayName, setTargetDisplayName] = useState("");
 
-  // ---------------------------
-  // Helper para limpar o formulário
   function clearBrazilianEmployeeForm() {
-    reset(); // limpa valores e erros do react-hook-form
+    reset();
     setCpfValue("");
     setCepValue("");
     setPhoneValue("");
@@ -357,25 +363,26 @@ export function NewModalCreateEmployee({ onEmployeeCreated }: NewModalCreateEmpl
     setSearchCbo("");
     setIsLoading(false);
   }
-  // ---------------------------
+
+  // bloquear abertura/envio sem alvo
+  const targetId = targetType === "supplier" ? supplierId : subcontractId;
+  const canSubmit = Boolean(targetId);
 
   return (
     <>
-      {/* Trigger abre diretamente o Dialog de cadastro */}
       <Dialog
         open={isBrazilianEmployeeModalOpen}
         onOpenChange={(open) => {
           setIsBrazilianEmployeeModalOpen(open);
-          if (!open) {
-            // LIMPA ao fechar a modal (X, overlay, ESC, botão externo)
-            clearBrazilianEmployeeForm();
-          }
+          if (!open) clearBrazilianEmployeeForm();
         }}
       >
         <DialogTrigger asChild>
           <Button
             className="hidden md:block bg-realizaBlue border border-white rounded-md"
-            onClick={() => setIsBrazilianEmployeeModalOpen(true)}
+            onClick={() => canSubmit && setIsBrazilianEmployeeModalOpen(true)}
+            disabled={!canSubmit}
+            title={!canSubmit ? (targetType === "supplier" ? "Selecione um fornecedor" : "Selecione um subcontratado") : ""}
           >
             Cadastrar novo colaborador +
           </Button>
@@ -384,7 +391,9 @@ export function NewModalCreateEmployee({ onEmployeeCreated }: NewModalCreateEmpl
         <DialogTrigger asChild>
           <Button
             className="md:hidden bg-realizaBlue"
-            onClick={() => setIsBrazilianEmployeeModalOpen(true)}
+            onClick={() => canSubmit && setIsBrazilianEmployeeModalOpen(true)}
+            disabled={!canSubmit}
+            title={!canSubmit ? (targetType === "supplier" ? "Selecione um fornecedor" : "Selecione um subcontratado") : ""}
           >
             +
           </Button>
@@ -406,37 +415,30 @@ export function NewModalCreateEmployee({ onEmployeeCreated }: NewModalCreateEmpl
             <ScrollArea className="h-[75vh]">
               <div>
                 <form
-                  action=""
                   className="flex flex-col gap-5 bg-white p-5"
                   onSubmit={handleSubmit(
                     handleSubmitEmployee,
-                    (errors) => {
-                      console.log("Erros detectados:", errors);
-                    }
+                    (errors) => console.log("Erros detectados:", errors)
                   )}
                 >
-                  {/* Nome */}
                   <div>
                     <Label>Nome</Label>
                     <Input type="text" placeholder="Digite seu nome" {...register("name")} />
                     {errors.name && <span className="text-sm text-red-600">{errors.name.message}</span>}
                   </div>
 
-                  {/* Sobrenome */}
                   <div>
                     <Label>Sobrenome</Label>
                     <Input type="text" placeholder="Digite seu sobrenome" {...register("surname")} />
                     {errors.surname && <span className="text-sm text-red-600">{errors.surname.message}</span>}
                   </div>
 
-                  {/* Data de nascimento */}
                   <div>
                     <Label>Data de nascimento</Label>
                     <Input type="date" placeholder="Digite a data de nascimento" {...register("birthDate")} />
                     {errors.birthDate && <span className="text-sm text-red-600">{errors.birthDate.message}</span>}
                   </div>
 
-                  {/* Estado civil */}
                   <div>
                     <Label>Estado civil</Label>
                     <select {...register("maritalStatus")} className="flex flex-col rounded-md border p-2 w-full">
@@ -453,7 +455,6 @@ export function NewModalCreateEmployee({ onEmployeeCreated }: NewModalCreateEmpl
                     )}
                   </div>
 
-                  {/* Tipo de contrato */}
                   <div>
                     <Label>Tipo de contrato</Label>
                     <select {...register("contractType")} className="flex flex-col rounded-md border p-2 w-full">
@@ -473,7 +474,6 @@ export function NewModalCreateEmployee({ onEmployeeCreated }: NewModalCreateEmpl
                     {errors.contractType && <span className="text-sm text-red-600">{errors.contractType.message}</span>}
                   </div>
 
-                  {/* CPF */}
                   <div>
                     <Label>CPF</Label>
                     <Input
@@ -490,28 +490,22 @@ export function NewModalCreateEmployee({ onEmployeeCreated }: NewModalCreateEmpl
                     {errors.cpf && <span className="text-sm text-red-600">{errors.cpf.message}</span>}
                   </div>
 
-                  {/* Data de admissão */}
                   <div>
                     <Label>Data de admissão</Label>
                     <Input type="date" {...register("admissionDate")} />
                   </div>
 
-                  {/* Salário */}
                   <div>
                     <Label>Salário:</Label>
                     <Input
                       type="text"
                       {...register("salary")}
-                      onChange={(e) => {
-                        const formattedSalary = formatSalary(e.target.value);
-                        setValue("salary", formattedSalary);
-                      }}
+                      onChange={(e) => setValue("salary", formatSalary(e.target.value))}
                       placeholder="000.000,00"
                     />
                     {errors.salary && <span className="text-sm text-red-600">{errors.salary.message}</span>}
                   </div>
 
-                  {/* Sexo */}
                   <div>
                     <Label>Sexo</Label>
                     <select {...register("gender")} className="flex flex-col rounded-md border p-2 w-full">
@@ -522,7 +516,6 @@ export function NewModalCreateEmployee({ onEmployeeCreated }: NewModalCreateEmpl
                     {errors.gender && <span className="text-red-600">{errors.gender.message}</span>}
                   </div>
 
-                  {/* CEP */}
                   <div>
                     <Label>CEP</Label>
                     <div className="flex w-full gap-2">
@@ -547,41 +540,35 @@ export function NewModalCreateEmployee({ onEmployeeCreated }: NewModalCreateEmpl
                     {errors.cep && <span className="text-sm text-red-600">{errors.cep.message}</span>}
                   </div>
 
-                  {/* Estado */}
                   <div>
                     <Label>Estado</Label>
                     <Input placeholder="Digite seu estado" {...register("state")} />
                     {errors.state && <span className="text-sm text-red-600">{errors.state.message}</span>}
                   </div>
 
-                  {/* Cidade */}
                   <div>
                     <Label>Cidade</Label>
                     <Input placeholder="Digite sua cidade" {...register("city")} />
                     {errors.city && <span className="text-sm text-red-600">{errors.city.message}</span>}
                   </div>
 
-                  {/* Endereço */}
                   <div>
                     <Label>Endereco</Label>
                     <Input placeholder="Digite seu endereço" {...register("address")} />
                     {errors.address && <span className="text-sm text-red-600">{errors.address.message}</span>}
                   </div>
 
-                  {/* Número */}
                   <div>
                     <Label>Número</Label>
                     <Input placeholder="Digite o número" {...register("number")} />
                     {errors.number && <span className="text-sm text-red-600">{errors.number.message}</span>}
                   </div>
 
-                  {/* Complemento */}
                   <div>
                     <Label>Complemento</Label>
                     <Input placeholder="Digite o complemento" {...register("complement")} />
                   </div>
 
-                  {/* Telefone */}
                   <div className="flex flex-col gap-2">
                     <Label>Telefone</Label>
                     <Input
@@ -598,7 +585,6 @@ export function NewModalCreateEmployee({ onEmployeeCreated }: NewModalCreateEmpl
                     {errors.phone && <span className="text-sm text-red-600">{errors.phone.message}</span>}
                   </div>
 
-                  {/* Celular */}
                   <div className="flex flex-col gap-2">
                     <Label>Celular</Label>
                     <Input
@@ -615,7 +601,6 @@ export function NewModalCreateEmployee({ onEmployeeCreated }: NewModalCreateEmpl
                     {errors.mobile && <span className="text-sm text-red-600">{errors.mobile.message}</span>}
                   </div>
 
-                  {/* Cargo */}
                   <div>
                     <Label>Cargo</Label>
                     <select {...register("positionId")} className="flex flex-col rounded-md border p-2 w-full">
@@ -629,7 +614,6 @@ export function NewModalCreateEmployee({ onEmployeeCreated }: NewModalCreateEmpl
                     {errors.positionId && <span className="text-red-600">{errors.positionId.message}</span>}
                   </div>
 
-                  {/* CBO */}
                   <div>
                     <Label>CBO</Label>
                     <div className="border border-neutral-400 flex items-center gap-2 rounded-md px-2 py-1 bg-white shadow-sm">
@@ -652,7 +636,6 @@ export function NewModalCreateEmployee({ onEmployeeCreated }: NewModalCreateEmpl
                     </select>
                   </div>
 
-                  {/* Educação */}
                   <div className="flex flex-col gap-2">
                     <Label>Graduação</Label>
                     <select {...register("education")} className="flex flex-col rounded-md border p-2">
@@ -675,7 +658,7 @@ export function NewModalCreateEmployee({ onEmployeeCreated }: NewModalCreateEmpl
                     {errors.education && <span className="text-red-600">{errors.education.message}</span>}
                   </div>
 
-                  <Button type="submit" className="bg-realizaBlue" disabled={isLoading}>
+                  <Button type="submit" className="bg-realizaBlue" disabled={isLoading || !canSubmit}>
                     {isLoading ? <Oval visible={true} height={20} width={20} color="#fff" ariaLabel="oval-loading" /> : "Cadastrar"}
                   </Button>
                 </form>
@@ -690,10 +673,7 @@ export function NewModalCreateEmployee({ onEmployeeCreated }: NewModalCreateEmpl
         open={showSuccessModal}
         onOpenChange={(open) => {
           setShowSuccessModal(open);
-          if (!open) {
-            // Opcional: ao fechar a modal de sucesso, garantir que o form esteja limpo
-            clearBrazilianEmployeeForm();
-          }
+          if (!open) clearBrazilianEmployeeForm();
         }}
       >
         <DialogContent className="max-w-[700px] p-6 text-center">
@@ -706,9 +686,8 @@ export function NewModalCreateEmployee({ onEmployeeCreated }: NewModalCreateEmpl
           <div className="flex ">
             <div className="flex flex-col items-center justify-center gap-4 py-4 w-[100%]">
               <p className="text-md text-gray-700 text-start">
-                Colaborador <strong>"{employeeName}"</strong> adicionado com sucesso à aba de colaboradores. Se deseja
-                visualizar este colaborador, acesse a aba de colaboradores vinculados ao fornecedor{" "}
-                <strong>"{supplierName}"</strong>.
+                Colaborador <strong>"{employeeName}"</strong> adicionado com sucesso. Para visualizar,
+                acesse a aba de colaboradores vinculados a <strong>"{targetDisplayName}"</strong>.
               </p>
             </div>
           </div>
