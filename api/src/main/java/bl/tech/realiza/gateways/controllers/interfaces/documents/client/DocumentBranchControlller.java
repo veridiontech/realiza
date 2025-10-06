@@ -23,8 +23,8 @@ public interface DocumentBranchControlller {
     ResponseEntity<DocumentResponseDto> getBranchDocuments(String id);
     ResponseEntity<String> addRequiredDocument(String idEnterprise, String documentMatrixId);
     ResponseEntity<Void> removeRequiredDocument(String documentId);
-    ResponseEntity<List<DocumentSummarizedResponseDto>> getAllFilteredDocumentBranch(String idBranch, String documentTypeName, Boolean isSelected);
-    ResponseEntity<List<DocumentExpirationResponseDto>> getAllFilteredDocumentBranchExpiration(String idBranch, String documentTypeName, Boolean isSelected);
+    ResponseEntity<List<DocumentSummarizedResponseDto>> getAllFilteredDocumentBranch(String idBranch, String documentTypeName, Boolean isSelected, Boolean required);
+    ResponseEntity<List<DocumentExpirationResponseDto>> getAllFilteredDocumentBranchExpiration(String idBranch, String documentTypeName, Boolean isSelected, Boolean required);
     ResponseEntity<String> updateSelectedBranchDocuments(Boolean isSelected, UpdateDocumentRequestDto updateDocumentRequestDto, Boolean replicate);
     ResponseEntity<DocumentExpirationResponseDto> updateSelectedBranchDocumentsExpiration(String idDocumentation, DocumentExpirationUpdateRequestDto documentExpirationUpdateRequestDto, Boolean replicate, List<String> branchIds);
 }

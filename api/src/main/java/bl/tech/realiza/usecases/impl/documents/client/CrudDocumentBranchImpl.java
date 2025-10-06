@@ -470,21 +470,28 @@ public class CrudDocumentBranchImpl implements CrudDocumentBranch {
     }
 
     @Override
-    public List<DocumentSummarizedResponseDto> findAllFilteredDocuments(String id, String documentTypeName, Boolean isSelected) {
+    public List<DocumentSummarizedResponseDto> findAllFilteredDocuments(String id, String documentTypeName, Boolean isSelected, Boolean required) {
         branchRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Branch not found"));
 
-        return documentBranchRepository.findFilteredDocumentsSimplified(id, documentTypeName, isSelected);
+        return documentBranchRepository.findFilteredDocumentsSimplified(id, documentTypeName, isSelected, required);
     }
 
 
     @Override
-    public List<DocumentExpirationResponseDto> findAllFilteredDocumentsExpiration(String idBranch, String documentTypeName, Boolean isSelected) {
+    public List<DocumentExpirationResponseDto> findAllFilteredDocumentsExpiration(String idBranch, String documentTypeName, Boolean isSelected, Boolean required) {
         branchRepository.findById(idBranch)
                 .orElseThrow(() -> new NotFoundException("Branch not found"));
 
-        List<DocumentBranch> documentBranch = documentBranchRepository
-                .findAllByBranch_IdBranchAndDocumentMatrix_TypeAndIsActive(idBranch, documentTypeName.toLowerCase(), isSelected);
+        List<DocumentBranch> documentBranch;
+
+        if (required != null) {
+            documentBranch = documentBranchRepository
+                    .findAllByBranch_IdBranchAndDocumentMatrix_TypeAndIsActiveAndRequired(idBranch, documentTypeName.toLowerCase(), isSelected, required);
+        } else {
+            documentBranch = documentBranchRepository
+                    .findAllByBranch_IdBranchAndDocumentMatrix_TypeAndIsActive(idBranch, documentTypeName.toLowerCase(), isSelected);
+        }
 
         return documentBranch.stream()
                 .sorted(Comparator.comparing(Document::getTitle, Comparator.nullsLast(String.CASE_INSENSITIVE_ORDER)))
@@ -620,6 +627,9 @@ public class CrudDocumentBranchImpl implements CrudDocumentBranch {
         documentBranch.setDoesBlock(documentExpirationUpdateRequestDto.getDoesBlock() != null
                 ? documentExpirationUpdateRequestDto.getDoesBlock()
                 : documentBranch.getDoesBlock());
+        documentBranch.setRequired((documentExpirationUpdateRequestDto.getRequired() != null
+                ? documentExpirationUpdateRequestDto.getRequired()
+                : documentBranch.getRequired()));
 
         DocumentBranch savedDocumentBranch = documentBranchRepository.save(documentBranch);
 
@@ -653,6 +663,8 @@ public class CrudDocumentBranchImpl implements CrudDocumentBranch {
                 .title(documentBranch.getTitle())
                 .expirationDateAmount(documentBranch.getExpirationDateAmount())
                 .expirationDateUnit(documentBranch.getExpirationDateUnit())
+                .doesBlock(documentBranch.getDoesBlock())
+                .required(documentBranch.getRequired())
                 .build();
     }
 }

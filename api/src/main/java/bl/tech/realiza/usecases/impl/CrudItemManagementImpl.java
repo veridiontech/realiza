@@ -770,14 +770,17 @@ public class CrudItemManagementImpl implements CrudItemManagement {
 
     private ItemManagementProviderResponseDto toItemManagementProviderResponseDto(ItemManagement itemManagement, User requester, Provider newProvider) {
         String enterpriseName = null;
+        String enterpriseCnpj = null;
         String clientName = null;
         String clientCnpj = null;
         String branchName = null;
+        String branchCnpj = null;
 
         Provider unproxiedProvider = (Provider) Hibernate.unproxy(newProvider);
 
         if (unproxiedProvider instanceof ProviderSupplier providerSupplier) {
             enterpriseName = providerSupplier.getCorporateName();
+            enterpriseCnpj = providerSupplier.getCnpj();
             clientName = !providerSupplier.getBranches().isEmpty()
                     ? providerSupplier.getBranches().get(0).getClient().getCorporateName()
                     : null;
@@ -789,8 +792,14 @@ public class CrudItemManagementImpl implements CrudItemManagement {
                     ? providerSupplier.getBranches().get(0).getName()
                     : null
                     : null;
+            branchCnpj = !providerSupplier.getBranches().isEmpty()
+                    ? providerSupplier.getBranches().get(0) != null
+                    ? providerSupplier.getBranches().get(0).getCnpj()
+                    : null
+                    : null;
         } else if (unproxiedProvider instanceof ProviderSubcontractor providerSubcontractor) {
             enterpriseName = providerSubcontractor.getCorporateName();
+            enterpriseCnpj = providerSubcontractor.getCnpj();
             clientName = !providerSubcontractor.getProviderSupplier().getBranches().isEmpty()
                     ? providerSubcontractor.getProviderSupplier().getBranches().get(0).getClient().getCorporateName()
                     : null;
@@ -802,11 +811,17 @@ public class CrudItemManagementImpl implements CrudItemManagement {
                     ? providerSubcontractor.getProviderSupplier().getBranches().get(0).getName()
                     : null
                     : null;
+            branchCnpj = !providerSubcontractor.getProviderSupplier().getBranches().isEmpty()
+                    ? providerSubcontractor.getProviderSupplier().getBranches().get(0) != null
+                    ? providerSubcontractor.getProviderSupplier().getBranches().get(0).getCnpj()
+                    : null
+                    : null;
         }
 
         return ItemManagementProviderResponseDto.builder()
                 .idSolicitation(itemManagement.getIdSolicitation())
                 .enterpriseName(enterpriseName)
+                .enterpriseCnpj(enterpriseCnpj)
                 .solicitationType(itemManagement.getSolicitationType())
                 .clientName(clientName)
                 .clientCnpj(clientCnpj)
@@ -814,6 +829,7 @@ public class CrudItemManagementImpl implements CrudItemManagement {
                 .requesterEmail(requester.getEmail())
                 .status(itemManagement.getStatus())
                 .branchName(branchName)
+                .branchCnpj(branchCnpj)
                 .creationDate(itemManagement.getCreationDate())
                 .build();
     }
@@ -827,19 +843,23 @@ public class CrudItemManagementImpl implements CrudItemManagement {
         Branch branch = null;
         String ownerName = null;
         String enterpriseName = null;
+        String enterpriseCnpj = null;
         String clientName = null;
         String clientCnpj = null;
         String branchName = null;
+        String branchCnpj = null;
 
         if (contract instanceof ContractProviderSupplier contractProviderSupplier) {
             branch = contractProviderSupplier.getBranch();
             branchName = branch.getName();
+            branchCnpj = branch.getCnpj();
             client = branch.getClient();
             clientName = client.getCorporateName();
             clientCnpj = client.getCnpj();
         } else if (contract instanceof ContractProviderSubcontractor contractProviderSubcontractor) {
             branch = contractProviderSubcontractor.getContractProviderSupplier().getBranch();
             branchName = branch.getName();
+            branchCnpj = branch.getCnpj();
             client = branch.getClient();
             clientName = client.getCorporateName();
             clientCnpj = client.getCnpj();
@@ -849,17 +869,21 @@ public class CrudItemManagementImpl implements CrudItemManagement {
             ownerName = documentEmployee.getEmployee().getFullName();
             if (employee.getSupplier() != null) {
                enterpriseName = employee.getSupplier().getCorporateName();
+               enterpriseCnpj = employee.getSupplier().getCnpj();
             } else if(employee.getSubcontract() != null) {
                enterpriseName = employee.getSubcontract().getCorporateName();
+               enterpriseCnpj = employee.getSubcontract().getCnpj();
             }
         } else if (document instanceof DocumentProviderSupplier documentProviderSupplier) {
             Provider provider = documentProviderSupplier.getProviderSupplier();
             ownerName = provider.getCorporateName();
             enterpriseName = provider.getCorporateName();
+            enterpriseCnpj = provider.getCnpj();
         } else if (document instanceof DocumentProviderSubcontractor documentProviderSubcontractor) {
             Provider provider = documentProviderSubcontractor.getProviderSubcontractor();
             ownerName = provider.getCorporateName();
             enterpriseName = provider.getCorporateName();
+            enterpriseCnpj = provider.getCnpj();
         }
 
         return ItemManagementDocumentResponseDto.builder()
@@ -867,11 +891,13 @@ public class CrudItemManagementImpl implements CrudItemManagement {
                 .title(document.getTitle())
                 .ownerName(ownerName)
                 .enterpriseName(enterpriseName)
+                .enterpriseCnpj(enterpriseCnpj)
                 .solicitationType(itemManagement.getSolicitationType())
                 .description(itemManagement.getDescription())
                 .clientName(clientName)
                 .clientCnpj(clientCnpj)
                 .branchName(branchName)
+                .branchCnpj(branchCnpj)
                 .requesterName(requester.getFullName())
                 .requesterEmail(requester.getEmail())
                 .status(itemManagement.getStatus())
@@ -885,24 +911,30 @@ public class CrudItemManagementImpl implements CrudItemManagement {
         Client client = null;
         Branch branch = null;
         String enterpriseName = null;
+        String enterpriseCnpj = null;
         String contractReference = null;
         String clientName = null;
         String clientCnpj = null;
         String branchName = null;
+        String branchCnpj = null;
 
         contractReference = contract.getContractReference();
 
         if (contract instanceof ContractProviderSupplier contractProviderSupplier) {
             enterpriseName = contractProviderSupplier.getProviderSupplier().getCorporateName();
+            enterpriseCnpj = contractProviderSupplier.getProviderSupplier().getCnpj();
             branch = contractProviderSupplier.getBranch();
             branchName = branch.getName();
+            branchCnpj = branch.getCnpj();
             client = branch.getClient();
             clientName = client.getCorporateName();
             clientCnpj = client.getCnpj();
         } else if (contract instanceof ContractProviderSubcontractor contractProviderSubcontractor) {
             enterpriseName = contractProviderSubcontractor.getProviderSubcontractor().getCorporateName();
+            enterpriseCnpj = contractProviderSubcontractor.getProviderSubcontractor().getCnpj();
             branch = contractProviderSubcontractor.getContractProviderSupplier().getBranch();
             branchName = branch.getName();
+            branchCnpj = branch.getCnpj();
             client = branch.getClient();
             clientName = client.getCorporateName();
             clientCnpj = client.getCnpj();
@@ -912,10 +944,12 @@ public class CrudItemManagementImpl implements CrudItemManagement {
                 .idSolicitation(itemManagement.getIdSolicitation())
                 .contractReference(contractReference)
                 .enterpriseName(enterpriseName)
+                .enterpriseCnpj(enterpriseCnpj)
                 .solicitationType(itemManagement.getSolicitationType())
                 .clientName(clientName)
                 .clientCnpj(clientCnpj)
                 .branchName(branchName)
+                .branchCnpj(branchCnpj)
                 .requesterName(requester.getFullName())
                 .requesterEmail(requester.getEmail())
                 .status(itemManagement.getStatus())
@@ -1029,10 +1063,12 @@ public class CrudItemManagementImpl implements CrudItemManagement {
             Provider provider = documentProviderSupplier.getProviderSupplier();
             ownerName = provider.getCorporateName();
             enterpriseName = provider.getCorporateName();
+            enterpriseCnpj = provider.getCnpj();
         } else if (document instanceof DocumentProviderSubcontractor documentProviderSubcontractor) {
             Provider provider = documentProviderSubcontractor.getProviderSubcontractor();
             ownerName = provider.getCorporateName();
             enterpriseName = provider.getCorporateName();
+            enterpriseCnpj = provider.getCnpj();
         }
 
         return ItemManagementDocumentDetailsResponseDto.builder()
@@ -1044,6 +1080,7 @@ public class CrudItemManagementImpl implements CrudItemManagement {
                         .cnpj(clientCnpj)
                         .build())
                 .enterprise(ItemManagementDocumentDetailsResponseDto.Enterprise.builder()
+                        .cnpj(enterpriseCnpj)
                         .corporateName(enterpriseName)
                         .build())
                 .requester(ItemManagementDocumentDetailsResponseDto.Requester.builder()
@@ -1065,17 +1102,20 @@ public class CrudItemManagementImpl implements CrudItemManagement {
         String clientName = null;
         String clientCnpj = null;
         String enterpriseName = null;
+        String enterpriseCnpj = null;
         String contractReference = null;
 
         contractReference = contract.getContractReference();
         if (contract instanceof ContractProviderSupplier contractProviderSupplier) {
             enterpriseName = contractProviderSupplier.getProviderSupplier().getCorporateName();
+            enterpriseCnpj = contractProviderSupplier.getProviderSupplier().getCnpj();
             branch = contractProviderSupplier.getBranch();
             client = branch.getClient();
             clientName = client.getCorporateName();
             clientCnpj = client.getCnpj();
         } else if (contract instanceof ContractProviderSubcontractor contractProviderSubcontractor) {
             enterpriseName = contractProviderSubcontractor.getProviderSubcontractor().getCorporateName();
+            enterpriseCnpj = contractProviderSubcontractor.getProviderSubcontractor().getCnpj();
             branch = contractProviderSubcontractor.getContractProviderSupplier().getBranch();
             client = branch.getClient();
             clientName = client.getCorporateName();
@@ -1091,6 +1131,7 @@ public class CrudItemManagementImpl implements CrudItemManagement {
                         .cnpj(clientCnpj)
                         .build())
                 .enterprise(ItemManagementContractDetailsResponseDto.Enterprise.builder()
+                        .cnpj(enterpriseCnpj)
                         .corporateName(enterpriseName)
                         .build())
                 .requester(ItemManagementContractDetailsResponseDto.Requester.builder()

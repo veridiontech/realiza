@@ -16,11 +16,13 @@ import java.time.LocalDateTime;
 public class ItemManagementProviderResponseDto {
     private String idSolicitation;
     private String enterpriseName; // nome da empresa
+    private String enterpriseCnpj; // cnpj da empresa
 
     private ItemManagement.SolicitationType solicitationType; // criação/inativação
     private String clientName; // nome do cliente na qual essa empresa pertence
     private String clientCnpj; // cnpj do cliente
     private String branchName; // nome da filial
+    private String branchCnpj; // cnpj da filial
 
     private String requesterName; // nome do requirente
     private String requesterEmail; // email do requirente

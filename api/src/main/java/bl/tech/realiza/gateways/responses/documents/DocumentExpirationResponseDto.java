@@ -15,5 +15,6 @@ public class DocumentExpirationResponseDto {
     private String title;
     private Integer expirationDateAmount;
     private Boolean doesBlock;
+    private Boolean required;
     private DocumentMatrix.DayUnitEnum expirationDateUnit;
 }

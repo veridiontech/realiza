@@ -1,6 +1,5 @@
 package bl.tech.realiza.gateways.repositories.documents.client;
 
-import bl.tech.realiza.domains.documents.Document;
 import bl.tech.realiza.domains.documents.client.DocumentBranch;
 import bl.tech.realiza.gateways.responses.clients.controlPanel.document.DocumentControlPanelResponseDto;
 import bl.tech.realiza.gateways.responses.documents.DocumentForActivityResponseDto;
@@ -18,6 +17,7 @@ public interface DocumentBranchRepository extends JpaRepository<DocumentBranch, 
     List<DocumentBranch> findAllByBranch_IdBranchAndIsActiveIsTrue(String idSearch);
     List<DocumentBranch> findAllByBranch_IdBranchAndDocumentMatrix_Group_GroupNameAndIsActive(String idSearch, String groupName, Boolean isActive);
     List<DocumentBranch> findAllByBranch_IdBranchAndDocumentMatrix_TypeAndIsActive(String idSearch, String typeName, Boolean isActive);
+    List<DocumentBranch> findAllByBranch_IdBranchAndDocumentMatrix_TypeAndIsActiveAndRequired(String idSearch, String typeName, Boolean isActive,Boolean required);
     List<DocumentBranch> findAllByBranch_IdBranch(String id);
 
     @Query("""
@@ -66,16 +66,19 @@ public interface DocumentBranchRepository extends JpaRepository<DocumentBranch, 
     WHERE d.branch.idBranch = :idBranch
       AND LOWER(m.type) = LOWER(:documentTypeName)
       AND d.isActive = :isSelected
+      AND (:required IS NULL OR m.required = :required)
     ORDER BY LOWER(d.title)
 """)
     List<DocumentSummarizedResponseDto> findFilteredDocumentsSimplified(
             @Param("idBranch") String idBranch,
             @Param("documentTypeName") String documentTypeName,
-            @Param("isSelected") Boolean isSelected
+            @Param("isSelected") Boolean isSelected,
+            @Param("required") Boolean required
     );
 
     List<DocumentBranch> findAllByBranch_Client_IdClientAndTitle(String idClient, String title);
     List<DocumentBranch> findAllByBranch_IdBranchAndTitle(String idBranch, String title);
-
     List<DocumentBranch> findAllByBranch_IdBranchAndDocumentMatrix_IdDocument(String branchId, String documentMatrixId);
+    List<DocumentBranch> findAllByBranch_IdBranchAndRequired(String branchId, Boolean required);
+    List<DocumentBranch> findAllByBranch_IdBranchAndRequiredAndDocumentMatrix_Group_GroupName(String branchId, Boolean required, String groupName);
 }

@@ -56,6 +56,8 @@ public abstract class Document {
     @Builder.Default
     private Boolean doesBlock = false;
     @Builder.Default
+    private Boolean required = false;
+    @Builder.Default
     private Boolean isValidityDone = false;
 
     // -------------------------------

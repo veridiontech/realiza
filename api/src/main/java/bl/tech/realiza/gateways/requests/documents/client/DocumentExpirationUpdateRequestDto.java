@@ -11,4 +11,5 @@ public class DocumentExpirationUpdateRequestDto {
     private Integer expirationDateAmount;
     private DocumentMatrix.DayUnitEnum expirationDateUnit;
     private Boolean doesBlock;
+    private Boolean required;
 }

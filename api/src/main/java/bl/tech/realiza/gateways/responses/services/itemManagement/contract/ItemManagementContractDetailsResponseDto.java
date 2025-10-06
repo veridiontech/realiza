@@ -41,6 +41,7 @@ public class ItemManagementContractDetailsResponseDto {
     @Builder
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
     public static class Enterprise {
+        private String cnpj;
         private String corporateName;
     }
 
