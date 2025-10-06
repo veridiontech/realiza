@@ -1,9 +1,10 @@
 import { useEffect, useState, useMemo } from "react";
 import axios from "axios";
+import * as XLSX from "xlsx";
 import { ip } from "@/utils/ip";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { Trash2, Pencil } from "lucide-react";
+import { Trash2, Pencil, FileDown } from "lucide-react";
 import { useClient } from "@/context/Client-Provider";
 
 interface Document {
@@ -55,6 +56,7 @@ export interface DocumentMatrixEntry {
     expirationDateAmount: number;
     idDocumentGroup: string;
     groupName: string;
+    required: boolean;
 }
 
 type Permissions = {
@@ -199,6 +201,7 @@ export function ConfigPanel() {
     const [editType, setEditType] = useState("");
     const [editIsDocumentUnique, setEditIsDocumentUnique] = useState(false);
     const [editDoesBlock, setEditDoesBlock] = useState(false);
+    const [editIsRequired, setEditIsRequired] = useState(false);
     const [newDocName, setNewDocName] = useState("");
     const [newDocType, setNewDocType] = useState("");
     const [newDocExpirationAmount, setNewDocExpirationAmount] = useState(0);
@@ -206,6 +209,7 @@ export function ConfigPanel() {
         useState("MONTHS");
     const [newDocDoesBlock, setNewDocDoesBlock] = useState(false);
     const [newDocIsUnique, setNewDocIsUnique] = useState(false);
+    const [newDocIsRequired, setNewDocIsRequired] = useState(false);
     const [isCreatingDocument, setIsCreatingDocument] = useState(false);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [isFinalConfirmModalOpen, setIsFinalConfirmModalOpen] = useState(false);
@@ -271,6 +275,7 @@ export function ConfigPanel() {
         setEditType(entry.type);
         setEditIsDocumentUnique(entry.isDocumentUnique);
         setEditDoesBlock(entry.doesBlock);
+        setEditIsRequired(!!entry.required);
         setIsEditingMatrix(true);
     }
 
@@ -1106,7 +1111,7 @@ export function ConfigPanel() {
     async function saveMatrixEntry() {
         if (!selectedMatrixEntry) return;
 
-        const payload: DocumentMatrixEntry = {
+        const payload = {
             ...selectedMatrixEntry,
             name: editName,
             expirationDateUnit: editExpirationUnit,
@@ -1114,6 +1119,7 @@ export function ConfigPanel() {
             type: editType,
             isDocumentUnique: editIsDocumentUnique,
             doesBlock: editDoesBlock,
+            required: !!editIsRequired,
         };
 
         try {
@@ -1133,7 +1139,7 @@ export function ConfigPanel() {
             );
             setDocsList((prev) =>
                 prev.map((e) =>
-                    e.idDocumentMatrix === payload.idDocumentMatrix ? payload : e
+                    e.idDocumentMatrix === (payload as DocumentMatrixEntry).idDocumentMatrix ? (payload as DocumentMatrixEntry) : e
                 )
             );
 
@@ -1175,6 +1181,7 @@ export function ConfigPanel() {
             expirationDateUnit: 'MONTHS',
             expirationDateAmount: newDocExpirationAmount,
             group: selectedGroup,
+            required: !!newDocIsRequired,
         };
 
         console.log("Payload para criação de documento de matriz:", payload);
@@ -1196,6 +1203,7 @@ export function ConfigPanel() {
             setNewDocExpirationUnit("MONTHS");
             setNewDocDoesBlock(false);
             setNewDocIsUnique(false);
+            setNewDocIsRequired(false);
 
             if (selectedGroup) {
                 getDocsByGroup(selectedGroup);
@@ -1222,6 +1230,43 @@ export function ConfigPanel() {
         { value: 'trabalhista', label: 'Trabalhista' },
         { value: 'geral', label: 'Geral' },
     ];
+
+    const handleExportExcel = () => {
+        if (!selectedGroup || docsList.length === 0) {
+            toast.info("Nenhum documento para exportar.");
+            return;
+        }
+
+        const selectedGroupInfo = documentGroups.find(g => g.idDocumentGroup === selectedGroup);
+        const groupName = selectedGroupInfo ? selectedGroupInfo.groupName : "Grupo";
+
+        const dataToExport = docsList.map(doc => {
+            const typeLabel = documentTypes.find(t => t.value === doc.type)?.label || doc.type;
+            return {
+                "Nome do Documento": doc.name,
+                "Tipo": typeLabel,
+                "Validade (meses)": doc.expirationDateAmount > 0 ? doc.expirationDateAmount : "N/A",
+                "Bloqueia": doc.doesBlock ? "Sim" : "Não",
+                "Documento Único": doc.isDocumentUnique ? "Sim" : "Não",
+            };
+        });
+
+        const worksheet = XLSX.utils.json_to_sheet(dataToExport);
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, "Documentos");
+
+        worksheet["!cols"] = [
+            { wch: 50 },
+            { wch: 25 },
+            { wch: 20 },
+            { wch: 10 },
+            { wch: 20 },
+        ];
+
+        const fileName = `Documentos_${groupName.replace(/[^a-zA-Z0-9]/g, '_')}.xlsx`;
+        XLSX.writeFile(workbook, fileName);
+        toast.success("Download do Excel iniciado.");
+    };
 
     return (
         <div className="p-6 md:p-10 flex flex-col gap-0 md:gap-0">
@@ -1871,8 +1916,19 @@ export function ConfigPanel() {
                                     ))}
                                 </select>
                             </div>
-                            <h3 className="text-lg font-semibold mt-6 mb-2">
-                                Documentos do Grupo
+                            <h3 className="text-lg font-semibold mt-6 mb-2 flex justify-between items-center">
+                                <span>Documentos do Grupo</span>
+                                {selectedGroup && !isLoadingDocsList && docsList.length > 0 && (
+                                    <Button
+                                        onClick={handleExportExcel}
+                                        variant="outline"
+                                        size="sm"
+                                        className="flex items-center gap-2"
+                                    >
+                                        <FileDown className="w-4 h-4" />
+                                        Exportar Excel
+                                    </Button>
+                                )}
                             </h3>
                             {!selectedGroup ? (
                                 <p className="text-gray-500">
@@ -2007,6 +2063,14 @@ export function ConfigPanel() {
                                             <label className="flex items-center gap-2 text-sm font-medium">
                                                 <input
                                                     type="checkbox"
+                                                    checked={editIsRequired}
+                                                    onChange={(e) => setEditIsRequired(e.target.checked)}
+                                                />
+                                                Documento Obrigatório
+                                            </label>
+                                            <label className="flex items-center gap-2 text-sm font-medium">
+                                                <input
+                                                    type="checkbox"
                                                     checked={editDoesBlock}
                                                     onChange={(e) => setEditDoesBlock(e.target.checked)}
                                                 />
@@ -2124,6 +2188,15 @@ export function ConfigPanel() {
                                             </div>
                                         </div>
                                         <div className="space-y-2">
+                                            <label className="flex items-center gap-2 text-sm font-medium">
+                                                <input
+                                                    type="checkbox"
+                                                    checked={newDocIsRequired}
+                                                    onChange={(e) => setNewDocIsRequired(e.target.checked)}
+                                                    disabled={!selectedGroup || isCreatingDocument}
+                                                />
+                                                Documento Obrigatório
+                                            </label>
                                             <label className="flex items-center gap-2 text-sm font-medium">
                                                 <input
                                                     type="checkbox"

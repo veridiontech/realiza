@@ -7,7 +7,7 @@ interface ExpirationItem {
   title: string;
   expirationDateAmount: number;
   expirationDateUnit: "DAYS" | "WEEKS" | "MONTHS";
-  doesBlock: boolean; 
+  doesBlock: boolean;
 }
 
 interface ValidateSectionProps {
@@ -22,9 +22,7 @@ export function ValidateSection({
   isSelected,
 }: ValidateSectionProps) {
   const [expirationList, setExpirationList] = useState<ExpirationItem[]>([]);
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const [amountEdit, setAmountEdit] = useState(0);
-  const [doesBlockEdit, setBlockEdit] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 
   const fetchExpirations = async () => {
@@ -41,7 +39,12 @@ export function ValidateSection({
         `${ip}/document/branch/document-matrix/expiration/${idBranch}`,
         {
           headers: { Authorization: `Bearer ${token}` },
-          params: { documentTypeName, isSelected: true, replicate: false, _ts: Date.now() },
+          params: {
+            documentTypeName,
+            isSelected: true,
+            replicate: false,
+            _ts: Date.now(),
+          },
         }
       );
 
@@ -62,40 +65,51 @@ export function ValidateSection({
     fetchExpirations();
   }, [idBranch, documentTypeName, isSelected]);
 
-  const handleEditClick = (doc: ExpirationItem) => {
-    setEditingId(doc.idDocument);
-    setAmountEdit(Number(doc.expirationDateAmount ?? 0));
-    setBlockEdit(!!doc.doesBlock); 
+  const handleInputChange = (
+    id: string,
+    field: keyof ExpirationItem,
+    value: string | number | boolean
+  ) => {
+    const updatedList = expirationList.map((item) => {
+      if (item.idDocument === id) {
+        return { ...item, [field]: value };
+      }
+      return item;
+    });
+    setExpirationList(updatedList);
   };
 
-  const handleSave = async (id: string) => {
+  const handleSaveAll = async () => {
     setIsSaving(true);
     try {
       const token = localStorage.getItem("tokenClient");
       if (!token) {
         console.error("Token não encontrado.");
+        setIsSaving(false);
         return;
       }
 
-      const payload = {
-        expirationDateAmount: amountEdit,
-        expirationDateUnit: "MONTHS",
-        doesBlock: doesBlockEdit,
-      };
+      const updatePromises = expirationList.map((doc) => {
+        const payload = {
+          expirationDateAmount: Number(doc.expirationDateAmount),
+          expirationDateUnit: "MONTHS",
+          doesBlock: doc.doesBlock,
+        };
+        return axios.post(
+          `${ip}/document/branch/document-matrix/expiration/update/${doc.idDocument}`,
+          payload,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+            params: { replicate: false },
+          }
+        );
+      });
 
-      await axios.post(
-        `${ip}/document/branch/document-matrix/expiration/update/${id}`,
-        payload,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-          params: { replicate: false },
-        }
-      );
-
+      await Promise.all(updatePromises);
+      setIsEditing(false);
       await fetchExpirations();
-      setEditingId(null);
     } catch (err: any) {
-      console.error("Erro ao salvar validade:", err);
+      console.error("Erro ao salvar todas as validades:", err);
       if (err.response) console.error("Detalhes do erro:", err.response.data);
     } finally {
       setIsSaving(false);
@@ -105,70 +119,82 @@ export function ValidateSection({
   if (expirationList.length === 0) return null;
 
   return (
-    <table className="w-full text-sm border border-gray-300">
-      <thead className="bg-gray-100">
-        <tr>
-          <th className="px-2 py-1 text-left">Título</th>
-          <th className="px-2 py-1 text-left">Validade (meses)</th>
-          <th className="px-2 py-1 text-left">
-            Bloqueia 
-          </th>
-          <th className="px-2 py-1 text-left">Ações</th>
-        </tr>
-      </thead>
-      <tbody>
-        {expirationList.map((doc) => (
-          <tr key={doc.idDocument} className="border-t">
-            <td className="px-2 py-1 font-medium">{doc.title}</td>
-
-            {editingId === doc.idDocument ? (
-              <>
-                <td className="px-2 py-1 text-center">
-                  <input
-                    type="number"
-                    min={0}
-                    value={amountEdit}
-                    onChange={(e) =>
-                      setAmountEdit(e.target.value === "" ? 0 : parseInt(e.target.value, 10))
-                    }
-                    className="w-20 border px-1 py-0.5"
-                    disabled={isSaving}
-                  />
-                </td>
-                <td className="px-2 py-1 text-center">
-                  <input
-                    type="checkbox"
-                    checked={!doesBlockEdit} 
-                    onChange={() => setBlockEdit(!doesBlockEdit)} 
-                    disabled={isSaving}
-                  />
-                </td>
-                <td className="px-2 py-1">
-                  <button
-                    onClick={() => handleSave(doc.idDocument)}
-                    className="text-green-600 font-semibold text-sm"
-                    disabled={isSaving}
-                  >
-                    {isSaving ? "Salvando..." : "Salvar"}
-                  </button>
-                </td>
-              </>
-            ) : (
-              <>
-                <td className="px-2 py-1 text-center">{doc.expirationDateAmount}</td>
-                <td className="px-2 py-1 text-center">
-                  <input type="checkbox" checked={!doc.doesBlock} readOnly disabled />
-                </td>
-                <td className="px-2 py-1">
-                  <button onClick={() => handleEditClick(doc)} className="text-blue-600 text-sm">
-                    Editar
-                  </button>
-                </td>
-              </>
-            )}
+    <div>
+      <div className="flex justify-end mb-2">
+        <button
+          onClick={isEditing ? handleSaveAll : () => setIsEditing(true)}
+          className={`font-semibold text-sm ${
+            isEditing ? "text-green-600" : "text-blue-600"
+          }`}
+          disabled={isSaving}
+        >
+          {isSaving ? "Salvando..." : isEditing ? "Salvar" : "Editar"}
+        </button>
+      </div>
+      <table className="w-full text-sm border border-gray-300">
+        <thead className="bg-gray-100">
+          <tr>
+            <th className="px-2 py-1 text-left">Título</th>
+            <th className="px-2 py-1 text-left">Validade (meses)</th>
+            <th className="px-2 py-1 text-left">Bloqueia</th>
           </tr>
-        ))}
-      </tbody>
-    </table>
+        </thead>
+        <tbody>
+          {expirationList.map((doc) => (
+            <tr key={doc.idDocument} className="border-t">
+              <td className="px-2 py-1 font-medium">{doc.title}</td>
+              {isEditing ? (
+                <>
+                  <td className="px-2 py-1">
+                    <input
+                      type="number"
+                      min={0}
+                      value={doc.expirationDateAmount}
+                      onChange={(e) =>
+                        handleInputChange(
+                          doc.idDocument,
+                          "expirationDateAmount",
+                          e.target.value === "" ? 0 : parseInt(e.target.value, 10)
+                        )
+                      }
+                      className="w-20 border px-1 py-0.5"
+                      disabled={isSaving}
+                    />
+                  </td>
+                  <td className="px-2 py-1">
+                    <input
+                      type="checkbox"
+                      checked={!doc.doesBlock}
+                      onChange={(e) =>
+                        handleInputChange(
+                          doc.idDocument,
+                          "doesBlock",
+                          !e.target.checked
+                        )
+                      }
+                      disabled={isSaving}
+                    />
+                  </td>
+                </>
+              ) : (
+                <>
+                  <td className="px-2 py-1 text-center">
+                    {doc.expirationDateAmount}
+                  </td>
+                  <td className="px-2 py-1">
+                    <input
+                      type="checkbox"
+                      checked={!doc.doesBlock}
+                      readOnly
+                      disabled
+                    />
+                  </td>
+                </>
+              )}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
   );
 }
