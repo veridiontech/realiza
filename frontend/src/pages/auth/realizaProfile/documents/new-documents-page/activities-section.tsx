@@ -200,7 +200,7 @@ export function ActiviteSectionBox() {
         <div className="flex gap-2">
           <Dialog>
             <DialogTrigger>
-              <Button className="bg-realizaBlue">
+              <Button className="bg-realizaBlue hidden">
                 Criar nova atividade
               </Button>
             </DialogTrigger>

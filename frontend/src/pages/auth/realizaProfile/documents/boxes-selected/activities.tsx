@@ -1,5 +1,5 @@
 import { useBranch } from "@/context/Branch-provider";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react"; // Importei useMemo
 import axios from "axios";
 import { ip } from "@/utils/ip";
 import { BoxActivities } from "../new-documents-page/box-activitie";
@@ -11,7 +11,7 @@ import { Blocks } from "react-loader-spinner";
 export function ActivitiesBox() {
   const [activitieSelected, setActivitieSelected] = useState<any>(null);
   const [activities, setActivities] = useState<any[]>([]);
-  const [documentsByActivitie, setDocumentsByActivitie] = useState([]);
+  const [documentsByActivitie, setDocumentsByActivitie] = useState<any[]>([]); // Tipagem melhorada
   const { selectedBranch, branch } = useBranch();
   const [loadingDocumentId, setLoadingDocumentId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -19,6 +19,8 @@ export function ActivitiesBox() {
   const [pendingOperation, setPendingOperation] = useState<any>(null);
   const [selectedBranches, setSelectedBranches] = useState<string[]>([]);
   const [replicate, setReplicate] = useState(false);
+  // Novo estado para o termo de pesquisa
+  const [searchTerm, setSearchTerm] = useState("");
 
   const getActivitie = async () => {
     const tokenFromStorage = localStorage.getItem("tokenClient");
@@ -49,12 +51,15 @@ export function ActivitiesBox() {
         }
       );
       setDocumentsByActivitie(res.data);
+      setSearchTerm(""); // Limpa o termo de pesquisa ao carregar novos documentos
     } catch (err) {
       console.log("Erro ao buscar documentos da atividade:", err);
     } finally {
       setIsLoading(false);
     }
   };
+
+  // Funções removeDocumentByActivitie e addDocumentByActivitie permanecem inalteradas...
 
   const removeDocumentByActivitie = async (
     idActivity: string,
@@ -160,6 +165,17 @@ export function ActivitiesBox() {
     }
   };
 
+  // 1. Função de filtro: usa useMemo para otimizar a filtragem
+  const filteredDocuments = useMemo(() => {
+    if (!searchTerm) {
+      return documentsByActivitie;
+    }
+    const lowercasedSearchTerm = searchTerm.toLowerCase();
+    return documentsByActivitie.filter((document) =>
+      document.documentTitle?.toLowerCase().includes(lowercasedSearchTerm)
+    );
+  }, [documentsByActivitie, searchTerm]);
+
   useEffect(() => {
     if (selectedBranch?.idBranch) {
       getActivitie();
@@ -184,44 +200,60 @@ export function ActivitiesBox() {
 
       <div>
         <div className="w-[35vw] border p-5 shadow-md">
+          {/* 2. Input de Pesquisa atualizado com estado e onChange */}
           <div className="flex items-center gap-2 rounded-md border p-2">
             <Search />
-            <input className="outline-none" />
+            <input
+              className="outline-none w-full"
+              placeholder="Pesquisar documentos..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
           </div>
           <ScrollArea className="h-[30vh]">
             {isLoading ? (
-              <div className="flex items-center justify-center">
+              <div className="flex items-center justify-center py-10">
                 <Blocks height="80" width="80" color="#4fa94d" visible={true} />
               </div>
             ) : (
               <div>
-                {documentsByActivitie.map((document: any) => (
-                  <div
-                    key={document.idDocument}
-                    className="flex cursor-pointer items-center gap-2 rounded-sm p-1 hover:bg-gray-200"
-                  >
-                    {loadingDocumentId === document.idDocument ? (
-                      <Blocks height="50" width="50" color="#4fa94d" visible={true} />
-                    ) : (
-                      <input
-                        type="checkbox"
-                        checked={document.selected === true}
-                        onChange={() => handleSelectDocument(document, document.idDocument)}
-                        className="cursor-pointer"
-                      />
-                    )}
-                    <span>{document.documentTitle || "Documento"}</span>
-                  </div>
-                ))}
+                {/* 3. Renderiza a lista filtrada */}
+                {filteredDocuments.length > 0 ? (
+                  filteredDocuments.map((document: any) => (
+                    <div
+                      key={document.idDocument}
+                      className="flex cursor-pointer items-center gap-2 rounded-sm p-1 hover:bg-gray-200"
+                    >
+                      {loadingDocumentId === document.idDocument ? (
+                        <Blocks height="50" width="50" color="#4fa94d" visible={true} />
+                      ) : (
+                        <input
+                          type="checkbox"
+                          checked={document.selected === true}
+                          onChange={() => handleSelectDocument(document, document.idDocument)}
+                          className="cursor-pointer"
+                        />
+                      )}
+                      <span>{document.documentTitle || "Documento sem título"}</span>
+                    </div>
+                  ))
+                ) : (
+                  // Mensagem para quando não houver resultados
+                  <p className="p-4 text-center text-gray-500">
+                    {searchTerm
+                      ? "Nenhum documento encontrado com este termo."
+                      : "Selecione uma atividade para ver os documentos ou adicione um termo de pesquisa."}
+                  </p>
+                )}
               </div>
             )}
           </ScrollArea>
         </div>
       </div>
 
+      {/* Seu Modal de Confirmação de Replicação permanece inalterado */}
       {showReplicateConfirmation && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          {/* Modal com tamanho fixo */}
           <div className="bg-white p-6 rounded-lg shadow-lg max-w-md w-full max-h-[80vh] overflow-hidden flex flex-col">
             <h3 className="text-lg font-semibold mb-4">Replicar Alteração?</h3>
             <p className="mb-4">Deseja replicar esta alteração para outras filiais?</p>
@@ -238,7 +270,6 @@ export function ActivitiesBox() {
 
             {replicate && (
               <div className="flex-1 overflow-y-auto">
-                {/* Aqui, o ScrollArea resolve o problema de altura fixa */}
                 <ScrollArea className="h-full">
                   <div className="text-left">
                     <div className="flex items-center gap-2 mb-2">
