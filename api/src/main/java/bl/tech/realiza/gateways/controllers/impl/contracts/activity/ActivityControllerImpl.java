@@ -1,11 +1,11 @@
 package bl.tech.realiza.gateways.controllers.impl.contracts.activity;
 
-import bl.tech.realiza.gateways.controllers.interfaces.contracts.activity.ActivityControlller;
+import bl.tech.realiza.gateways.controllers.interfaces.contracts.activity.ActivityController;
 import bl.tech.realiza.gateways.requests.contracts.activity.ActivityRequestDto;
 import bl.tech.realiza.gateways.requests.contracts.activity.AddActivitiesToBranchesRequest;
+import bl.tech.realiza.gateways.requests.contracts.activity.DocumentsToActivityRequest;
 import bl.tech.realiza.gateways.responses.contracts.activity.ActivityDocumentResponseDto;
 import bl.tech.realiza.gateways.responses.contracts.activity.ActivityResponseDto;
-import bl.tech.realiza.usecases.impl.contracts.activity.CrudActivityImpl;
 import bl.tech.realiza.usecases.interfaces.contracts.activity.CrudActivity;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -25,7 +25,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 @RequestMapping("/contract/activity")
 @Tag(name = "Activity", description = "Alter the branch activities")
-public class ActivityControllerImpl implements ActivityControlller {
+public class ActivityControllerImpl implements ActivityController {
 
     private final CrudActivity crudActivity;
 
@@ -79,11 +79,19 @@ public class ActivityControllerImpl implements ActivityControlller {
     @PostMapping("/add-document-to-activity/{idActivity}")
     @ResponseStatus(HttpStatus.CREATED)
     @Override
-    public ResponseEntity<ActivityDocumentResponseDto> addDocumentsToActivity(@PathVariable String idActivity,
-                                                                              @RequestParam String idDocumentBranch,
-                                                                              @RequestParam(required = false) Boolean replicate,
-                                                                              @RequestBody(required = false) List<String> branchIds) {
+    public ResponseEntity<ActivityDocumentResponseDto> addDocumentToActivity(@PathVariable String idActivity,
+                                                                             @RequestParam String idDocumentBranch,
+                                                                             @RequestParam(required = false) Boolean replicate,
+                                                                             @RequestBody(required = false) List<String> branchIds) {
         return ResponseEntity.ok(crudActivity.addDocumentToActivity(idActivity, idDocumentBranch, replicate, branchIds));
+    }
+
+    @PostMapping("/add-multiple-documents-to-activity/{idActivity}")
+    @ResponseStatus(HttpStatus.CREATED)
+    @Override
+    public ResponseEntity<List<ActivityDocumentResponseDto>> addMultipleDocumentsToActivity(@PathVariable String idActivity,
+                                                                                      @Valid @RequestBody DocumentsToActivityRequest request) {
+        return ResponseEntity.ok(crudActivity.addMultipleDocumentsToActivity(idActivity, request));
     }
 
     @PostMapping("/add-to-branches")
