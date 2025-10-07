@@ -5,6 +5,7 @@ import bl.tech.realiza.gateways.requests.documents.client.DocumentExpirationUpda
 import bl.tech.realiza.gateways.responses.documents.DocumentExpirationResponseDto;
 import bl.tech.realiza.gateways.responses.documents.DocumentResponseDto;
 import bl.tech.realiza.gateways.responses.documents.DocumentSummarizedResponseDto;
+import bl.tech.realiza.gateways.responses.documents.DocumentSummarizedWithSelectionResponseDto;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.multipart.MultipartFile;
@@ -25,6 +26,6 @@ public interface CrudDocumentBranch {
     String updateSelectedDocuments(Boolean isSelected, List<String> documentCollection, Boolean replicate, List<String> branchIds);
     String addRequiredDocument(String idEnterprise, String documentMatrixId);
     void removeRequiredDocument(String documentId);
-
     DocumentExpirationResponseDto updateSelectedDocumentExpiration(String idDocumentation, DocumentExpirationUpdateRequestDto documentExpirationUpdateRequestDto, Boolean replicate, List<String> branchIds);
+    List<DocumentSummarizedWithSelectionResponseDto> findAllFilteredDocumentBranchWithSelectedForActivity(String activityId);
 }
