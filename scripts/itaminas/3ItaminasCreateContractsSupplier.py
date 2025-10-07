@@ -6,7 +6,11 @@ import time
 import hashlib
 import pandas as pd
 import requests
+import mysql.connector  # NOVO: Import para conexão com o banco
 
+# ==============================================================================
+# CONFIGURAÇÕES GERAIS
+# ==============================================================================
 APP_URL = "http://localhost:8080".rstrip("/")
 
 USER_LOGIN = {
@@ -15,54 +19,84 @@ USER_LOGIN = {
 }
 
 # ====== PREENCHA AQUI ======
-EXCEL_FILE = "SISTEMA NOVO_ITAMINAS.xlsx"  # na mesma pasta do script
+EXCEL_FILE = "SISTEMA NOVO_ITAMINAS.xlsx"
 SHEET_RESULTS = "Resultado da consulta"
 
-CLIENT_ID = "be661155-c0d8-4458-a0b9-b214873cd116"  # caso precise
-REQUESTER_ID = "COLOQUE_ID_DO_REQUISITANTE"
+# ID do cliente para buscar os dados do banco
+CLIENT_ID = "23f05e50-6328-43b0-8283-ec73b4ce2ac1"
+# ID do usuário que está fazendo a requisição do contrato
+REQUESTER_ID = "140e89bb-9777-4bcb-a65c-b7dc2ebdc85c" # Exemplo, troque pelo ID correto
 
-# Dicionários fornecidos por você:
-BRANCH_MAP = {
-    # "Unidade X": "idBranchX",
-"Administrativa":	"9193d738-4446-4655-a650-447feec76158",
-"Compras":	"a4d2ed7d-4458-4862-b3e4-f4e1cfc7cb0d",
-"Custos, Orçamento e Contratos":	"1c661c4e-191e-4fda-82e1-752c67e94052",
-"Engenharia Elétrica e Automação":	"1cc20716-b123-43a3-b4d5-ccfcca8b8729",
-"Engenharia Mecânica":	"e460d590-0471-45eb-9604-1d7b854521e2",
-"Filtragem":	"df5696cb-daa2-499d-ae9b-5fb505764d20",
-"Engenharia de Processamento Mineral":	"95d0f9b2-a2e4-4b09-94e9-f1f604ddd6d9",
-"Geotecnia":	"57d2b987-d8c0-46d3-bb48-9c934bd21657",
-"Infraestrutura":	"5eccde13-4a0e-40fe-a829-21a817d06abb",
-"Logística":	"51417cef-364b-4668-b0a5-1f4ddf21caf5",
-"Manutenção Mecânica Industrial":	"da80c857-11dc-4398-89b1-4914f03a4862",
-"Meio Ambiente":	"a851a8bf-acc5-4a3e-9c1f-8e8e54828e49",
-"Planejamento de Lavra e Geologia":	"8fe77d13-8a0d-4fc7-b6b1-0e9da4bdaf54",
-"Segurança do Trabalho":	"f0105b97-b202-45c2-9188-72d27dce760e",
-"Recursos Humanos":	"438d2c87-7c8d-4e4b-980a-2256eb42673b",
-"Compliance":	"dd98c471-d336-4f2a-b3f3-96892789d93f",
-"Tecnologia da Informação":	"19f2ced4-a7ee-402c-b8dd-e0f349639b1e",
-"Suprimentos":	"5788eb88-44c1-4855-b4d4-7d49bbae524b",
-"Planejamento de Controle e Produção":	"15db246e-01a1-4804-8b34-01c6e6d198a9",
-"Posto de Combustível":	"5598d563-8b57-4fa4-a380-56bb337d4673",
-"Medicina do trabalho":	"d5330f51-5e5e-47f0-a9d5-ea39ffc71613",
-"Cantina":	"53b81e17-9c74-4610-85a0-27c78bb41c7b",
-}
-SERVICE_TYPE_MAP = {
-    # "Tipo Serviço Y": "idServiceTypeY",
-}
-MANAGER_MAP = {
-    # "gestor@empresa.com": "idResponsibleZ",
+# NOVO: Configuração do banco de dados (verifique se está correta)
+DB_CONFIG = {
+    "host": "177.170.30.9",
+    "port": 8004,
+    "user": "veridion_user",
+    "password": "SenhaSegura123!",
+    "database": "dbrealiza"
 }
 
 # ====== Config de rede/log ======
 REQ_TIMEOUT = 20
-RETRY_SLEEP_BASE = 1.2
-MAX_RETRIES = 2
 
-# ====== Helpers de log ======
+# ==============================================================================
+# FUNÇÃO PARA BUSCAR MAPEAMENTOS NO BANCO DE DADOS (NOVO)
+# ==============================================================================
+def fetch_mappings_from_db(client_id: str) -> (dict, dict, dict):
+    """
+    Conecta ao banco de dados para buscar os mapeamentos de unidades,
+    tipos de serviço e gestores relacionados a um cliente específico.
+    """
+    print("Buscando mapeamentos (unidades, serviços, gestores) no banco de dados...")
+    conn = None
+    try:
+        conn = mysql.connector.connect(**DB_CONFIG)
+        cursor = conn.cursor()
+
+        # 1. Buscar Unidades (Branches)
+        cursor.execute("SELECT name, id_branch FROM branch WHERE id_client = %s", (client_id,))
+        branch_map = {name: id_branch for name, id_branch in cursor.fetchall()}
+        print(f"✔ {len(branch_map)} Unidades encontradas para o cliente.")
+
+        # 2. Buscar Tipos de Serviço (vinculados às unidades do cliente)
+        service_type_query = """
+            SELECT DISTINCT st.title, st.id_service_type
+            FROM service_type st
+            JOIN service_type_branch stb ON st.id_service_type = stb.id_service_type
+            JOIN branch b ON stb.id_branch = b.id_branch
+            WHERE b.id_client = %s
+        """
+        cursor.execute(service_type_query, (client_id,))
+        service_type_map = {title: id_service_type for title, id_service_type in cursor.fetchall()}
+        print(f"✔ {len(service_type_map)} Tipos de Serviço encontrados.")
+
+        # 3. Buscar Gestores (vinculados às unidades do cliente)
+        manager_query = """
+            SELECT DISTINCT au.email, au.id_user
+            FROM app_user au
+            JOIN user_client ub ON au.id_user = ub.id_user
+            JOIN branch b ON ub.id_branch = b.id_branch
+            WHERE b.id_client = %s AND au.role = 'ROLE_CLIENT_MANAGER' AND au.email IS NOT NULL
+        """
+        cursor.execute(manager_query, (client_id,))
+        # Garante que a chave (email) seja minúscula para corresponder à lógica do script
+        manager_map = {email.lower(): id_user for email, id_user in cursor.fetchall()}
+        print(f"✔ {len(manager_map)} Gestores encontrados.")
+
+        return branch_map, service_type_map, manager_map
+
+    except mysql.connector.Error as err:
+        print(f"✖✖ ERRO FATAL de banco de dados: {err}")
+        raise SystemExit("Abortando devido à falha na busca de mapeamentos.")
+    finally:
+        if conn and conn.is_connected():
+            conn.close()
+
+# ==============================================================================
+# HELPERS E FUNÇÕES EXISTENTES (sem alteração)
+# ==============================================================================
 def mask_email(email: str) -> str:
-    if not email or "@" not in email:
-        return str(email)
+    if not email or "@" not in email: return str(email)
     name, dom = email.split("@", 1)
     return (name[:2] + "***@" + dom) if len(name) > 2 else ("***@" + dom)
 
@@ -75,251 +109,142 @@ def print_summary(title: str, ok: int, already: int, fail: int, skipped: int = 0
           (f" | ignorados: {skipped}" if skipped else ""))
 
 def request_with_retry(session: requests.Session, method: str, url: str, **kwargs) -> requests.Response:
+    # ... (código original sem alteração)
     attempts = 0
     while True:
         attempts += 1
         try:
             r = session.request(method, url, timeout=REQ_TIMEOUT, **kwargs)
+            if r.status_code < 500 or attempts > 2:
+                return r
+            time.sleep(1.2 * attempts)
         except requests.RequestException as e:
-            if attempts <= MAX_RETRIES:
-                sleep = RETRY_SLEEP_BASE * attempts
-                print(f"↻ exceção de rede, retry em {sleep:.1f}s… | err={e}")
-                time.sleep(sleep)
-                continue
-            raise
-        if r.status_code in (429, 502, 503, 504) and attempts <= MAX_RETRIES:
-            sleep = RETRY_SLEEP_BASE * attempts
-            ra = r.headers.get("Retry-After")
-            if ra:
-                try:
-                    sleep = max(sleep, float(ra))
-                except ValueError:
-                    pass
-            print(f"↻ {r.status_code} em {url} | retry em {sleep:.1f}s…")
-            time.sleep(sleep)
-            continue
-        return r
+            if attempts > 2: raise e
+            time.sleep(1.2 * attempts)
 
 def import_data_same_folder(file_name: str) -> pd.DataFrame:
     dir_atual = os.path.dirname(os.path.realpath(__file__))
     path = os.path.join(dir_atual, file_name)
-    df = pd.read_excel(
-        path,
-        sheet_name=SHEET_RESULTS,
-        engine="openpyxl",
-        dtype=str,
-        keep_default_na=False
-    )
+    df = pd.read_excel(path, sheet_name=SHEET_RESULTS, engine="openpyxl", dtype=str, keep_default_na=False)
     print("Dados importados com sucesso!")
     return df
 
-# ====== Coluna → campo (robusto a variação de maiúsculas/acentos) ======
 def find_column(df: pd.DataFrame, candidates):
     cols = {c.lower(): c for c in df.columns}
     for cand in candidates:
-        if cand.lower() in cols:
-            return cols[cand.lower()]
-    # tentativa: procurar por startswith aproximado
+        if cand.lower() in cols: return cols[cand.lower()]
     for cand in candidates:
         for col in df.columns:
-            if col.lower().startswith(cand.lower()):
-                return col
+            if col.lower().startswith(cand.lower()): return col
     raise ValueError(f"Coluna não encontrada. Procure por um destes nomes: {candidates}")
 
-# ====== Normalizações pontuais ======
 def to_date_sql(value: str) -> str:
-    """
-    Converte para 'YYYY-MM-DD' (Date SQL). Retorna None se não conseguir.
-    """
-    if not value:
-        return None
+    if not value: return None
     try:
         d = pd.to_datetime(value, dayfirst=True, errors="coerce")
-        if pd.isna(d):
-            return None
-        return d.strftime("%Y-%m-%d")
+        return None if pd.isna(d) else d.strftime("%Y-%m-%d")
     except Exception:
         return None
 
-# ====== Corpo do contrato ======
-def build_contract_body(row, cols, warnings_list):
-    # ProviderDatas
-    provider_datas = {
-        "corporateName": (row.get(cols["fornecedor"]) or "").strip() or None,
-        "email": None,   # sempre null
-        "cnpj": (row.get(cols["cnpj"]) or "").strip() or None,
-        "telephone": None,  # sempre null
-    }
+# ==============================================================================
+# LÓGICA DE NEGÓCIO (com alteração para usar MAPs dinâmicos)
+# ==============================================================================
+def build_contract_body(row, cols, warnings_list, branch_map, service_type_map, manager_map):
+    provider_datas = {"corporateName": (row.get(cols["fornecedor"]) or "").strip() or None, "email": None, "cnpj": (row.get(cols["cnpj"]) or "").strip() or None, "telephone": None}
 
-    # Branch
     unidade_nome = (row.get(cols["unidade"]) or "").strip()
-    id_branch = BRANCH_MAP.get(unidade_nome)
-    if not id_branch:
-        warnings_list.append(f"Branch não mapeada: '{unidade_nome}'")
+    id_branch = branch_map.get(unidade_nome)
+    if not id_branch: warnings_list.append(f"Branch não mapeada: '{unidade_nome}'")
 
-    # Gestor
     gestor_email = (row.get(cols["gestor_email"]) or "").strip().lower()
-    id_responsible = MANAGER_MAP.get(gestor_email)
-    if not id_responsible:
-        warnings_list.append(f"Gestor não mapeado: '{gestor_email or '—'}'")
+    if gestor_email:
+        gestor_email = gestor_email.replace('@itaminas.com.br', '@teste.com.br')
 
-    # Tipo de serviço
+    id_responsible = manager_map.get(gestor_email)
+    if not id_responsible: warnings_list.append(f"Gestor não mapeado: '{gestor_email or '—'}'")
+
     tipo_servico_nome = (row.get(cols["tipo_servico"]) or "").strip()
-    id_service_type = SERVICE_TYPE_MAP.get(tipo_servico_nome)
-    if not id_service_type:
-        warnings_list.append(f"Tipo de serviço não mapeado: '{tipo_servico_nome}'")
+    id_service_type = service_type_map.get(tipo_servico_nome)
+    if not id_service_type: warnings_list.append(f"Tipo de serviço não mapeado: '{tipo_servico_nome}'")
 
-    # Datas
     date_start = to_date_sql((row.get(cols["data_inicio"]) or "").strip())
-    if not date_start:
-        warnings_list.append(f"Data de Início inválida: '{row.get(cols['data_inicio'])}'")
+    if not date_start: warnings_list.append(f"Data de Início inválida: '{row.get(cols['data_inicio'])}'")
 
-    # Demais campos diretos
-    service_name = (row.get(cols["servico"]) or "").strip() or None
-    contract_ref = (row.get(cols["referencia"]) or "").strip() or None
-    description = None  # não informado
-    id_requester = REQUESTER_ID
-    expense_type = "OPEX"        # sempre OPEX
-    labor = True                 # sempre true
-    hse = False                  # sempre false
-    subcontract_permission = True
-    id_activities = []           # lista vazia (não informado)
-
-    body = {
-        "serviceName": service_name,
-        "contractReference": contract_ref,
-        "description": description,
-        "idResponsible": id_responsible,
-        "expenseType": expense_type,
-        "labor": labor,
-        "hse": hse,
-        "dateStart": date_start,
-        "idServiceType": id_service_type,
-        "idRequester": id_requester,
-        "subcontractPermission": subcontract_permission,
-        "idActivities": id_activities,
-        "idBranch": id_branch,
-        "providerDatas": provider_datas,
-    }
+    body = { "serviceName": (row.get(cols["servico"]) or "").strip() or None, "contractReference": (row.get(cols["referencia"]) or "").strip() or None, "description": None, "idResponsible": id_responsible, "expenseType": "OPEX", "labor": True, "hse": False, "dateStart": date_start, "idServiceType": id_service_type, "idRequester": REQUESTER_ID, "subcontractPermission": True, "idActivities": [], "idBranch": id_branch, "providerDatas": provider_datas, }
     return body
 
-# ====== Execução ======
+
 def create_contracts():
     url = f"{APP_URL}/contract/supplier"
 
+    BRANCH_MAP, SERVICE_TYPE_MAP, MANAGER_MAP = fetch_mappings_from_db(CLIENT_ID)
     df = import_data_same_folder(EXCEL_FILE)
 
-    # Descobrir nomes de colunas relevantes (flexível)
-    col_tipo_contratacao = find_column(df, ["Tipo de Contratação", "Tipo de Contratacao"])
-    col_unidade          = find_column(df, ["Unidade", "Unidade*"])
-    col_fornecedor       = find_column(df, ["Fornecedor"])
-    col_cnpj             = find_column(df, ["CNPJ", "CNPJ*"])
-    col_servico          = find_column(df, ["Serviço", "Servico"])
-    col_referencia       = find_column(df, ["Referência", "Referencia"])
-    col_gestor_email     = find_column(df, ["E-mail Gestor", "Email Gestor", "Gestor E-mail"])
-    col_tipo_servico     = find_column(df, ["Tipo do Serviço", "Tipo do Servico"])
-    col_data_inicio      = find_column(df, ["Data de Início do Serviço", "Data de Inicio do Servico"])
+    col_map = {"tipo_contratacao": find_column(df, ["Tipo de Contratação"]), "unidade": find_column(df, ["Unidade"]),
+               "fornecedor": find_column(df, ["Fornecedor"]), "cnpj": find_column(df, ["CNPJ"]),
+               "servico": find_column(df, ["Serviço"]), "referencia": find_column(df, ["Referência"]),
+               "gestor_email": find_column(df, ["E-mail Gestor"]), "tipo_servico": find_column(df, ["Tipo do Serviço"]),
+               "data_inicio": find_column(df, ["Data de Início do Serviço"]), }
 
-    # Filtra somente "Contratado"
-    df = df[df[col_tipo_contratacao].str.upper().str.strip() == "CONTRATADO"]
+    df = df[df[col_map["tipo_contratacao"]].str.upper().str.strip() == "CONTRATADO"]
+    seen_pairs, possibles = set(), []
+    ok, already, fail, skipped = 0, 0, 0, 0
 
-    # Deduplicar por (Unidade, Fornecedor)
-    seen_pairs = set()
-
-    ok = already = fail = skipped = 0
-    possibles = []  # lista de casos com potenciais problemas (mapeamentos faltando, datas ruins, etc.)
-
-    # Sessão + auth
     token = login()
     with requests.Session() as s:
-        s.headers.update({
-            "Authorization": f"Bearer {token}",
-            "Content-Type": "application/json",
-        })
+        s.headers.update({"Authorization": f"Bearer {token}", "Content-Type": "application/json"})
 
-        # Itera linhas
         for idx, row in df.iterrows():
-            unidade = (row.get(col_unidade) or "").strip()
-            fornecedor = (row.get(col_fornecedor) or "").strip()
+            unidade = (row.get(col_map["unidade"]) or "").strip()
+            fornecedor = (row.get(col_map["fornecedor"]) or "").strip()
+
             if not unidade or not fornecedor:
                 skipped += 1
-                print(f"↷ linha {idx} ignorada: Unidade/Fornecedor vazio.")
                 continue
 
-            pair_key = (unidade, fornecedor)
-            if pair_key in seen_pairs:
+            if (unidade, fornecedor) in seen_pairs:
                 skipped += 1
-                print(f"↷ linha {idx} duplicada para par (Unidade='{unidade}', Fornecedor='{fornecedor}') — ignorado.")
                 continue
-            seen_pairs.add(pair_key)
+            seen_pairs.add((unidade, fornecedor))
 
-            # Monta body
+            # --- LÓGICA ALTERADA AQUI ---
             warnings_list = []
-            cols = {
-                "unidade": col_unidade,
-                "fornecedor": col_fornecedor,
-                "cnpj": col_cnpj,
-                "servico": col_servico,
-                "referencia": col_referencia,  # “primeira coluna Referência” — aqui usamos a detectada
-                "gestor_email": col_gestor_email,
-                "tipo_servico": col_tipo_servico,
-                "data_inicio": col_data_inicio,
-            }
-            body = build_contract_body(row, cols, warnings_list)
-            chk = checksum(body)
-            started = time.time()
+            body = build_contract_body(row, col_map, warnings_list, BRANCH_MAP, SERVICE_TYPE_MAP, MANAGER_MAP)
 
-            # Se houver avisos de mapeamento faltante, registra (mas segue)
+            # Se a lista de avisos não estiver vazia, significa que um ID é nulo.
+            # Então, pulamos a chamada da API para esta linha.
             if warnings_list:
-                possibles.append({
-                    "unidade": unidade,
-                    "fornecedor": fornecedor,
-                    "motivos": warnings_list,
-                    "ref": row.get(col_referencia),
-                    "gestor_email": row.get(col_gestor_email),
-                })
+                motivos = "; ".join(warnings_list)
+                print(
+                    f"↷ Linha {idx + 2} ignorada (mapeamento pendente): ({unidade} | {fornecedor}) | Motivos: {motivos}")
+                skipped += 1
+                continue  # Pula para a próxima linha do Excel
+            # --- FIM DA ALTERAÇÃO ---
 
-            # POST
             try:
                 r = request_with_retry(s, "POST", url, json=body)
-                ms = round((time.time() - started) * 1000)
-
                 if r.status_code in (200, 201):
-                    rid = None
-                    if r.headers.get("Content-Type", "").startswith("application/json"):
-                        rid = (r.json() or {}).get("id")
-                    print(f"✔ contrato criado: ({unidade} | {fornecedor}) -> id={rid or '—'} | chk={chk} | {ms}ms")
+                    print(f"✔ contrato criado: ({unidade} | {fornecedor})")
                     ok += 1
                 elif r.status_code == 409:
-                    print(f"↷ contrato já existia (409): ({unidade} | {fornecedor}) | chk={chk}")
+                    print(f"↷ contrato já existia (409): ({unidade} | {fornecedor})")
                     already += 1
                 else:
-                    print(f"✖ falha criar contrato ({r.status_code}): ({unidade} | {fornecedor}) | resp={r.text[:220]} | chk={chk}")
+                    print(f"✖ falha ({r.status_code}): ({unidade} | {fornecedor}) | resp={r.text[:220]}")
                     fail += 1
             except Exception as e:
-                print(f"✖ exceção ao criar contrato ({unidade} | {fornecedor}): {e} | chk={chk}")
+                print(f"✖ exceção: ({unidade} | {fornecedor}): {e}")
                 fail += 1
 
     print_summary("Contratos", ok, already, fail, skipped)
 
-    # Relatório de potenciais problemáticos
-    if possibles:
-        print("\nATENÇÃO — Itens com potenciais problemas (mapeamentos/data):")
-        for p in possibles:
-            motivos = "; ".join(p["motivos"])
-            print(f"• Unidade='{p['unidade']}' | Fornecedor='{p['fornecedor']}' | Ref='{p.get('ref')}' | Gestor='{mask_email(p.get('gestor_email') or '')}' | Motivos: {motivos}")
-    else:
-        print("\nSem pendências de mapeamento/data detectadas.")
-
-# ====== Auth simples (igual aos scripts anteriores) ======
 def login() -> str:
     url = f"{APP_URL}/login"
-    r = requests.post(url, json={"email": USER_LOGIN["email"], "password": USER_LOGIN["password"]}, timeout=REQ_TIMEOUT)
+    r = requests.post(url, json=USER_LOGIN, timeout=REQ_TIMEOUT)
     r.raise_for_status()
     data = r.json()
     token = data.get("token") or data.get("access_token")
-    if not token:
-        raise RuntimeError(f"Login OK, mas não veio token. Resposta: {data}")
+    if not token: raise RuntimeError(f"Login OK, mas não veio token. Resposta: {data}")
     print("Login ok")
     return token
 

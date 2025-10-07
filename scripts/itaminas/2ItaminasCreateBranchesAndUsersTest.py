@@ -15,8 +15,8 @@ global branches
 global users
 global profile_id
 branches = {}
-profile_id = "b4be52d6-e9db-44f0-85a6-22d1dfae5ba3"
-client_global_id = "b4be52d6-e9db-44f0-85a6-22d1dfae5ba3"
+profile_id = "8bfd38b5-a120-492a-af88-12ac012a2742"
+client_global_id = "23f05e50-6328-43b0-8283-ec73b4ce2ac1"
 
 def mask_email(email: str) -> str:
     if not email or "@" not in email:
@@ -75,15 +75,19 @@ def create_branches(token, data):
         "Authorization": f"Bearer {token}",
         "Content-Type": "application/json"
     }
+    ok, already, fail, skipped = 0, 0, 0, 0
+
     try:
         units_data = data.get('UNIDADES', None)
         if units_data is not None and not units_data.empty:
             for _, branch in units_data.iterrows():
                 if not any(str(v).strip() for v in branch.values):
+                    skipped += 1
                     continue
 
                 name = check_empty(branch.get('Unidade*'))
                 if not name:
+                    skipped += 1
                     continue
 
                 cnpj = check_empty(branch['CNPJ*'])
@@ -110,15 +114,18 @@ def create_branches(token, data):
                 # Enviando a requisição POST para criar o cliente
                 response = requests.post(url, json=branch_request, headers=headers)
 
-                if response.status_code == 200:
-                    # Caso a requisição seja bem-sucedida
-                    data = response.json()
-                    print("Filial criada com sucesso:", data["name"])
-                    branches[data["name"]] = data["idBranch"]
+                if response.status_code in [200, 201]:
+                    data_resp = response.json()
+                    print(f"✔ Filial criada com sucesso: {data_resp['name']}")
+                    branches[data_resp["name"]] = data_resp["idBranch"]
+                    ok += 1
+                elif response.status_code == 409:  # Supondo que 409 é conflito/duplicado
+                    print(f"↷ Filial '{name}' já existia.")
+                    already += 1
                 else:
-                    print(f"Falha ao criar filial. Status Code: {response.status_code}")
-                    print("Resposta:", response.text)
-                    return None
+                    print(
+                        f"✖ Falha ao criar filial '{name}'. Status: {response.status_code}, Resposta: {response.text[:100]}")
+                    fail += 1
         else:
             print("Dados de unidades não encontrados ou vazios.")
     except Exception as e:
@@ -133,8 +140,10 @@ def create_users(token, branch_hash_map, data):
         "Authorization": f"Bearer {token}",
         "Content-Type": "application/json"
     }
+    ok, already, fail, skipped = 0, 0, 0, 0
+
     try:
-        print(branches)
+        print("Mapeamento de filiais a ser usado:", branches)
         response = requests.get(APP_URL + f"/profile/by-name/{client_global_id}", headers=headers)
         if response.status_code == 200:
             profiles = response.json()
@@ -154,35 +163,46 @@ def create_users(token, branch_hash_map, data):
         users_data = data.get('USUARIOS', None)
         if users_data is not None and not users_data.empty:
             for _, user in users_data.iterrows():
-                if user:
-                    full_name = check_empty(user['Funcionário*'])
-                    cpf = check_empty(user['CPF*'])
-                    email = check_empty(user['E-mail*'])
-                    branch = branch_hash_map.get(check_empty(user['Unidade*']))
+                if not any(str(v).strip() for v in user.values):
+                    skipped += 1
+                    continue
 
-                    first_name, surname = split_fullname(full_name)
+                full_name = check_empty(user['Funcionário*'])
+                email = check_empty(user['E-mail*'])
 
-                    user_request = {
-                        "cpf": cpf,
-                        "role": 'ROLE_CLIENT_MANAGER',
-                        "firstName": first_name,
-                        "surname": surname,
-                        "email": email,
-                        "branch": branch,
-                        "enterprise": 'CLIENT',
-                        "idEnterprise": client_global_id,
-                        "profileId": profile_id
-                    }
+                if not full_name or not email:
+                    print(f"↷ Linha ignorada: Nome ou E-mail vazio.")
+                    skipped += 1
+                    continue
 
-                    response = requests.post(url, json=user_request, headers=headers)
+                cpf = check_empty(user['CPF*'])
+                branch_name = check_empty(user['Unidade*'])
+                branch_id = branch_hash_map.get(branch_name)
 
-                    if response.status_code == 200:
-                        print("Usuário criado com sucesso:", response.text)
-                        return data
-                    else:
-                        print(f"Falha ao criar usuário. Status Code: {response.status_code}")
-                        print("Resposta:", response.text)
-                        return None
+                first_name, surname = split_fullname(full_name)
+
+                user_request = {
+                    "cpf": cpf, "role": 'ROLE_CLIENT_MANAGER',
+                    "firstName": first_name,
+                    "surname": surname,
+                    "email": email,
+                    "branch": branch_id,
+                    "enterprise": 'CLIENT',
+                    "idEnterprise": client_global_id,
+                    "profileId": profile_id}
+
+                response = requests.post(url, json=user_request, headers=headers)
+
+                if response.status_code in [200, 201]:
+                    print(f"✔ Usuário '{email}' criado com sucesso.")
+                    ok += 1
+                elif response.status_code == 500 and 'Duplicate entry' in response.text:
+                    print(f"↷ Usuário '{email}' já existe (duplicado).")
+                    already += 1
+                else:
+                    print(f"✖ Falha ao criar usuário '{email}'. Status: {response.status_code}")
+                    print(f"  Resposta: {response.text[:200]}...")  # Mostra apenas o início de erros longos
+                    fail += 1
         else:
             print("Dados de usuários não encontrados ou vazios.")
     except Exception as e:

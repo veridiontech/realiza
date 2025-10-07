@@ -15,8 +15,8 @@ USER_LOGIN = {
 }
 
 # IDs globais
-profile_id = "b4be52d6-e9db-44f0-85a6-22d1dfae5ba3"
-client_global_id = "be661155-c0d8-4458-a0b9-b214873cd116"
+profile_id = "c90b9ad7-081b-4d78-9ddd-1aca5e7b4bd2  "
+client_global_id = "74df2fd3-e16c-4432-8a0f-6df378fe1cbc"
 
 # Mapa de filiais criadas: { nome: idBranch }
 branches = {}
