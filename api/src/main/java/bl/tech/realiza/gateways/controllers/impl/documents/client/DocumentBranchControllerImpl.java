@@ -7,6 +7,7 @@ import bl.tech.realiza.gateways.requests.documents.client.UpdateDocumentRequestD
 import bl.tech.realiza.gateways.responses.documents.DocumentExpirationResponseDto;
 import bl.tech.realiza.gateways.responses.documents.DocumentResponseDto;
 import bl.tech.realiza.gateways.responses.documents.DocumentSummarizedResponseDto;
+import bl.tech.realiza.gateways.responses.documents.DocumentSummarizedWithSelectionResponseDto;
 import bl.tech.realiza.usecases.interfaces.documents.client.CrudDocumentBranch;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -136,6 +137,14 @@ public class DocumentBranchControllerImpl implements DocumentBranchControlller {
             @RequestParam Boolean isSelected,
             @RequestParam(required = false) Boolean required) {
         return ResponseEntity.ok(crudDocumentBranch.findAllFilteredDocuments(idBranch,documentTypeName,isSelected, required));
+    }
+
+    @GetMapping("/document-matrix/all-and-selected-by-activity/{activityId}")
+    @ResponseStatus(HttpStatus.OK)
+    @PreAuthorize("hasRole('ROLE_REALIZA_BASIC')")
+    @Override
+    public ResponseEntity<List<DocumentSummarizedWithSelectionResponseDto>> getAllFilteredDocumentBranchWithSelectedForActivity(@PathVariable String activityId) {
+        return ResponseEntity.ok(crudDocumentBranch.findAllFilteredDocumentBranchWithSelectedForActivity(activityId));
     }
 
     @GetMapping("/document-matrix/expiration/{idBranch}")

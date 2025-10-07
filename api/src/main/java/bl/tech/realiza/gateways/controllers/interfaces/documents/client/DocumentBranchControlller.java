@@ -6,6 +6,7 @@ import bl.tech.realiza.gateways.requests.documents.client.UpdateDocumentRequestD
 import bl.tech.realiza.gateways.responses.documents.DocumentExpirationResponseDto;
 import bl.tech.realiza.gateways.responses.documents.DocumentResponseDto;
 import bl.tech.realiza.gateways.responses.documents.DocumentSummarizedResponseDto;
+import bl.tech.realiza.gateways.responses.documents.DocumentSummarizedWithSelectionResponseDto;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
@@ -24,6 +25,7 @@ public interface DocumentBranchControlller {
     ResponseEntity<String> addRequiredDocument(String idEnterprise, String documentMatrixId);
     ResponseEntity<Void> removeRequiredDocument(String documentId);
     ResponseEntity<List<DocumentSummarizedResponseDto>> getAllFilteredDocumentBranch(String idBranch, String documentTypeName, Boolean isSelected, Boolean required);
+    ResponseEntity<List<DocumentSummarizedWithSelectionResponseDto>> getAllFilteredDocumentBranchWithSelectedForActivity(String activityId);
     ResponseEntity<List<DocumentExpirationResponseDto>> getAllFilteredDocumentBranchExpiration(String idBranch, String documentTypeName, Boolean isSelected, Boolean required);
     ResponseEntity<String> updateSelectedBranchDocuments(Boolean isSelected, UpdateDocumentRequestDto updateDocumentRequestDto, Boolean replicate);
     ResponseEntity<DocumentExpirationResponseDto> updateSelectedBranchDocumentsExpiration(String idDocumentation, DocumentExpirationUpdateRequestDto documentExpirationUpdateRequestDto, Boolean replicate, List<String> branchIds);

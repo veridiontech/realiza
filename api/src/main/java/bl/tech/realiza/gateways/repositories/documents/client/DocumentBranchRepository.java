@@ -76,9 +76,22 @@ public interface DocumentBranchRepository extends JpaRepository<DocumentBranch, 
             @Param("required") Boolean required
     );
 
+    @Query("""
+    SELECT d
+    FROM DocumentBranch d
+    WHERE d.branch.idBranch = :idBranch
+      AND d.isActive = :isSelected
+    ORDER BY LOWER(d.title)
+""")
+    List<DocumentBranch> findFilteredDocuments(
+            @Param("idBranch") String idBranch,
+            @Param("isSelected") Boolean isSelected
+    );
+
     List<DocumentBranch> findAllByBranch_Client_IdClientAndTitle(String idClient, String title);
     List<DocumentBranch> findAllByBranch_IdBranchAndTitle(String idBranch, String title);
     List<DocumentBranch> findAllByBranch_IdBranchAndDocumentMatrix_IdDocument(String branchId, String documentMatrixId);
     List<DocumentBranch> findAllByBranch_IdBranchAndRequired(String branchId, Boolean required);
     List<DocumentBranch> findAllByBranch_IdBranchAndRequiredAndDocumentMatrix_Group_GroupName(String branchId, Boolean required, String groupName);
+    List<DocumentBranch> findAllByBranch_IdBranchAndIsActive(String branchId, Boolean isSelected);
 }

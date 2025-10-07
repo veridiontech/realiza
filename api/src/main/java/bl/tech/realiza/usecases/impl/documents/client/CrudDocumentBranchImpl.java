@@ -1,6 +1,7 @@
 package bl.tech.realiza.usecases.impl.documents.client;
 
 import bl.tech.realiza.domains.clients.Branch;
+import bl.tech.realiza.domains.contract.activity.ActivityDocuments;
 import bl.tech.realiza.domains.documents.Document;
 import bl.tech.realiza.domains.documents.client.DocumentBranch;
 import bl.tech.realiza.domains.documents.matrix.DocumentMatrix;
@@ -11,16 +12,15 @@ import bl.tech.realiza.domains.user.User;
 import bl.tech.realiza.exceptions.BadRequestException;
 import bl.tech.realiza.exceptions.NotFoundException;
 import bl.tech.realiza.gateways.repositories.clients.BranchRepository;
+import bl.tech.realiza.gateways.repositories.contracts.activity.ActivityDocumentRepository;
+import bl.tech.realiza.gateways.repositories.contracts.activity.ActivityRepository;
 import bl.tech.realiza.gateways.repositories.documents.client.DocumentBranchRepository;
 import bl.tech.realiza.gateways.repositories.documents.matrix.DocumentMatrixRepository;
 import bl.tech.realiza.gateways.repositories.services.FileRepository;
 import bl.tech.realiza.gateways.repositories.users.UserRepository;
 import bl.tech.realiza.gateways.requests.documents.client.DocumentBranchRequestDto;
 import bl.tech.realiza.gateways.requests.documents.client.DocumentExpirationUpdateRequestDto;
-import bl.tech.realiza.gateways.responses.documents.DocumentExpirationResponseDto;
-import bl.tech.realiza.gateways.responses.documents.DocumentMatrixResponseDto;
-import bl.tech.realiza.gateways.responses.documents.DocumentResponseDto;
-import bl.tech.realiza.gateways.responses.documents.DocumentSummarizedResponseDto;
+import bl.tech.realiza.gateways.responses.documents.*;
 import bl.tech.realiza.services.queue.replication.ReplicationMessage;
 import bl.tech.realiza.services.queue.replication.ReplicationQueueProducer;
 import bl.tech.realiza.services.GoogleCloudService;
@@ -60,6 +60,8 @@ public class CrudDocumentBranchImpl implements CrudDocumentBranch {
     private final SetupQueueProducer setupQueueProducer;
     private final GoogleCloudService googleCloudService;
     private final ReplicationQueueProducer replicationQueueProducer;
+    private final ActivityDocumentRepository activityDocumentRepository;
+    private final ActivityRepository activityRepository;
 
     @Value("${gcp.storage.bucket}")
     private String bucketName;
@@ -666,5 +668,29 @@ public class CrudDocumentBranchImpl implements CrudDocumentBranch {
                 .doesBlock(documentBranch.getDoesBlock())
                 .required(documentBranch.getRequired())
                 .build();
+    }
+
+    @Override
+    public List<DocumentSummarizedWithSelectionResponseDto> findAllFilteredDocumentBranchWithSelectedForActivity(String activityId) {
+        String branchId = activityRepository.findBranchIdByActivity(activityId);
+        List<ActivityDocuments> activityDocumentsList = activityDocumentRepository.findAllByActivity_IdActivity(activityId);
+        List<DocumentBranch> documentBranches = documentBranchRepository.findAllByBranch_IdBranch(branchId);
+        List<DocumentSummarizedWithSelectionResponseDto> response = new ArrayList<>();
+        for (DocumentBranch document : documentBranches) {
+            DocumentSummarizedWithSelectionResponseDto documentResponse = DocumentSummarizedWithSelectionResponseDto.builder()
+                    .idDocument(document.getIdDocumentation())
+                    .title(document.getTitle())
+                    .build();
+            if (activityDocumentsList.stream().anyMatch(documents ->
+                    documents.getDocumentBranch().getIdDocumentation()
+                            .equals(document.getIdDocumentation()))) {
+                System.out.println("Id: " + document.getIdDocumentation());
+                documentResponse.setSelected(Boolean.TRUE);
+            } else {
+                documentResponse.setSelected(Boolean.FALSE);
+            }
+            response.add(documentResponse);
+        }
+        return response;
     }
 }
