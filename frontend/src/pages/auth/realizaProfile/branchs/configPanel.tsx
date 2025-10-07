@@ -2068,6 +2068,9 @@ export function ConfigPanel() {
                                                 />
                                                 Documento Obrigatório
                                             </label>
+                                            <p className="text-xs text-gray-500 ml-6 -mt-1">
+                                                Documento solicitado independentemente da gestão controlada(Trabalhista ou SSMA)
+                                            </p>
                                             <label className="flex items-center gap-2 text-sm font-medium">
                                                 <input
                                                     type="checkbox"
@@ -2197,6 +2200,9 @@ export function ConfigPanel() {
                                                 />
                                                 Documento Obrigatório
                                             </label>
+                                            <p className="text-xs text-gray-500 ml-6 -mt-1">
+                                                Este documento não está vinculado a nenhum tipo de contrato.
+                                            </p>
                                             <label className="flex items-center gap-2 text-sm font-medium">
                                                 <input
                                                     type="checkbox"
