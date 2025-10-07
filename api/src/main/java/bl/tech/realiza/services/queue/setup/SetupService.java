@@ -15,6 +15,7 @@ import bl.tech.realiza.domains.documents.provider.DocumentProviderSupplier;
 import bl.tech.realiza.domains.employees.Employee;
 import bl.tech.realiza.domains.providers.ProviderSubcontractor;
 import bl.tech.realiza.domains.providers.ProviderSupplier;
+import bl.tech.realiza.domains.user.security.Permission;
 import bl.tech.realiza.domains.user.security.Profile;
 import bl.tech.realiza.domains.user.security.ProfileRepo;
 import bl.tech.realiza.exceptions.NotFoundException;
@@ -44,10 +45,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -142,12 +140,13 @@ public class SetupService {
         List<ProfileRepo> profileRepos = profileRepoRepository.findAll();
         List<Profile> profiles = new ArrayList<>();
         for (ProfileRepo profileRepo : profileRepos) {
+            Set<Permission> permissions = new HashSet<>(profileRepo.getPermissions());
             profiles.add(
                     Profile.builder()
                             .name(profileRepo.getName())
                             .description(profileRepo.getDescription())
                             .admin(profileRepo.getAdmin())
-                            .permissions(profileRepo.getPermissions())
+                            .permissions(permissions)
                             .client(client)
                             .build()
             );
