@@ -12,7 +12,9 @@ import { ManageEmployeesModal } from "./modals/ManageEmployeesModal";
 import { BriefcaseBusiness, Cog, Users2Icon } from "lucide-react";
 
 export const ClientCollaborators = (): JSX.Element => {
-  const [selectedTab, setSelectedTab] = useState("fornecedor");
+  const [selectedTab, setSelectedTab] = useState<"fornecedor" | "subcontratado">(
+    "fornecedor"
+  );
   const [loading, setLoading] = useState(false);
   const [error] = useState<string | null>(null);
   const { selectedBranch } = useBranch();
@@ -20,7 +22,7 @@ export const ClientCollaborators = (): JSX.Element => {
   const [suppliersList, setSuppliersList] = useState<propsSupplier[]>([]);
   const [getUniqueSupplier, setGetUniqueSupplier] =
     useState<propsSupplier | null>(null);
-  const [getSubcontractorList, setGetSubcontractorList] = useState([]);
+  const [, setGetSubcontractorList] = useState<any[]>([]); 
   const { user } = useUser();
   const { supplier, setSupplier } = useSupplier();
 
@@ -54,6 +56,10 @@ export const ClientCollaborators = (): JSX.Element => {
   };
 
   const getSubcontractor = async () => {
+    if (!selectedSupplier) {
+      setGetSubcontractorList([]);
+      return;
+    }
     setLoading(true);
     try {
       const tokenFromStorage = localStorage.getItem("tokenClient");
@@ -75,16 +81,23 @@ export const ClientCollaborators = (): JSX.Element => {
     if (selectedBranch?.idBranch) {
       suppliers();
     }
+  }, [selectedBranch?.idBranch]);
+
+  useEffect(() => {
     if (selectedSupplier) {
       uniqueSupplier();
-      getSubcontractor();
+      if (selectedTab === "subcontratado") {
+        getSubcontractor();
+      }
+    } else {
+      setGetUniqueSupplier(null);
+      setGetSubcontractorList([]);
     }
-  }, [selectedBranch?.idBranch, selectedSupplier]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedSupplier, selectedTab]);
 
-  if (
-    user?.role === "ROLE_CLIENT_RESPONSIBLE" &&
-    "ROLE_CLIENT_RESPONSIBLE"
-  ) {
+  // Lógica de Renderização para ROLE_CLIENT_RESPONSIBLE
+  if (user?.role === "ROLE_CLIENT_RESPONSIBLE") {
     return (
       <div className="m-4 flex flex-col items-center">
         <div className="dark:bg-primary flex w-[90rem] flex-col rounded-lg bg-white p-10 shadow-md relative bottom-[5vw]">
@@ -93,8 +106,21 @@ export const ClientCollaborators = (): JSX.Element => {
               <Users2Icon size={30} className="text-[#FFCE50]" /> Colaboradores
             </h1>
             <div className="flex gap-2">
-              <NewModalCreateEmployee onEmployeeCreated={getSubcontractor} />
-              <ManageEmployeesModal idProvider={supplier?.idProvider ?? null} />
+              <NewModalCreateEmployee
+                onEmployeeCreated={() => {
+                  if (selectedTab === "fornecedor") {
+                    // Re-fetch logic based on actual scenario
+                  } else if (selectedTab === "subcontratado") {
+                    getSubcontractor(); 
+                  }
+                }}
+                targetType={selectedTab === "fornecedor" ? "supplier" : "subcontractor"} 
+                supplierId={supplier?.idProvider ?? null} 
+                subcontractId={null} 
+              />
+              <ManageEmployeesModal
+                idProvider={supplier?.idProvider ?? null}
+              />
             </div>
           </div>
           <div className="mb-4 flex">
@@ -136,7 +162,10 @@ export const ClientCollaborators = (): JSX.Element => {
           ) : selectedTab === "fornecedor" ? (
             <div>
               <div className="">
-                <TableEmployee idProvider={supplier?.idProvider ?? null} />
+                <TableEmployee
+                  idTarget={supplier?.idProvider ?? null}
+                  targetType="supplier"
+                />
               </div>
             </div>
           ) : (
@@ -147,13 +176,11 @@ export const ClientCollaborators = (): JSX.Element => {
                   <strong>Fornecedor: </strong>
                   <h1>{supplier?.corporateName}</h1>
                 </div>
-                <div>
-                  {getSubcontractorList.map((subcontractor: any) => (
-                    <div key={subcontractor.idProvider}>
-                      <span>{subcontractor.corporateName} </span>
-                    </div>
-                  ))}
-                </div>
+                {/* Se a intenção é mostrar colaboradores de subcontratados do fornecedor selecionado: */}
+                <TableEmployee
+                  idTarget={supplier?.idProvider ?? null} // ID do fornecedor, para listar subcontratados dele
+                  targetType="subcontractor"
+                />
               </div>
             </div>
           )}
@@ -162,6 +189,7 @@ export const ClientCollaborators = (): JSX.Element => {
     );
   }
 
+  // Lógica de Renderização para outros papéis (e seleção inicial)
   return (
     <div className="m-4 flex justify-center">
       <div className="flex flex-col">
@@ -176,10 +204,13 @@ export const ClientCollaborators = (): JSX.Element => {
                 variant="ghost"
                 className={`px-4 py-2 transition-all duration-300 ${
                   selectedTab === "fornecedor"
-                    ? "bg-white text-realizaBlue scale-110 font-bold  shadow-lg"
+                    ? "bg-white text-realizaBlue scale-110 font-bold  shadow-lg"
                     : "text-white border border-white"
                 }`}
-                onClick={() => setSelectedTab("fornecedor")}
+                onClick={() => {
+                  setSelectedTab("fornecedor");
+                  setGetUniqueSupplier(null); 
+                }}
               >
                 <Cog /> Fornecedor
               </Button>
@@ -187,10 +218,12 @@ export const ClientCollaborators = (): JSX.Element => {
                 variant="ghost"
                 className={`px-4 py-2 transition-all duration-300 ${
                   selectedTab === "subcontratado"
-                    ? "bg-white text-realizaBlue scale-110 font-bold  shadow-lg"
+                    ? "bg-white text-realizaBlue scale-110 font-bold  shadow-lg"
                     : "text-white border border-white"
                 }`}
-                onClick={() => setSelectedTab("subcontratado")}
+                onClick={() => {
+                  setSelectedTab("subcontratado");
+                }}
               >
                 <BriefcaseBusiness /> Subcontratado
               </Button>
@@ -220,6 +253,8 @@ export const ClientCollaborators = (): JSX.Element => {
                       );
                       if (supplierData) {
                         setSupplier(supplierData);
+                      } else {
+                        setSupplier(null);
                       }
                     }}
                     className="rounded-lg border p-2 text-[12px]"
@@ -235,7 +270,10 @@ export const ClientCollaborators = (): JSX.Element => {
                     ))}
                   </select>
                 </div>
-                <TableEmployee idProvider={selectedSupplier} />
+                <TableEmployee
+                  idTarget={selectedSupplier}
+                  targetType="supplier"
+                />
               </div>
             ) : (
               <div>
@@ -252,20 +290,32 @@ export const ClientCollaborators = (): JSX.Element => {
                       <p>Nenhum fornecedor selecionado</p>
                     )}
                   </div>
-                  <div>
-                    {getSubcontractorList.map((subcontractor: any) => (
-                      <div key={subcontractor.idProvider}>
-                        <span>{subcontractor.corporateName}teste</span>
-                      </div>
-                    ))}
-                  </div>
+                  {/* Assumindo que o selectedSupplier é o alvo para a busca de subcontratados */}
+                  <TableEmployee
+                    idTarget={selectedSupplier}
+                    targetType="subcontractor"
+                  />
+                  
                 </div>
               </div>
             )}
           </div>
         </div>
-        <div className="flex gap-2 justify-end  relative  2xl:bottom-[14vh] xl:bottom-[12vh] lg:bottom-[8vh] md:bottom-[7vh] bottom-[15vh]">
-          <NewModalCreateEmployee onEmployeeCreated={getSubcontractor} />
+        <div className="flex gap-2 justify-end  relative  2xl:bottom-[14vh] xl:bottom-[12vh] lg:bottom-[8vh] md:bottom-[7vh] bottom-[15vh]">
+          <NewModalCreateEmployee
+            onEmployeeCreated={
+              selectedTab === "fornecedor" ? suppliers : getSubcontractor
+            } 
+            targetType={selectedTab === "fornecedor" ? "supplier" : "subcontractor"}
+            supplierId={selectedSupplier}
+            subcontractId={selectedSupplier} // Passa o selectedSupplier como subcontratId (logica pode precisar de ajuste dependendo do seu backend)
+            targetName={
+              selectedTab === "fornecedor"
+                ? suppliersList.find((s) => s.idProvider === selectedSupplier)
+                    ?.corporateName
+                : getUniqueSupplier?.corporateName
+            }
+          />
           <ManageEmployeesModal idProvider={selectedSupplier} />
         </div>
       </div>

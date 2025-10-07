@@ -36,8 +36,8 @@ export function ValidateSection({
   // **ASSUMINDO QUE VOCÊ QUER A LÓGICA DA MAIN, A MAIS SIMPLES QUE SALVA APENAS UM ITEM, VAMOS RECRIAR O QUE ELA PRECISA:**
   // (O código que segue a lógica da main está incorreto no seu exemplo pois está incompleto, vou assumir a intenção da main)
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [amountEdit, setAmountEdit] = useState(0); // Assumindo valor padrão
-  const [doesBlockEdit, setDoesBlockEdit] = useState(false); // Assumindo valor padrão
+  const [amountEdit, ] = useState(0); // Assumindo valor padrão
+  const [doesBlockEdit, ] = useState(false); // Assumindo valor padrão
 
   const fetchExpirations = async () => {
     if (!idBranch || !documentTypeName) return;
