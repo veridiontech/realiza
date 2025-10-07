@@ -89,6 +89,7 @@ export function TableEmployee({ idTarget, targetType }: TableEmployeeProps) {
       setDetailsContract(res.data);
     } catch (err: any) {
       console.error("Erro ao buscar detalhes do contrato:", err);
+    (err);
     }
   };
 
@@ -113,11 +114,12 @@ export function TableEmployee({ idTarget, targetType }: TableEmployeeProps) {
   };
 
   // === BLOCO 1 (fornecedor) ===
-  if (user?.role === "ROLE_SUPPLIER_RESPONSIBLE" && "ROLE_SUPPLIER_MANAGER") {
+  // CORRIGIDO: O operador lógico estava incorreto.
+  if (user?.role === "ROLE_SUPPLIER_RESPONSIBLE" || user?.role === "ROLE_SUPPLIER_MANAGER") {
     return (
-      <div className="flex flex-col items-center justify-center gap-5  relative xl:top-[6vw] md:top-[10vw]">
+      <div className="flex flex-col items-center justify-center gap-5  relative xl:top-[6vw] md:top-[10vw]">
         {isLoading ? (
-          <div className="flex  w-[95vw] flex-wrap justify-center gap-5 rounded-md p-10 shadow-lg  bg-white">
+          <div className="flex  w-[95vw] flex-wrap justify-center gap-5 rounded-md p-10 shadow-lg  bg-white">
             <Blocks
               height="80"
               width="80"
@@ -129,11 +131,11 @@ export function TableEmployee({ idTarget, targetType }: TableEmployeeProps) {
             />
           </div>
         ) : (
-          <div className="flex  flex-col w-[95vw]  gap-5 rounded-md p-10 shadow-lg  bg-white">
+          <div className="flex  flex-col w-[95vw]  gap-5 rounded-md p-10 shadow-lg  bg-white">
             <div>
               <div className="flex flex-col gap-2">
                 <span>Filtrar colaborador</span>
-                <div className="flex w-[50vw] items-center gap-1 rounded-md border border-neutral-500  p-2">
+                <div className="flex w-[50vw] items-center gap-1 rounded-md border border-neutral-500  p-2">
                   <Search />
                   <input
                     type="text"
@@ -283,11 +285,12 @@ export function TableEmployee({ idTarget, targetType }: TableEmployeeProps) {
   }
 
   // === BLOCO 2 (cliente) ===
-  if (user?.role === "ROLE_CLIENT_RESPONSIBLE" && "ROLE_CLIENT_MANAGER") {
+  // CORRIGIDO: O operador lógico estava incorreto.
+  if (user?.role === "ROLE_CLIENT_RESPONSIBLE" || user?.role === "ROLE_CLIENT_MANAGER") {
     return (
-      <div className="flex flex-col items-center justify-center gap-5  relative xl:top-[6vw] md:top-[10vw]">
+      <div className="flex flex-col items-center justify-center gap-5  relative xl:top-[6vw] md:top-[10vw]">
         {isLoading ? (
-          <div className="flex  w-[95vw] flex-wrap justify-center gap-5 rounded-md p-10 shadow-lg  bg-white">
+          <div className="flex  w-[95vw] flex-wrap justify-center gap-5 rounded-md p-10 shadow-lg  bg-white">
             <Blocks
               height="80"
               width="80"
@@ -299,11 +302,11 @@ export function TableEmployee({ idTarget, targetType }: TableEmployeeProps) {
             />
           </div>
         ) : (
-          <div className="flex  flex-col w-[95vw]  gap-5 rounded-md p-10 shadow-lg  bg-white">
+          <div className="flex  flex-col w-[95vw]  gap-5 rounded-md p-10 shadow-lg  bg-white">
             <div>
               <div className="flex flex-col gap-2">
                 <span>Filtrar colaborador</span>
-                <div className="flex w-[50vw] items-center gap-1 rounded-md border border-neutral-500  p-2">
+                <div className="flex w-[50vw] items-center gap-1 rounded-md border border-neutral-500  p-2">
                   <Search />
                   <input
                     type="text"
@@ -454,9 +457,9 @@ export function TableEmployee({ idTarget, targetType }: TableEmployeeProps) {
 
   // === fallback ===
   return (
-    <div className="flex flex-col items-center justify-center gap-5  relative xl:top-[6vw] md:top-[10vw]">
+    <div className="flex flex-col items-center justify-center gap-5  relative xl:top-[6vw] md:top-[10vw]">
       {isLoading ? (
-        <div className="flex  w-[95vw] flex-wrap justify-center gap-5 rounded-md p-10 shadow-lg  bg-white">
+        <div className="flex  w-[95vw] flex-wrap justify-center gap-5 rounded-md p-10 shadow-lg  bg-white">
           <Blocks
             height="80"
             width="80"
@@ -468,11 +471,11 @@ export function TableEmployee({ idTarget, targetType }: TableEmployeeProps) {
           />
         </div>
       ) : (
-        <div className="flex  flex-col w-[95vw]  gap-5 rounded-md p-10 shadow-lg bg-white">
+        <div className="flex  flex-col w-[95vw]  gap-5 rounded-md p-10 shadow-lg bg-white">
           <div>
             <div className="flex flex-col gap-2">
               <span>Filtrar colaborador</span>
-              <div className="flex w-[50vw] items-center gap-1 rounded-md border border-neutral-500  p-2">
+              <div className="flex w-[50vw] items-center gap-1 rounded-md border border-neutral-500  p-2">
                 <Search />
                 <input
                   type="text"
@@ -608,12 +611,16 @@ export function TableEmployee({ idTarget, targetType }: TableEmployeeProps) {
                         <div className="relative flex py-2 items-center overflow-hidden gap-1 text-[14px]">
                           <p>Status:</p>
                           <p
-                            className={`font-semibold ${getStatusClass(employee.situation)}`}
+                            className={`font-semibold ${getStatusClass(
+                              employee.situation
+                            )}`}
                           >
                             {employee.situation}
                           </p>
                           <div
-                            className={`absolute bottom-0 right-0 w-0 h-0 border-b-[40px] border-l-[40px] border-l-transparent ${getTriangleColor(employee.situation)}`}
+                            className={`absolute bottom-0 right-0 w-0 h-0 border-b-[40px] border-l-[40px] border-l-transparent ${getTriangleColor(
+                              employee.situation
+                            )}`}
                           ></div>
                         </div>
                       </div>
