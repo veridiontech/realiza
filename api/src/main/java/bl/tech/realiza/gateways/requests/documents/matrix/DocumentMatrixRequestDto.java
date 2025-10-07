@@ -11,6 +11,7 @@ public class DocumentMatrixRequestDto {
     private String name;
     private String type;
     private Boolean doesBlock;
+    private Boolean required;
     private Boolean isDocumentUnique;
 //    private String subgroup;
     private String group;

@@ -399,6 +399,8 @@ public class ReplicationService {
                     .title(documentMatrix.getName())
                     .type(documentMatrix.getType())
                     .status(Document.Status.PENDENTE)
+                            .doesBlock(documentMatrix.getDoesBlock())
+                            .required(documentMatrix.getRequired())
                     .isActive(false)
                     .branch(branch)
                     .documentMatrix(documentMatrix)

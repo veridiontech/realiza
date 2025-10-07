@@ -15,6 +15,7 @@ import bl.tech.realiza.domains.documents.provider.DocumentProviderSupplier;
 import bl.tech.realiza.domains.employees.Employee;
 import bl.tech.realiza.domains.providers.ProviderSubcontractor;
 import bl.tech.realiza.domains.providers.ProviderSupplier;
+import bl.tech.realiza.domains.user.security.Permission;
 import bl.tech.realiza.domains.user.security.Profile;
 import bl.tech.realiza.domains.user.security.ProfileRepo;
 import bl.tech.realiza.exceptions.NotFoundException;
@@ -44,10 +45,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -142,12 +140,13 @@ public class SetupService {
         List<ProfileRepo> profileRepos = profileRepoRepository.findAll();
         List<Profile> profiles = new ArrayList<>();
         for (ProfileRepo profileRepo : profileRepos) {
+            Set<Permission> permissions = new HashSet<>(profileRepo.getPermissions());
             profiles.add(
                     Profile.builder()
                             .name(profileRepo.getName())
                             .description(profileRepo.getDescription())
                             .admin(profileRepo.getAdmin())
-                            .permissions(profileRepo.getPermissions())
+                            .permissions(permissions)
                             .client(client)
                             .build()
             );
@@ -202,6 +201,8 @@ public class SetupService {
                     .type(documentMatrix.getType())
                     .status(Document.Status.PENDENTE)
                     .isActive(false)
+                            .doesBlock(documentMatrix.getDoesBlock())
+                            .required(documentMatrix.getRequired())
                     .branch(branch)
                     .documentMatrix(documentMatrix)
                     .validity(documentMatrix.getValidity())
@@ -227,6 +228,7 @@ public class SetupService {
         List<Activity> activities = new ArrayList<>(List.of());
         List<String> idDocuments = new ArrayList<>(List.of());
         List<DocumentBranch> documentBranch;
+        List<DocumentBranch> documentBranches;
 
         ContractProviderSupplier contractProviderSupplier = contractProviderSupplierRepository.findById(contractProviderSupplierId)
                 .orElseThrow(() -> new NotFoundException("Contract not found"));
@@ -242,7 +244,6 @@ public class SetupService {
             if (activities.isEmpty()) {
                 throw new NotFoundException("Activities not found");
             }
-
             for (Activity activity : activities) {
                 List<ActivityDocuments> activityDocumentsList = activityDocumentRepository.findAllByActivity_IdActivity(activity.getIdActivity());
                 for (ActivityDocuments activityDocument : activityDocumentsList) {
@@ -250,7 +251,9 @@ public class SetupService {
                     if ((hse && hseList.contains(type))
                             || (labor && type.equals("trabalhista"))
                             || type.equals("geral")) {
-                        idDocuments.add(activityDocument.getDocumentBranch().getIdDocumentation());
+                        if (!activityDocument.getDocumentBranch().getRequired()) {
+                            idDocuments.add(activityDocument.getDocumentBranch().getIdDocumentation());
+                        }
                     }
                 }
             }
@@ -262,6 +265,18 @@ public class SetupService {
         }
 
         documentBranch = documentBranchRepository.findAllById(idDocuments);
+        DocumentBranch documentInBranch = documentBranch.stream().findFirst().orElse(null);
+        if (documentInBranch != null) {
+            String branchId = documentInBranch.getBranch().getIdBranch();
+            documentBranches = documentBranchRepository.findAllByBranch_IdBranchAndRequired(branchId, Boolean.TRUE);
+            List<DocumentBranch> filteredDocuments = documentBranches.stream()
+                    .filter(documentBranch1 ->
+                        (hse && hseList.contains(documentBranch1.getType()))
+                            || (labor && documentBranch1.getType().equals("trabalhista"))
+                            || documentBranch1.getType().equals("geral"))
+                    .toList();
+            documentBranch.addAll(filteredDocuments);
+        }
 
         ProviderSupplier finalNewProviderSupplier = contractProviderSupplier.getProviderSupplier();
 
@@ -299,6 +314,8 @@ public class SetupService {
                         .isActive(true)
                         .documentMatrix(document.getDocumentMatrix())
                         .providerSupplier(finalNewProviderSupplier)
+                            .doesBlock(document.getDoesBlock())
+                            .required(document.getRequired())
                         .validity(document.getValidity())
                         .expirationDateUnit(document.getExpirationDateUnit())
                         .expirationDateAmount(document.getExpirationDateAmount())
@@ -317,6 +334,8 @@ public class SetupService {
                         .status(Document.Status.PENDENTE)
                         .type(document.getType())
                         .isActive(true)
+                        .doesBlock(document.getDoesBlock())
+                        .required(document.getRequired())
                         .documentMatrix(document.getDocumentMatrix())
                         .providerSupplier(finalNewProviderSupplier)
                         .validity(document.getValidity())
@@ -378,7 +397,9 @@ public class SetupService {
                     if ((hse && hseList.contains(type))
                             || (labor && type.equals("trabalhista"))
                             || type.equals("geral")) {
-                        idDocuments.add(activityDocument.getDocumentBranch().getIdDocumentation());
+                        if (!activityDocument.getDocumentBranch().getRequired()) {
+                            idDocuments.add(activityDocument.getDocumentBranch().getIdDocumentation());
+                        }
                     }
                 }
             }
@@ -390,6 +411,14 @@ public class SetupService {
         }
 
         documentSupplier = documentProviderSupplierRepository.findAllById(idDocuments);
+        List<DocumentProviderSupplier> documentsBeforeFilter = documentProviderSupplierRepository.findAllByProviderSupplier_IdProviderAndRequired(contractProviderSubcontractor.getProviderSupplier().getIdProvider(), Boolean.TRUE);
+        List<DocumentProviderSupplier> filteredDocuments = documentsBeforeFilter.stream()
+                .filter(documentProviderSupplier ->
+                        (hse && hseList.contains(documentProviderSupplier.getType()))
+                                || (labor && documentProviderSupplier.getType().equals("trabalhista"))
+                                || documentProviderSupplier.getType().equals("geral"))
+                .toList();
+        documentSupplier.addAll(filteredDocuments);
 
         ProviderSubcontractor finalNewProviderSubcontractor = contractProviderSubcontractor.getProviderSubcontractor();
         List<DocumentProviderSubcontractor> batch = new ArrayList<>(50);
@@ -424,6 +453,8 @@ public class SetupService {
                         .status(Document.Status.PENDENTE)
                         .type(document.getType())
                         .isActive(true)
+                            .doesBlock(document.getDoesBlock())
+                            .required(document.getRequired())
                         .documentMatrix(document.getDocumentMatrix())
                         .validity(document.getValidity())
                         .providerSubcontractor(finalNewProviderSubcontractor)
@@ -444,6 +475,8 @@ public class SetupService {
                         .status(Document.Status.PENDENTE)
                         .type(document.getType())
                         .isActive(true)
+                        .doesBlock(document.getDoesBlock())
+                        .required(document.getRequired())
                         .documentMatrix(document.getDocumentMatrix())
                         .validity(document.getValidity())
                         .providerSubcontractor(finalNewProviderSubcontractor)
@@ -521,6 +554,8 @@ public class SetupService {
                             .status(Document.Status.PENDENTE)
                             .type(document.getType())
                             .isActive(true)
+                            .doesBlock(document.getDoesBlock())
+                            .required(document.getRequired())
                             .documentMatrix(document.getDocumentMatrix())
                             .employee(employee)
                             .validity(document.getValidity())
@@ -607,6 +642,8 @@ public class SetupService {
                             .status(Document.Status.PENDENTE)
                             .type(document.getType())
                             .isActive(true)
+                            .doesBlock(document.getDoesBlock())
+                            .required(document.getRequired())
                             .documentMatrix(document.getDocumentMatrix())
                             .employee(employee)
                             .validity(document.getValidity())
@@ -725,7 +762,9 @@ public class SetupService {
                     .title(document.getTitle())
                     .type(document.getType())
                     .status(Document.Status.PENDENTE)
-                    .isActive(true)
+                    .isActive(false)
+                    .doesBlock(document.getDoesBlock())
+                    .required(document.getRequired())
                     .branch(branch)
                     .documentMatrix(document.getDocumentMatrix())
                     .validity(document.getValidity())

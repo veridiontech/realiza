@@ -2,8 +2,10 @@ package bl.tech.realiza.usecases.interfaces.contracts.activity;
 
 import bl.tech.realiza.gateways.requests.contracts.activity.ActivityRequestDto;
 import bl.tech.realiza.gateways.requests.contracts.activity.AddActivitiesToBranchesRequest;
+import bl.tech.realiza.gateways.requests.contracts.activity.DocumentsToActivityRequest;
 import bl.tech.realiza.gateways.responses.contracts.activity.ActivityDocumentResponseDto;
 import bl.tech.realiza.gateways.responses.contracts.activity.ActivityResponseDto;
+import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.scheduling.annotation.Async;
@@ -24,4 +26,5 @@ public interface CrudActivity {
     void transferFromRepo(String idBranch);
     void transferFromRepo(String branchId, List<String> activityIds);
     String addActivitiesToBranches(AddActivitiesToBranchesRequest request);
+    List<ActivityDocumentResponseDto> addMultipleDocumentsToActivity(String idActivity, DocumentsToActivityRequest request);
 }

@@ -132,9 +132,10 @@ public class DocumentBranchControllerImpl implements DocumentBranchControlller {
     @Override
     public ResponseEntity<List<DocumentSummarizedResponseDto>> getAllFilteredDocumentBranch(
             @PathVariable String idBranch,
-            @RequestParam String documentTypeName,
-            @RequestParam Boolean isSelected) {
-        return ResponseEntity.ok(crudDocumentBranch.findAllFilteredDocuments(idBranch,documentTypeName,isSelected));
+            @RequestParam(required = false) String documentTypeName,
+            @RequestParam Boolean isSelected,
+            @RequestParam(required = false) Boolean required) {
+        return ResponseEntity.ok(crudDocumentBranch.findAllFilteredDocuments(idBranch,documentTypeName,isSelected, required));
     }
 
     @GetMapping("/document-matrix/expiration/{idBranch}")
@@ -144,8 +145,9 @@ public class DocumentBranchControllerImpl implements DocumentBranchControlller {
     public ResponseEntity<List<DocumentExpirationResponseDto>> getAllFilteredDocumentBranchExpiration(
             @PathVariable String idBranch,
             @RequestParam String documentTypeName,
-            @RequestParam Boolean isSelected) {
-        return ResponseEntity.ok(crudDocumentBranch.findAllFilteredDocumentsExpiration(idBranch,documentTypeName,isSelected));
+            @RequestParam Boolean isSelected,
+            @RequestParam(required = false) Boolean required) {
+        return ResponseEntity.ok(crudDocumentBranch.findAllFilteredDocumentsExpiration(idBranch,documentTypeName,isSelected, required));
     }
 
     @PostMapping("/document-matrix/update")

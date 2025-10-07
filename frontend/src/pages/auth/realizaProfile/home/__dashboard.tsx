@@ -119,12 +119,12 @@ const createUserClient = z.object({
 type CreateUserClient = z.infer<typeof createUserClient>;
 
 interface User {
-    idUser: string;
-    firstName: string;
-    surname: string;
-    cpf: string;
-    email: string;
-    position: string;
+  idUser: string;
+  firstName: string;
+  surname: string;
+  cpf: string;
+  email: string;
+  position: string;
 }
 
 export function Dashboard() {
@@ -907,134 +907,135 @@ export function Dashboard() {
                   )}
                   {selectedTab === "usuarios" && (
                     <div className="flex flex-col gap-5">
-                        <span>
-                            {selectedBranch ? (
-                            <div>
-                                <p>
-                                <strong>Filial:</strong> {selectedBranch.name}
-                                </p>
-                            </div>
-                            ) : (
-                            <div>
-                                <p>
-                                <strong>Filial:</strong> Filial não selecionada
-                                </p>
-                            </div>
-                            )}
-                        </span>
-
-                        <div className="block space-y-4 overflow-y-auto md:hidden">
-                            <div className="flex w-full items-center gap-4 rounded-md border p-2">
-                                <Search />
-                                <input
-                                type="text"
-                                value={searchTerm}
-                                onChange={handleUserSearch}
-                                placeholder="Pesquisar usuários (Nome, CPF)"
-                                className="outline-none w-full"
-                                />
-                            </div>
-                            <div className="h-[300px] space-y-4 overflow-y-auto">
-                                {isLoading ? (
-                                <p className="text-center text-gray-600">Carregando...</p>
-                                ) : filteredUsers.length > 0 ? (
-                                filteredUsers.map((user: User) => (
-                                    <div
-                                    key={user.idUser}
-                                    className="rounded-lg border border-gray-300 bg-white p-4 shadow-sm"
-                                    >
-                                    <p className="bg-[#345D5C33] text-sm font-semibold text-gray-700">
-                                        Nome:
-                                    </p>
-                                    <p className="text-realizaBlue mb-2">
-                                        {user.firstName} {user.surname}
-                                    </p>
-
-                                    <p className="bg-[#345D5C33] text-sm font-semibold text-gray-700">
-                                        CPF:
-                                    </p>
-                                    <p className="mb-2 text-gray-800">{user.cpf}</p>
-
-                                    <Link
-                                        to={`/sistema/detailsUsers/${user.idUser}`}
-                                    >
-                                        <button className="text-realizaBlue mt-2 flex items-center gap-1 hover:underline">
-                                        <Settings2 size={18} /> Acessar
-                                        </button>
-                                    </Link>
-                                    </div>
-                                ))
-                                ) : (
-                                <p className="text-center text-gray-600">
-                                    Nenhum colaborador encontrado
-                                </p>
-                                )}
-                            </div>
+                      <span>
+                        {selectedBranch ? (
+                        <div>
+                            <p>
+                            <strong>Filial:</strong> {selectedBranch.name}
+                            </p>
                         </div>
+                        ) : (
+                        <div>
+                            <p>
+                            <strong>Filial:</strong> Filial não selecionada
+                            </p>
+                        </div>
+                        )}
+                      </span>
 
-                        <div className="hidden rounded-lg border bg-white p-4 shadow-lg md:block">
-                            <div className="flex w-64 items-center gap-4 rounded-md border p-2">
+                      <div className="block space-y-4 overflow-y-auto md:hidden">
+                          <div className="flex w-full items-center gap-4 rounded-md border p-2">
                             <Search />
                             <input
-                                type="text"
-                                value={searchTerm}
-                                onChange={handleUserSearch}
-                                placeholder="Pesquisar usuários"
-                                className="outline-none"
+                            type="text"
+                            value={searchTerm}
+                            onChange={handleUserSearch}
+                            placeholder="Pesquisar usuários (Nome, CPF)"
+                            className="outline-none w-full"
                             />
-                            </div>
-                            <div className="mt-4 max-h-[300px] overflow-y-auto rounded-lg">
-                                <table className="w-full border-collapse border border-gray-300">
-                                <thead>
-                                    <tr className="sticky top-0 bg-[#345D5C33]">
-                                    <th className="border px-4 py-2 text-start">Nome</th>
-                                    <th className="border px-4 py-2 text-start">CPF</th>
-                                    <th className="border px-4 py-2 text-center">Ações</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {isLoading ? (
-                                    <tr>
-                                        <td
-                                        colSpan={3}
-                                        className="px-4 py-2 text-center text-gray-600"
-                                        >
-                                        Carregando...
-                                        </td>
-                                    </tr>
-                                    ) : filteredUsers.length > 0 ? (
-                                    filteredUsers.map((user: User) => (
-                                        <tr key={user.idUser}>
-                                        <td className="px-4 py-2">
-                                            <li className="list-none text-realizaBlue">
-                                            {user.firstName} {user.surname}
-                                            </li>
-                                        </td>
-                                        <td className="px-4 py-2">{user.cpf}</td>
-                                        <td className="px-4 py-2 text-center">
-                                            <Link
-                                            to={`/sistema/detailsUsers/${user.idUser}`}
-                                            className="text-realizaBlue hover:underline flex items-center justify-center gap-1"
-                                            >
-                                            <Settings2 size={16} />
-                                            </Link>
-                                        </td>
-                                        </tr>
-                                    ))
-                                    ) : (
-                                    <tr>
-                                        <td
-                                        colSpan={3}
-                                        className="border border-gray-300 px-4 py-2 text-center"
-                                        >
-                                        Nenhum colaborador encontrado
-                                        </td>
-                                    </tr>
-                                    )}
-                                </tbody>
-                                </table>
-                            </div>
+                          </div>
+                          <div className="h-[300px] space-y-4 overflow-y-auto">
+                              {isLoading ? (
+                              <p className="text-center text-gray-600">Carregando...</p>
+                              ) : filteredUsers.length > 0 ? (
+                              filteredUsers.map((user: User) => (
+                                  <div
+                                  key={user.idUser}
+                                  className="rounded-lg border border-gray-300 bg-white p-4 shadow-sm"
+                                  >
+                                  <p className="bg-[#345D5C33] text-sm font-semibold text-gray-700">
+                                      Nome:
+                                  </p>
+                                  <p className="text-realizaBlue mb-2">
+                                      {user.firstName} {user.surname}
+                                  </p>
+
+                                  <p className="bg-[#345D5C33] text-sm font-semibold text-gray-700">
+                                      CPF:
+                                  </p>
+                                  <p className="mb-2 text-gray-800">{user.cpf}</p>
+
+                                  <Link
+                                      to={`/sistema/detailsUsers/${user.idUser}`}
+                                  >
+                                      <button className="text-realizaBlue mt-2 flex items-center gap-1 hover:underline">
+                                      <Settings2 size={18} /> Acessar
+                                      </button>
+                                  </Link>
+                                  </div>
+                              ))
+                              ) : (
+                              <p className="text-center text-gray-600">
+                                  Nenhum colaborador encontrado
+                              </p>
+                              )}
+                          </div>
+                      </div>
+
+                      <div className="hidden rounded-lg border bg-white p-4 shadow-lg md:block">
+                        <div className="flex w-64 items-center gap-4 rounded-md border p-2">
+                          <Search />
+                          <input
+                            type="text"
+                            value={searchTerm}
+                            onChange={handleUserSearch}
+                            placeholder="Pesquisar usuários"
+                            className="outline-none"
+                          />
                         </div>
+                        <div className="mt-4 max-h-[300px] overflow-y-auto rounded-lg">
+                          <table className="w-full border-collapse border border-gray-300">
+                            <thead>
+                              {/* ALTERAÇÃO: Cabeçalho opaco e com z-10 */}
+                              <tr className="sticky top-0 bg-gray-200 z-10">
+                                <th className="px-4 py-2 text-start">Nome</th> {/* Removido border */}
+                                <th className="px-4 py-2 text-start">CPF</th> {/* Removido border e garantido text-start */}
+                                <th className="px-4 py-2 text-center">Ações</th> {/* Removido border e garantido text-center */}
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {isLoading ? (
+                                <tr>
+                                  <td
+                                    colSpan={3}
+                                    className="px-4 py-2 text-center text-gray-600"
+                                  >
+                                    Carregando...
+                                  </td>
+                                </tr>
+                              ) : filteredUsers.length > 0 ? (
+                                filteredUsers.map((user: User) => (
+                                  <tr key={user.idUser}>
+                                    <td className="px-4 py-2 text-start"> {/* Adicionado text-start para consistência */}
+                                      <li className="list-none text-realizaBlue">
+                                        {user.firstName} {user.surname}
+                                      </li>
+                                    </td>
+                                    <td className="px-4 py-2 text-start">{user.cpf}</td> {/* Adicionado text-start para consistência */}
+                                    <td className="px-4 py-2 text-center">
+                                      <Link
+                                        to={`/sistema/detailsUsers/${user.idUser}`}
+                                        className="text-realizaBlue hover:underline flex items-center justify-center gap-1"
+                                      >
+                                        <Settings2 size={16} />
+                                      </Link>
+                                    </td>
+                                  </tr>
+                                ))
+                              ) : (
+                                <tr>
+                                  <td
+                                    colSpan={3}
+                                    className="border border-gray-300 px-4 py-2 text-center"
+                                  >
+                                    Nenhum colaborador encontrado
+                                  </td>
+                                </tr>
+                              )}
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
                     </div>
                   )}
                 </div>

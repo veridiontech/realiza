@@ -11,7 +11,7 @@ import axios from "axios";
 import { ip } from "@/utils/ip";
 import { toast } from "sonner";
 import { Puff } from "react-loader-spinner";
-import { Pointer, CircleX, Files, FileCheck2  } from "lucide-react";
+import { Pointer, CircleX, Files, FileCheck2 } from "lucide-react";
 
 interface Employee {
   idEmployee: string;
@@ -23,83 +23,144 @@ interface ManageEmployeesModalProps {
   idProvider: string | null;
 }
 
+type StatusKey =
+  | "ACTIVE"
+  | "FINISHED"
+  | "FINISH_REQUESTED"
+  | "SUSPENDED"
+  | "SUSPEND_REQUESTED"
+  | "REACTIVATION_REQUESTED";
+
 interface Contract {
   idContract: string;
   contractReference: string;
   description: string;
   dateStart: string;
   serviceName: string;
+  status?: StatusKey | string;
 }
 
-export function ManageEmployeesModal({
-  idProvider,
-}: ManageEmployeesModalProps) {
+const STATUS_FILTER: StatusKey[] = [
+  "ACTIVE",
+  "FINISHED",
+  "FINISH_REQUESTED",
+  "SUSPENDED",
+  "SUSPEND_REQUESTED",
+  "REACTIVATION_REQUESTED",
+];
+
+function formatStatus(status?: string) {
+  const map: Record<StatusKey, { label: string; className: string }> = {
+    ACTIVE: { label: "Ativo", className: "bg-green-100 text-green-700 border-green-200" },
+    FINISHED: { label: "Finalizado", className: "bg-gray-100 text-gray-700 border-gray-200" },
+    FINISH_REQUESTED: { label: "Finalização solicitada", className: "bg-yellow-100 text-yellow-800 border-yellow-200" },
+    SUSPENDED: { label: "Suspenso", className: "bg-red-100 text-red-700 border-red-200" },
+    SUSPEND_REQUESTED: { label: "Suspensão solicitada", className: "bg-orange-100 text-orange-800 border-orange-200" },
+    REACTIVATION_REQUESTED: { label: "Reativação solicitada", className: "bg-blue-100 text-blue-800 border-blue-200" },
+  };
+
+  const key = (status || "").toUpperCase() as StatusKey;
+  return map[key] ?? { label: status ?? "—", className: "bg-gray-100 text-gray-700 border-gray-200" };
+}
+
+// Helper: carregar contratos com todos os status exigidos
+async function loadContracts(idProvider: string): Promise<Contract[]> {
+  const token = localStorage.getItem("tokenClient");
+  if (!idProvider) {
+    toast.error("Fornecedor não selecionado (idProvider vazio).");
+    return [];
+  }
+
+  try {
+    const res = await axios.get(`${ip}/contract/supplier/filtered-supplier`, {
+      headers: { Authorization: `Bearer ${token}` },
+      params: {
+        idSearch: idProvider,
+        status: STATUS_FILTER,         // <- obrigatórios
+        page: 0,
+        size: 100,                     // aumenta pra garantir lista cheia
+        sort: "contractReference",
+        direction: "ASC",
+      },
+      // garante "status=A&status=B" (sem índices)
+      paramsSerializer: { indexes: false } as any,
+    });
+
+    const raw = res?.data;
+    const list = Array.isArray(raw?.content) ? raw.content : (Array.isArray(raw) ? raw : []);
+    return list as Contract[];
+  } catch (e) {
+    console.error("Erro ao buscar contratos:", e);
+    toast.error("Não foi possível carregar os contratos.");
+    return [];
+  }
+}
+
+export function ManageEmployeesModal({ idProvider }: ManageEmployeesModalProps) {
   const [activeTab, setActiveTab] = useState<"alocar" | "desalocar">("alocar");
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [loading, setLoading] = useState(false);
   const [selectedEmployees, setSelectedEmployees] = useState<string[]>([]);
   const [mainModalOpen, setMainModalOpen] = useState(false);
   const [confirmModalOpen, setConfirmModalOpen] = useState(false);
-  const [selectContractsModalOpen, setSelectContractsModalOpen] =
-    useState(false);
+  const [selectContractsModalOpen, setSelectContractsModalOpen] = useState(false);
   const [finalConfirmOpen, setFinalConfirmOpen] = useState(false);
   const [contracts, setContracts] = useState<Contract[]>([]);
   const [selectedContracts, setSelectedContracts] = useState<string[]>([]);
   const [allocatedEmployees, setAllocatedEmployees] = useState<Employee[]>([]);
-  const [selectedAllocatedEmployees, setSelectedAllocatedEmployees] = useState<
-    string[]
-  >([]);
+  const [selectedAllocatedEmployees, setSelectedAllocatedEmployees] = useState<string[]>([]);
   const [isAllocating, setIsAllocating] = useState(false);
 
+  // Carrega colaboradores (alocar) e contratos (desalocar) ao abrir o modal principal
   useEffect(() => {
-    if (mainModalOpen) {
-      if (activeTab === "alocar") {
-        const fetchAndSortEmployees = async () => {
-          setLoading(true);
-          try {
-            const tokenFromStorage = localStorage.getItem("tokenClient");
-            const res = await axios.get(
-              `${ip}/employee?idSearch=${idProvider}&enterprise=SUPPLIER`,
-              {
-                headers: { Authorization: `Bearer ${tokenFromStorage}` },
-              }
-            );
-            const data = res.data.content || res.data;
-            const sorted = [...data].sort((a: Employee, b: Employee) =>
-              `${a.name} ${a.surname}`.localeCompare(`${b.name} ${b.surname}`)
-            );
-            setEmployees(sorted);
-          } catch (error) {
-            console.error("Erro ao buscar colaboradores:", error);
-          } finally {
-            setLoading(false);
-            setSelectedEmployees([]);
-          }
-        };
-        fetchAndSortEmployees();
-      } else if (activeTab === "desalocar") {
-        const fetchContracts = async () => {
-          setLoading(true);
-          try {
-            const tokenFromStorage = localStorage.getItem("tokenClient");
-            const res = await axios.get(
-              `${ip}/contract/supplier/filtered-supplier?idSearch=${idProvider}`,
-              {
-                headers: { Authorization: `Bearer ${tokenFromStorage}` },
-              }
-            );
-            setContracts(res.data.content || []);
-          } catch (error) {
-            console.error("Erro ao buscar contratos:", error);
-          } finally {
-            setLoading(false);
-            setSelectedContracts([]);
-          }
-        };
-        fetchContracts();
-      }
+    if (!mainModalOpen) return;
+
+    if (activeTab === "alocar") {
+      const fetchAndSortEmployees = async () => {
+        setLoading(true);
+        try {
+          const tokenFromStorage = localStorage.getItem("tokenClient");
+          const res = await axios.get(
+            `${ip}/employee`,
+            {
+              headers: { Authorization: `Bearer ${tokenFromStorage}` },
+              params: { idSearch: idProvider, enterprise: "SUPPLIER" },
+            }
+          );
+
+          const data = Array.isArray(res.data?.content) ? res.data.content : res.data;
+          const sorted = [...(data || [])].sort((a: Employee, b: Employee) =>
+            `${a.name} ${a.surname}`.localeCompare(`${b.name} ${b.surname}`)
+          );
+          setEmployees(sorted);
+        } catch (error) {
+          console.error("Erro ao buscar colaboradores:", error);
+        } finally {
+          setLoading(false);
+          setSelectedEmployees([]);
+        }
+      };
+      fetchAndSortEmployees();
+    } else if (activeTab === "desalocar") {
+      (async () => {
+        setLoading(true);
+        const list = await loadContracts(idProvider ?? "");
+        setContracts(list);
+        setSelectedContracts([]);
+        setLoading(false);
+      })();
     }
   }, [mainModalOpen, activeTab, idProvider]);
+
+  // Carrega contratos quando abre o modal de seleção de contratos (fluxo alocar)
+  useEffect(() => {
+    if (selectContractsModalOpen && idProvider) {
+      (async () => {
+        const list = await loadContracts(idProvider);
+        setContracts(list);
+      })();
+    }
+  }, [selectContractsModalOpen, idProvider]);
 
   const fetchAllocatedEmployees = async (contractId: string) => {
     setLoading(true);
@@ -107,11 +168,9 @@ export function ManageEmployeesModal({
       const tokenFromStorage = localStorage.getItem("tokenClient");
       const res = await axios.get(`${ip}/employee/filtered-by-contract`, {
         headers: { Authorization: `Bearer ${tokenFromStorage}` },
-        params: {
-          idContract: contractId,
-        },
+        params: { idContract: contractId },
       });
-      setAllocatedEmployees(res.data.content || []);
+      setAllocatedEmployees(res.data?.content || []);
       setSelectedAllocatedEmployees([]);
     } catch (error) {
       console.error("Erro ao buscar colaboradores alocados:", error);
@@ -121,10 +180,7 @@ export function ManageEmployeesModal({
   };
 
   const handleDeallocate = async () => {
-    if (
-      selectedContracts.length !== 1 ||
-      selectedAllocatedEmployees.length === 0
-    ) {
+    if (selectedContracts.length !== 1 || selectedAllocatedEmployees.length === 0) {
       toast.error("Selecione 1 contrato e pelo menos 1 colaborador.");
       return;
     }
@@ -175,13 +231,9 @@ export function ManageEmployeesModal({
 
   const toggleSelect = (id: string) => {
     if (activeTab === "alocar") {
-      setSelectedEmployees((prev) =>
-        prev.includes(id) ? prev.filter((e) => e !== id) : [...prev, id]
-      );
+      setSelectedEmployees((prev) => (prev.includes(id) ? prev.filter((e) => e !== id) : [...prev, id]));
     } else {
-      setSelectedContracts((prev) =>
-        prev.includes(id) ? prev.filter((cid) => cid !== id) : [...prev, id]
-      );
+      setSelectedContracts((prev) => (prev.includes(id) ? prev.filter((cid) => cid !== id) : [...prev, id]));
     }
   };
 
@@ -191,10 +243,7 @@ export function ManageEmployeesModal({
       setMainModalOpen(false);
       setSelectContractsModalOpen(true);
     } else if (activeTab === "desalocar") {
-      if (
-        selectedAllocatedEmployees.length === 0 ||
-        selectedContracts.length !== 1
-      ) {
+      if (selectedAllocatedEmployees.length === 0 || selectedContracts.length !== 1) {
         toast.error("Selecione 1 contrato e pelo menos 1 colaborador.");
         return;
       }
@@ -203,40 +252,15 @@ export function ManageEmployeesModal({
     }
   };
 
-  const getContracts = async () => {
-    try {
-      const tokenFromStorage = localStorage.getItem("tokenClient");
-      const res = await axios.get(
-        `${ip}/contract/supplier/filtered-supplier?idSearch=${idProvider}`,
-        {
-          headers: { Authorization: `Bearer ${tokenFromStorage}` },
-        }
-      );
-      setContracts(res.data.content);
-    } catch (err) {
-      console.log(err);
-    }
-  };
-
-  useEffect(() => {
-    if (selectContractsModalOpen && idProvider) {
-      getContracts();
-    }
-  }, [selectContractsModalOpen, idProvider]);
-
   const toggleSelectContract = async (id: string) => {
     if (activeTab === "desalocar") {
       setSelectedContracts((prev) => {
-        const updated = prev.includes(id)
-          ? prev.filter((cid) => cid !== id)
-          : [id];
+        const updated = prev.includes(id) ? [] : [id]; // garante único
         return updated;
       });
       await fetchAllocatedEmployees(id);
     } else {
-      setSelectedContracts((prev) =>
-        prev.includes(id) ? prev.filter((cid) => cid !== id) : [...prev, id]
-      );
+      setSelectedContracts((prev) => (prev.includes(id) ? prev.filter((cid) => cid !== id) : [...prev, id]));
     }
   };
 
@@ -285,6 +309,7 @@ export function ManageEmployeesModal({
         ⚙️
       </Button>
 
+      {/* Modal de ação inicial */}
       <Dialog open={confirmModalOpen} onOpenChange={setConfirmModalOpen}>
         <DialogContent className="border border-[#2E3C57] text-white max-w-xl pt-3 px-3">
           <DialogHeader className="bg-[#1F2A40] p-5 rounded-sm">
@@ -319,13 +344,12 @@ export function ManageEmployeesModal({
         </DialogContent>
       </Dialog>
 
+      {/* Modal principal (lista colaboradores / contratos) */}
       <Dialog open={mainModalOpen} onOpenChange={setMainModalOpen}>
-        <DialogContent className=" max-w-[85vw] sm:max-w-[40vw] md:max-w-[35vw] text-white pt-2 px-2">
+        <DialogContent className="max-w-[85vw] sm:max-w-[40vw] md:max-w-[35vw] text-white pt-2 px-2">
           <DialogHeader className="bg-[#1F2A40] p-5 rounded-sm">
             <DialogTitle className="text-white">
-              {activeTab === "alocar"
-                ? "Alocar Colaboradores"
-                : "Desalocar Colaboradores"}
+              {activeTab === "alocar" ? "Alocar Colaboradores" : "Desalocar Colaboradores"}
             </DialogTitle>
           </DialogHeader>
 
@@ -359,7 +383,6 @@ export function ManageEmployeesModal({
                           : "bg-[#fffafa] hover:bg-green-200 border-none text-gray-700 font-semibold"
                       }`}
                     >
-                     
                       {emp.name} {emp.surname}
                     </button>
                   );
@@ -371,9 +394,7 @@ export function ManageEmployeesModal({
               selectedContracts.length === 1 ? (
                 allocatedEmployees.length > 0 ? (
                   allocatedEmployees.map((emp) => {
-                    const isSelected = selectedAllocatedEmployees.includes(
-                      emp.idEmployee
-                    );
+                    const isSelected = selectedAllocatedEmployees.includes(emp.idEmployee);
                     return (
                       <button
                         key={emp.idEmployee}
@@ -399,32 +420,30 @@ export function ManageEmployeesModal({
                 )
               ) : (
                 contracts.map((contract) => {
-                  const isSelected = selectedContracts.includes(
-                    contract.idContract
-                  );
+                  const isSelected = selectedContracts.includes(contract.idContract);
+                  const { label, className } = formatStatus(contract.status);
                   return (
                     <button
                       key={contract.idContract}
                       onClick={() => toggleSelectContract(contract.idContract)}
                       className={`w-full text-left p-3 rounded-md border transition-all duration-200 ${
                         isSelected
-                          ? "bg-green-600 border-red-400"
+                          ? "bg-green-600 border-[#3A4C70]"
                           : "bg-[#2E3C57] hover:bg-[#3A4C70] border-[#3A4C70]"
                       }`}
                     >
-                      <div className="flex flex-col">
-                        <span className="font-semibold">
-                          {contract.serviceName}
-                        </span>
-                        <span className="text-sm text-gray-300">
-                          {contract.contractReference}
-                        </span>
+                      <div className="flex flex-col gap-1">
+                        <div className="flex items-center gap-2">
+                          <span className="font-semibold">{contract.serviceName}</span>
+                          <span className={`inline-block text-xs font-semibold px-2 py-1 rounded border ${className}`}>
+                            {label}
+                          </span>
+                        </div>
+                        <span className="text-sm text-gray-300">{contract.contractReference}</span>
                         <span className="text-sm text-gray-300">
                           {new Date(contract.dateStart).toLocaleDateString()}
                         </span>
-                        <span className="text-sm text-gray-400">
-                          {contract.description}
-                        </span>
+                        <span className="text-sm text-gray-400">{contract.description}</span>
                       </div>
                     </button>
                   );
@@ -440,9 +459,7 @@ export function ManageEmployeesModal({
             <div className="mt-4 flex justify-end">
               <Button
                 onClick={handleConfirm}
-                className={`${
-                  activeTab === "alocar" ? "bg-green-600" : "bg-red-600"
-                } hover:brightness-110 text-white font-semibold px-6 py-2 rounded-md`}
+                className={`${activeTab === "alocar" ? "bg-green-600" : "bg-red-600"} hover:brightness-110 text-white font-semibold px-6 py-2 rounded-md`}
               >
                 Proxima etapa
               </Button>
@@ -451,53 +468,50 @@ export function ManageEmployeesModal({
         </DialogContent>
       </Dialog>
 
-      <Dialog
-        open={selectContractsModalOpen}
-        onOpenChange={setSelectContractsModalOpen}
-      >
+      {/* Modal seleção de contratos (fluxo alocar) */}
+      <Dialog open={selectContractsModalOpen} onOpenChange={setSelectContractsModalOpen}>
         <DialogContent className="max-w-[85vw] sm:max-w-[40vw] md:max-w-[35vw] text-white pt-2 px-5">
           <DialogHeader className="bg-[#fff] py-5 px-2 rounded-lg">
             <DialogTitle className="text-black text-start text-lg flex gap-3 items-center">
-              <Pointer width={18} height={18}/>
+              <Pointer width={18} height={18} />
               Selecione os contratos
             </DialogTitle>
           </DialogHeader>
+
           <ScrollArea className="h-[50vh] mt-4 space-y-2">
             {contracts.length > 0 ? (
               contracts.map((contract) => {
-                const isSelected = selectedContracts.includes(
-                  contract.idContract
-                );
+                const isSelected = selectedContracts.includes(contract.idContract);
+                const { label, className } = formatStatus(contract.status);
                 return (
                   <button
                     key={contract.idContract}
                     onClick={() => toggleSelectContract(contract.idContract)}
                     className={`w-full text-left p-3 rounded-md border transition-all duration-200 flex gap-5 items-center ${
                       isSelected
-                        ? "bg-green-100 border-green-100 text-green-600 font-semibold"
-                        : "bg-[#fffafa] hover:bg-green-200 border-none text-gray-700 font-semibold"
+                        ? "bg-green-100 border-green-100 text-green-700"
+                        : "bg-[#fffafa] hover:bg-green-200 border-none text-gray-700"
                     }`}
                   >
-                     <Files width={70} height={70}/>
-                    <div className="flex flex-col">
-                      <span className="font-semibold">
-                        {contract.serviceName}
-                      </span>
-                      <span className="text-sm text-gray-300">
-                        {contract.contractReference}
-                      </span>
-                      <span className="text-sm text-gray-300">
+                    <Files width={70} height={70} />
+                    <div className="flex flex-col gap-1">
+                      <div className="flex items-center gap-2">
+                        <span className="font-semibold">{contract.serviceName}</span>
+                        <span className={`inline-block text-xs font-semibold px-2 py-1 rounded border ${className}`}>
+                          {label}
+                        </span>
+                      </div>
+                      <span className="text-sm text-gray-600">{contract.contractReference}</span>
+                      <span className="text-sm text-gray-600">
                         {new Date(contract.dateStart).toLocaleDateString()}
                       </span>
-                      <span className="text-sm text-gray-400">
-                        {contract.description}
-                      </span>
+                      <span className="text-sm text-gray-500">{contract.description}</span>
                     </div>
                   </button>
                 );
               })
             ) : (
-              <p>Nenhum contrato disponível.</p>
+              <p className="text-black">Nenhum contrato disponível.</p>
             )}
           </ScrollArea>
 
@@ -525,30 +539,23 @@ export function ManageEmployeesModal({
         </DialogContent>
       </Dialog>
 
+      {/* Modal confirmação final */}
       <Dialog open={finalConfirmOpen} onOpenChange={setFinalConfirmOpen}>
         <DialogContent className="bg-[#fff] border border-[#2E3C57] text-black max-w-lg p-0">
           <DialogHeader className="bg-[#1F2A40] py-4 px-5">
             <DialogTitle className="text-white text-start text-lg flex gap-3 items-center">
               <FileCheck2 />
-              {activeTab === "alocar"
-                ? "Confirme a alocação"
-                : "Confirme a desalocação"}
+              {activeTab === "alocar" ? "Confirme a alocação" : "Confirme a desalocação"}
             </DialogTitle>
           </DialogHeader>
 
           <div className="mt-4 space-y-4 px-5">
             <div>
-              <h3 className="font-semibold mb-2">
-                Colaboradores Selecionados:
-              </h3>
+              <h3 className="font-semibold mb-2">Colaboradores Selecionados:</h3>
               <ul className="list-disc list-inside font-normal text-sm text-gray-500">
                 {(activeTab === "alocar"
-                  ? employees.filter((emp) =>
-                      selectedEmployees.includes(emp.idEmployee)
-                    )
-                  : allocatedEmployees.filter((emp) =>
-                      selectedAllocatedEmployees.includes(emp.idEmployee)
-                    )
+                  ? employees.filter((emp) => selectedEmployees.includes(emp.idEmployee))
+                  : allocatedEmployees.filter((emp) => selectedAllocatedEmployees.includes(emp.idEmployee))
                 ).map((emp) => (
                   <li key={emp.idEmployee}>
                     {emp.name} {emp.surname}
@@ -582,20 +589,12 @@ export function ManageEmployeesModal({
               Voltar
             </Button>
             <Button
-              onClick={
-                activeTab === "alocar" ? handleAllocate : handleDeallocate
-              }
+              onClick={activeTab === "alocar" ? handleAllocate : handleDeallocate}
               disabled={isAllocating}
               className="bg-green-600 hover:bg-green-700 text-white font-semibold px-6 py-2 rounded-md flex items-center justify-center gap-2"
             >
               {isAllocating ? (
-                <Puff
-                  visible={true}
-                  height="20"
-                  width="20"
-                  color="white"
-                  ariaLabel="puff-loading"
-                />
+                <Puff visible height="20" width="20" color="white" ariaLabel="puff-loading" />
               ) : (
                 "Confirmar"
               )}

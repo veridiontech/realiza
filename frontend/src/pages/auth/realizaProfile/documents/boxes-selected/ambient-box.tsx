@@ -26,6 +26,9 @@ export function AmbientBox() {
   const [isLoading, setIsLoading] = useState(false);
   const [replicate, setReplicate] = useState(false);
   const [selectedBranches, setSelectedBranches] = useState<string[]>([]);
+  
+  // ⭐️ NOVO ESTADO: Gatilho para forçar o refresh do ValidateSection ⭐️
+  const [refreshTrigger, setRefreshTrigger] = useState(0); 
 
   const getDocument = async () => {
     const tokenFromStorage = localStorage.getItem("tokenClient");
@@ -85,6 +88,10 @@ export function AmbientBox() {
 
       clearArray();
       await pullDatas();
+      
+      // ⭐️ DISPARO DO GATILHO: Incrementa o estado após a operação de alocação/desalocação ⭐️
+      setRefreshTrigger(prev => prev + 1); 
+      
     } catch (err) {
       console.log("erro ao enviar documento", err);
     } finally {
@@ -334,6 +341,8 @@ export function AmbientBox() {
             idBranch={selectedBranch?.idBranch!}
             documentTypeName="MEIO AMBIENTE"
             isSelected={true}
+            // ⭐️ PASSA O GATILHO DE ATUALIZAÇÃO ⭐️
+            refreshTrigger={refreshTrigger} 
           />
         </div>
       </div>

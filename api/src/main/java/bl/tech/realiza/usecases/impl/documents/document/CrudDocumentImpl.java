@@ -523,6 +523,7 @@ public class CrudDocumentImpl implements CrudDocument {
                                     .expirationDateUnit(document.getExpirationDateUnit())
                                     .validity(documentValidityEnum)
                                     .doesBlock(document.getDoesBlock())
+                                    .required(document.getRequired())
                                     .documentMatrix(document.getDocumentMatrix())
                                     .employee(documentEmployee.getEmployee())
                                     .build();
@@ -534,6 +535,7 @@ public class CrudDocumentImpl implements CrudDocument {
                                     .expirationDateUnit(document.getExpirationDateUnit())
                                     .validity(documentValidityEnum)
                                     .doesBlock(document.getDoesBlock())
+                                    .required(document.getRequired())
                                     .documentMatrix(document.getDocumentMatrix())
                                     .providerSupplier(documentProviderSupplier.getProviderSupplier())
                                     .build();
@@ -545,6 +547,7 @@ public class CrudDocumentImpl implements CrudDocument {
                                     .expirationDateUnit(document.getExpirationDateUnit())
                                     .validity(documentValidityEnum)
                                     .doesBlock(document.getDoesBlock())
+                                    .required(document.getRequired())
                                     .documentMatrix(document.getDocumentMatrix())
                                     .providerSubcontractor(documentProviderSubcontractor.getProviderSubcontractor())
                                     .build();

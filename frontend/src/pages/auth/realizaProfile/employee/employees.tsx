@@ -12,26 +12,31 @@ import { ManageEmployeesModal } from "./modals/ManageEmployeesModal";
 import { BriefcaseBusiness, Cog, Users2Icon } from "lucide-react";
 
 export const EmployeesTable = (): JSX.Element => {
-  const [selectedTab, setSelectedTab] = useState("fornecedor");
+  const [selectedTab, setSelectedTab] = useState<"fornecedor" | "subcontratado">("fornecedor");
   const [loading, setLoading] = useState(false);
   const [error] = useState<string | null>(null);
+
   const { selectedBranch } = useBranch();
-  const [selectedSupplier, setSelectedSupplier] = useState<string | null>(null);
-  const [suppliersList, setSuppliersList] = useState<propsSupplier[]>([]);
-  const [getUniqueSupplier, setGetUniqueSupplier] =
-    useState<propsSupplier | null>(null);
-  const [getSubcontractorList, setGetSubcontractorList] = useState([]);
   const { user } = useUser();
   const { supplier, setSupplier } = useSupplier();
 
+  const [suppliersList, setSuppliersList] = useState<propsSupplier[]>([]);
+  const [selectedSupplier, setSelectedSupplier] = useState<string | null>(null);
+  const [getUniqueSupplier, setGetUniqueSupplier] = useState<propsSupplier | null>(null);
+
+  const [getSubcontractorList, setGetSubcontractorList] = useState<any[]>([]);
+  const [selectedSubcontractor, setSelectedSubcontractor] = useState<string | null>(null);
+  const [selectedSubcontractorName, setSelectedSubcontractorName] = useState<string>("");
+
+  const isSupplierResponsible = user?.role === "ROLE_SUPPLIER_RESPONSIBLE";
+
+  // ------ API calls
   const suppliers = async () => {
     try {
       const tokenFromStorage = localStorage.getItem("tokenClient");
       const res = await axios.get(
         `${ip}/supplier/filtered-client?idSearch=${selectedBranch?.idBranch}`,
-        {
-          headers: { Authorization: `Bearer ${tokenFromStorage}` },
-        }
+        { headers: { Authorization: `Bearer ${tokenFromStorage}` } }
       );
       setSuppliersList(res.data.content);
     } catch (error) {
@@ -40,6 +45,7 @@ export const EmployeesTable = (): JSX.Element => {
   };
 
   const uniqueSupplier = async () => {
+    if (!selectedSupplier) return;
     try {
       const tokenFromStorage = localStorage.getItem("tokenClient");
       const res = await axios.get(`${ip}/supplier/${selectedSupplier}`, {
@@ -52,14 +58,16 @@ export const EmployeesTable = (): JSX.Element => {
   };
 
   const getSubcontractor = async () => {
+    if (!selectedSupplier) {
+      setGetSubcontractorList([]);
+      return;
+    }
     setLoading(true);
     try {
       const tokenFromStorage = localStorage.getItem("tokenClient");
       const res = await axios.get(
         `${ip}/subcontractor/filtered-supplier?idSearch=${selectedSupplier}`,
-        {
-          headers: { Authorization: `Bearer ${tokenFromStorage}` },
-        }
+        { headers: { Authorization: `Bearer ${tokenFromStorage}` } }
       );
       setGetSubcontractorList(res.data.content);
     } catch (err) {
@@ -69,17 +77,38 @@ export const EmployeesTable = (): JSX.Element => {
     }
   };
 
+  // ------ Effects
   useEffect(() => {
     if (selectedBranch?.idBranch) {
       suppliers();
     }
+  }, [selectedBranch?.idBranch]);
+
+  useEffect(() => {
     if (selectedSupplier) {
       uniqueSupplier();
       getSubcontractor();
+      // reset seleção de subcontratado quando trocar fornecedor
+      setSelectedSubcontractor(null);
+      setSelectedSubcontractorName("");
     }
-  }, [selectedBranch?.idBranch, selectedSupplier]);
+  }, [selectedSupplier]);
 
-  const isSupplierResponsible = user?.role === "ROLE_SUPPLIER_RESPONSIBLE";
+  // ------ Helpers
+  const targetSupplierId = isSupplierResponsible ? (supplier?.idProvider ?? null) : selectedSupplier;
+  const targetSupplierName = isSupplierResponsible
+    ? supplier?.corporateName
+    : suppliersList.find((s) => s.idProvider === selectedSupplier)?.corporateName;
+
+  // Refresh inteligente (chamado após cadastro)
+  const refreshAfterCreate = () => {
+    if (selectedTab === "fornecedor") {
+      // Se quiser, recarregue a lista do fornecedor (ex.: emitir evento para TableEmployee)
+    } else {
+      // Na aba de subcontratado recarrega a lista de subcontratados
+      getSubcontractor();
+    }
+  };
 
   return (
     <div className="m-4 flex justify-center">
@@ -90,6 +119,7 @@ export const EmployeesTable = (): JSX.Element => {
               <Users2Icon className="text-[#FFCE50]" />
               <h1 className="text-2xl font-medium text-white">Colaboradores</h1>
             </div>
+
             <div className="flex gap-2">
               <Button
                 variant="ghost"
@@ -102,6 +132,7 @@ export const EmployeesTable = (): JSX.Element => {
               >
                 <Cog className="mr-2 h-4 w-4" /> Fornecedor
               </Button>
+
               <Button
                 variant="ghost"
                 className={`px-4 py-2 transition-all duration-300 ${
@@ -118,9 +149,7 @@ export const EmployeesTable = (): JSX.Element => {
 
           <div className="p-4">
             {loading ? (
-              <div className="text-center text-gray-600">
-                Carregando colaboradores...
-              </div>
+              <div className="text-center text-gray-600">Carregando colaboradores...</div>
             ) : error ? (
               <div className="text-center text-red-500">{error}</div>
             ) : selectedTab === "fornecedor" ? (
@@ -128,75 +157,119 @@ export const EmployeesTable = (): JSX.Element => {
                 {isSupplierResponsible ? (
                   <div>
                     <h2 className="mb-4 text-xl">{supplier?.corporateName}</h2>
-                    <TableEmployee idProvider={supplier?.idProvider ?? null} />
+                    {/* Lista colaboradores do fornecedor do usuário responsável */}
+                    <TableEmployee idTarget={supplier?.idProvider ?? null} targetType="supplier" />
                   </div>
                 ) : (
                   <div>
                     <h2 className="mb-4 text-xl">Selecione um Fornecedor</h2>
                     <div>
-                      <span className="text-realizaBlue text-[14px]">
-                        Fornecedor:{" "}
-                      </span>
+                      <span className="text-realizaBlue text-[14px]">Fornecedor: </span>
                       <select
                         value={selectedSupplier || ""}
                         onChange={(e) => {
                           const selectedId = e.target.value;
                           setSelectedSupplier(selectedId);
-                          const supplierData = suppliersList.find(
-                            (sup) => sup.idProvider === selectedId
-                          );
-                          if (supplierData) {
-                            setSupplier(supplierData);
-                          }
+                          const supplierData = suppliersList.find((sup) => sup.idProvider === selectedId);
+                          if (supplierData) setSupplier(supplierData);
                         }}
                         className="rounded-lg border p-2 text-[12px]"
                       >
                         <option value="">Selecione um fornecedor</option>
-                        {suppliersList.map((supplier) => (
-                          <option
-                            key={supplier.idProvider}
-                            value={supplier.idProvider}
-                          >
-                            {supplier.corporateName}
+                        {suppliersList.map((s) => (
+                          <option key={s.idProvider} value={s.idProvider}>
+                            {s.corporateName}
                           </option>
                         ))}
                       </select>
                     </div>
-                    <TableEmployee idProvider={selectedSupplier} />
+
+                    {/* Lista colaboradores do fornecedor selecionado */}
+                    <TableEmployee idTarget={selectedSupplier} targetType="supplier" />
                   </div>
                 )}
               </div>
             ) : (
-              <div>
-                <div className="flex flex-col gap-5">
-                  <div className="flex items-center gap-2">
-                    <strong>Fornecedor: </strong>
-                    {getUniqueSupplier ? (
-                      <div className="flex items-center gap-3">
-                        <p>{getUniqueSupplier?.corporateName}</p> -
-                        <p>{getUniqueSupplier?.cnpj}</p>
-                      </div>
-                    ) : (
-                      <p>Nenhum fornecedor selecionado</p>
-                    )}
-                  </div>
-                  <div>
-                    {getSubcontractorList.map((subcontractor: any) => (
-                      <div key={subcontractor.idProvider}>
-                        <span>{subcontractor.corporateName}</span>
-                      </div>
-                    ))}
-                  </div>
+              <div className="flex flex-col gap-5">
+                <div className="flex items-center gap-2">
+                  <strong>Fornecedor: </strong>
+                  {getUniqueSupplier ? (
+                    <div className="flex items-center gap-3">
+                      <p>{getUniqueSupplier?.corporateName}</p> - <p>{getUniqueSupplier?.cnpj}</p>
+                    </div>
+                  ) : (
+                    <p>Nenhum fornecedor selecionado</p>
+                  )}
                 </div>
+
+                {!selectedSupplier && (
+                  <div className="text-sm text-red-600">
+                    Primeiro selecione um fornecedor (na aba Fornecedor) para carregar os subcontratados.
+                  </div>
+                )}
+
+                <div className="flex items-center gap-2">
+                  <span className="text-realizaBlue text-[14px]">Subcontratado: </span>
+                  <select
+                    value={selectedSubcontractor || ""}
+                    onChange={(e) => {
+                      const id = e.target.value;
+                      setSelectedSubcontractor(id);
+                      const sc = getSubcontractorList.find((x: any) => x.idProvider === id);
+                      setSelectedSubcontractorName(sc?.corporateName || "");
+                    }}
+                    className="rounded-lg border p-2 text-[12px]"
+                    disabled={!selectedSupplier}
+                  >
+                    <option value="">Selecione um subcontratado</option>
+                    {getSubcontractorList.map((sub: any) => (
+                      <option key={sub.idProvider} value={sub.idProvider}>
+                        {sub.corporateName}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Lista colaboradores do subcontratado selecionado */}
+                {selectedSubcontractor ? (
+                  <div className="mt-2">
+                    <TableEmployee idTarget={selectedSubcontractor} targetType="subcontractor" />
+                  </div>
+                ) : (
+                  <p className="text-sm text-gray-600">
+                    Selecione um subcontratado para listar os colaboradores.
+                  </p>
+                )}
               </div>
             )}
           </div>
         </div>
+
         <div className="relative bottom-[18vh] flex justify-end gap-2 2xl:bottom-[16vh] xl:bottom-[14vh] lg:bottom-[10vh] md:bottom-[9vh]">
-          <NewModalCreateEmployee onEmployeeCreated={getSubcontractor} />
-          <ManageEmployeesModal idProvider={selectedSupplier} />
+          {selectedTab === "fornecedor" ? (
+            <NewModalCreateEmployee
+              onEmployeeCreated={refreshAfterCreate}
+              targetType="supplier"
+              supplierId={targetSupplierId}
+              targetName={targetSupplierName || "Fornecedor"}
+            />
+          ) : (
+            <NewModalCreateEmployee
+              onEmployeeCreated={refreshAfterCreate}
+              targetType="subcontractor"
+              subcontractId={selectedSubcontractor}
+              targetName={selectedSubcontractorName || "Subcontratado"}
+            />
+          )}
+
+          <ManageEmployeesModal
+            idProvider={selectedTab === "fornecedor" ? targetSupplierId : selectedSubcontractor}
+          />
         </div>
       </div>
     </div>
   );
 };
+
+// (opcional) export default também, se você quiser importar por default em outro lugar
+export default EmployeesTable;

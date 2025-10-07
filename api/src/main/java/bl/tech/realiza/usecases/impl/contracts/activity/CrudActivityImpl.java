@@ -19,6 +19,7 @@ import bl.tech.realiza.gateways.repositories.documents.client.DocumentBranchRepo
 import bl.tech.realiza.gateways.repositories.users.UserRepository;
 import bl.tech.realiza.gateways.requests.contracts.activity.ActivityRequestDto;
 import bl.tech.realiza.gateways.requests.contracts.activity.AddActivitiesToBranchesRequest;
+import bl.tech.realiza.gateways.requests.contracts.activity.DocumentsToActivityRequest;
 import bl.tech.realiza.gateways.responses.contracts.activity.ActivityDocumentResponseDto;
 import bl.tech.realiza.gateways.responses.contracts.activity.ActivityResponseDto;
 import bl.tech.realiza.gateways.responses.documents.DocumentForActivityResponseDto;
@@ -477,7 +478,7 @@ public class CrudActivityImpl implements CrudActivity {
             List<Activity> activitiesInBranch = activityRepository.findAllByBranch_IdBranch(branch.getIdBranch());
             for (ActivityRepo repo : repos) {
                 if (activitiesInBranch.stream()
-                        .noneMatch(activity ->
+                        .noneMatch(activity -> activity.getActivityRepo() != null &&
                                 activity.getActivityRepo().getIdActivity()
                                         .equals(repo.getIdActivity()))) {
                     newActivities.add(Activity.builder()
@@ -491,5 +492,61 @@ public class CrudActivityImpl implements CrudActivity {
             activityRepository.saveAll(newActivities);
         }
         return "Activities added to selected branches";
+    }
+
+    @Override
+    public List<ActivityDocumentResponseDto> addMultipleDocumentsToActivity(String idActivity, DocumentsToActivityRequest request) {
+        List<ActivityDocumentResponseDto> response = new ArrayList<>();
+        Activity activity = activityRepository.findById(idActivity)
+                .orElseThrow(() -> new NotFoundException("Activity not found"));
+
+        List<DocumentBranch> documentBranches = documentBranchRepository.findAllById(request.getDocumentBranchIds());
+
+        Boolean replicate = false;
+        if (request.getReplicate() != null) {
+            replicate = request.getReplicate();
+        }
+
+        for (DocumentBranch documentBranch : documentBranches) {
+            ActivityDocuments activityDocuments = ActivityDocuments.builder()
+                    .activity(activity)
+                    .documentBranch(documentBranch)
+                    .build();
+            ActivityDocuments savedActivityDocuments = activityDocumentRepository.save(activityDocuments);
+
+            if (replicate
+                    && request.getBranchIds() != null
+                    && !request.getBranchIds().isEmpty()) {
+                replicationQueueProducer.send(ReplicationMessage.builder()
+                        .type("ALLOCATE_DOCUMENT_FROM_ACTIVITY")
+                        .branchIds(request.getDocumentBranchIds())
+                        .documentId(savedActivityDocuments.getDocumentBranch().getIdDocumentation())
+                        .activityId(savedActivityDocuments.getActivity().getIdActivity())
+                        .build());
+            }
+
+            if (JwtService.getAuthenticatedUserId() != null) {
+                userRepository.findById(JwtService.getAuthenticatedUserId()).ifPresent(
+                        userResponsible -> auditLogServiceImpl.createAuditLog(
+                                activity.getIdActivity(),
+                                ACTIVITY,
+                                userResponsible.getFullName() + " atribuiu o documento "
+                                        + documentBranch.getTitle() + " a atividade "
+                                        + activity.getTitle(),
+                                null,
+                                null,
+                                ALLOCATE,
+                                userResponsible.getIdUser()));
+            }
+
+            response.add(ActivityDocumentResponseDto.builder()
+                    .idAssociation(savedActivityDocuments.getId())
+                    .idActivity(savedActivityDocuments.getActivity().getIdActivity())
+                    .idDocument(savedActivityDocuments.getDocumentBranch().getIdDocumentation())
+                    .documentTitle(savedActivityDocuments.getDocumentBranch().getTitle())
+                    .build());
+        }
+
+        return response;
     }
 }

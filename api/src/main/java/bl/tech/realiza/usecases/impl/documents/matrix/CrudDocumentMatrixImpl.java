@@ -51,9 +51,12 @@ public class CrudDocumentMatrixImpl implements CrudDocumentMatrix {
                 .name(documentMatrixRequestDto.getName())
                 .type(documentMatrixRequestDto.getType())
                 .doesBlock(documentMatrixRequestDto.getDoesBlock())
+                .required(documentMatrixRequestDto.getRequired())
                 .isDocumentUnique(documentMatrixRequestDto.getIsDocumentUnique())
                 .isValidityFixed(documentMatrixRequestDto.getIsValidityFixed())
                 .fixedValidityAt(parseDayMonth(documentMatrixRequestDto.getFixedValidityAt()))
+                        .expirationDateAmount(documentMatrixRequestDto.getExpirationDateAmount())
+                        .expirationDateUnit(documentMatrixRequestDto.getExpirationDateUnit())
                 .group(documentMatrixGroup)
 //                .subGroup(documentMatrixSubgroup)
                 .build());
@@ -99,6 +102,9 @@ public class CrudDocumentMatrixImpl implements CrudDocumentMatrix {
         documentMatrix.setDoesBlock(documentMatrixRequestDto.getDoesBlock() != null
                 ? documentMatrixRequestDto.getDoesBlock()
                 : documentMatrix.getDoesBlock());
+        documentMatrix.setRequired(documentMatrixRequestDto.getRequired() != null
+                ? documentMatrixRequestDto.getRequired()
+                : documentMatrix.getRequired());
 //        documentMatrix.setSubGroup(documentMatrixRequestDto.getSubgroup() != null
 //                ? documentMatrixSubgroup
 //                : documentMatrix.getSubGroup());
@@ -151,6 +157,7 @@ public class CrudDocumentMatrixImpl implements CrudDocumentMatrix {
                 .expirationDateAmount(documentMatrix.getExpirationDateAmount())
                 .type(documentMatrix.getType())
                 .doesBlock(documentMatrix.getDoesBlock())
+                .required(documentMatrix.getRequired())
                 .isDocumentUnique(documentMatrix.getIsDocumentUnique())
                 .isValidityFixed(documentMatrix.getIsValidityFixed() != null
                         ? documentMatrix.getIsValidityFixed()

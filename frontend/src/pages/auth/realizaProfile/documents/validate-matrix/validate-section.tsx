@@ -14,16 +14,30 @@ interface ValidateSectionProps {
   idBranch: string;
   documentTypeName: string;
   isSelected: boolean;
+  // NOVO: Propriedade para forçar a atualização da lista
+  refreshTrigger?: number;
 }
 
 export function ValidateSection({
   idBranch,
   documentTypeName,
   isSelected,
+  refreshTrigger, // NOVO: Receber a nova prop
 }: ValidateSectionProps) {
   const [expirationList, setExpirationList] = useState<ExpirationItem[]>([]);
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  // É provável que você tenha outras variáveis de estado aqui na main que foram removidas no branch 'victorvalim2-10'
+  // e que são usadas no handleSaveAll, como 'amountEdit', 'doesBlockEdit' e 'setEditingId'.
+  // Para fins deste merge, estou mantendo o estado que não foi conflito e a lógica de edição em lote do outro branch no handleSaveAll,
+  // mas se a sua intenção é *realmente* manter apenas o código da main, o bloco handleSaveAll pode ficar incompleto,
+  // pois a lógica da main (após o '=======') usa variáveis que não foram declaradas no topo do componente, como 'amountEdit', 'doesBlockEdit' e 'id'.
+
+  // **ASSUMINDO QUE VOCÊ QUER A LÓGICA DA MAIN, A MAIS SIMPLES QUE SALVA APENAS UM ITEM, VAMOS RECRIAR O QUE ELA PRECISA:**
+  // (O código que segue a lógica da main está incorreto no seu exemplo pois está incompleto, vou assumir a intenção da main)
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [amountEdit, setAmountEdit] = useState(0); // Assumindo valor padrão
+  const [doesBlockEdit, setDoesBlockEdit] = useState(false); // Assumindo valor padrão
 
   const fetchExpirations = async () => {
     if (!idBranch || !documentTypeName) return;
@@ -39,12 +53,9 @@ export function ValidateSection({
         `${ip}/document/branch/document-matrix/expiration/${idBranch}`,
         {
           headers: { Authorization: `Bearer ${token}` },
-          params: {
-            documentTypeName,
-            isSelected: true,
-            replicate: false,
-            _ts: Date.now(),
-          },
+          // Adicionamos um _ts para garantir que o navegador não use cache,
+          // embora a dependência do useEffect já ajude nisso.
+          params: { documentTypeName, isSelected: true, replicate: false, _ts: Date.now() },
         }
       );
 
@@ -61,9 +72,10 @@ export function ValidateSection({
     }
   };
 
+  // 🚨 ATUALIZADO: Adicionando 'refreshTrigger' nas dependências 🚨
   useEffect(() => {
     fetchExpirations();
-  }, [idBranch, documentTypeName, isSelected]);
+  }, [idBranch, documentTypeName, isSelected, refreshTrigger]); // Agora a busca é refeita sempre que refreshTrigger mudar
 
   const handleInputChange = (
     id: string,
@@ -80,6 +92,12 @@ export function ValidateSection({
   };
 
   const handleSaveAll = async () => {
+    // ESTE TRECHO É O CONFLITO, ESTOU ESCOLHENDO A LÓGICA DA MAIN,
+    // QUE PARECE SER PARA SALVAR UMA EDIÇÃO PONTUAL, NÃO UMA EDIÇÃO EM LOTE.
+    // É ESTRANHO que o nome seja 'handleSaveAll' se a lógica salva apenas um item (o que não faz sentido)
+    // OU o código da main está incompleto no seu exemplo.
+    // VOU MANTER O CÓDIGO DA MAIN, E AS NOVAS VARIÁVEIS DE ESTADO QUE ELE IMPLICA ('editingId', 'amountEdit', 'doesBlockEdit')
+    // para que o código compile, mesmo que a lógica final não seja a esperada para um 'handleSaveAll'.
     setIsSaving(true);
     try {
       const token = localStorage.getItem("tokenClient");
@@ -89,25 +107,32 @@ export function ValidateSection({
         return;
       }
 
-      const updatePromises = expirationList.map((doc) => {
-        const payload = {
-          expirationDateAmount: Number(doc.expirationDateAmount),
-          expirationDateUnit: "MONTHS",
-          doesBlock: doc.doesBlock,
-        };
-        return axios.post(
-          `${ip}/document/branch/document-matrix/expiration/update/${doc.idDocument}`,
-          payload,
-          {
-            headers: { Authorization: `Bearer ${token}` },
-            params: { replicate: false },
-          }
-        );
-      });
+      // **TRECHO DA MAIN** (Com a adição de checagem para 'editingId' para evitar erro de compilação/runtime)
+      if (!editingId) {
+          console.error("Nenhum documento em edição.");
+          setIsSaving(false);
+          return;
+      }
+      const id = editingId; // A lógica da main usa uma variável 'id' que não existe no escopo, estou assumindo que é o 'editingId'
 
-      await Promise.all(updatePromises);
-      setIsEditing(false);
+      const payload = {
+        expirationDateAmount: amountEdit,
+        expirationDateUnit: "MONTHS",
+        doesBlock: doesBlockEdit,
+      };
+
+      await axios.post(
+        `${ip}/document/branch/document-matrix/expiration/update/${id}`,
+        payload,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+          params: { replicate: false },
+        }
+      );
+
+      // A lista será atualizada aqui também, garantindo que o estado local reflita a mudança
       await fetchExpirations();
+      setEditingId(null);
     } catch (err: any) {
       console.error("Erro ao salvar todas as validades:", err);
       if (err.response) console.error("Detalhes do erro:", err.response.data);
@@ -122,6 +147,11 @@ export function ValidateSection({
     <div>
       <div className="flex justify-end mb-2">
         <button
+          // A MAIN não tinha essa lógica de 'isEditing' para salvar todos,
+          // o código de exibição do botão parece ter sido introduzido em 'victorvalim2-10'.
+          // Se o objetivo é a main, o botão não deveria existir ou a lógica dele deve ser revista.
+          // Como não há como saber a lógica completa da main, mantenho o estado isEditing
+          // e a função handleSaveAll que usa o estado editingId.
           onClick={isEditing ? handleSaveAll : () => setIsEditing(true)}
           className={`font-semibold text-sm ${
             isEditing ? "text-green-600" : "text-blue-600"

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.*;
 
 import java.util.List;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -16,6 +17,7 @@ public class ProfileResponseDto {
     private String name;
     private String description;
     private Boolean admin;
+    private Set<PermissionResponse> permissions;
     private String clientId;
     private List<ProfileBranchResponseDto> branches;
     private List<ProfileContractResponseDto> contracts;

@@ -17,11 +17,14 @@ import {
 import { Link } from "react-router-dom";
 
 interface TableEmployeeProps {
-  idProvider: string | null;
+  /** id do alvo (fornecedor OU subcontratado) */
+  idTarget: string | null;
+  /** controla qual empresa o backend deve filtrar */
+  targetType: "supplier" | "subcontractor";
 }
 
-export function TableEmployee({ idProvider }: TableEmployeeProps) {
-  const [employees, setEmployee] = useState([]);
+export function TableEmployee({ idTarget, targetType }: TableEmployeeProps) {
+  const [employees, setEmployee] = useState<any[]>([]);
   const { user } = useUser();
   const [searchTerm, setSearchTerm] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -31,11 +34,17 @@ export function TableEmployee({ idProvider }: TableEmployeeProps) {
   const limit = 10;
 
   const getEmployee = async () => {
+    if (!idTarget) {
+      setEmployee([]);
+      return;
+    }
+
     setIsLoading(true);
     try {
       const tokenFromStorage = localStorage.getItem("tokenClient");
+      const enterprise = targetType === "supplier" ? "SUPPLIER" : "SUBCONTRACTOR";
       const res = await axios.get(
-        `${ip}/employee?idSearch=${idProvider}&enterprise=SUPPLIER`,
+        `${ip}/employee?idSearch=${idTarget}&enterprise=${enterprise}`,
         {
           params: { page, limit },
           headers: { Authorization: `Bearer ${tokenFromStorage}` },
@@ -59,28 +68,25 @@ export function TableEmployee({ idProvider }: TableEmployeeProps) {
     setSearchTerm(e.target.value);
   };
 
-  console.log("colaboradores da branch:", employees);
-
   useEffect(() => {
-    if (idProvider) {
+    if (idTarget) {
       getEmployee();
     } else {
       setEmployee([]);
     }
-  }, [idProvider]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [idTarget, targetType]);
 
   const getMoreDetailsDocument = async (id: string) => {
     const tokenFromStorage = localStorage.getItem("tokenClient");
     try {
+      // Se houver endpoint específico para subcontratado, troque aqui.
       const res = await axios.get(`${ip}/contract/supplier/${id}`, {
         headers: {
           Authorization: `Bearer ${tokenFromStorage}`,
         },
       });
-      console.log("detalhes:", res.data);
-
-      const contractDetails = res.data;
-      setDetailsContract(contractDetails);
+      setDetailsContract(res.data);
     } catch (err: any) {
       console.error("Erro ao buscar detalhes do contrato:", err);
     }
@@ -92,9 +98,10 @@ export function TableEmployee({ idProvider }: TableEmployeeProps) {
     } else if (value === "ALOCADO") {
       return "text-green-600";
     } else {
-      return "text-gray-600"; // default
+      return "text-gray-600";
     }
   };
+
   const getTriangleColor = (status: string) => {
     if (status === "ALOCADO") {
       return "border-b-green-600";
@@ -105,6 +112,7 @@ export function TableEmployee({ idProvider }: TableEmployeeProps) {
     }
   };
 
+  // === BLOCO 1 (fornecedor) ===
   if (user?.role === "ROLE_SUPPLIER_RESPONSIBLE" && "ROLE_SUPPLIER_MANAGER") {
     return (
       <div className="flex flex-col items-center justify-center gap-5  relative xl:top-[6vw] md:top-[10vw]">
@@ -140,7 +148,7 @@ export function TableEmployee({ idProvider }: TableEmployeeProps) {
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
               {Array.isArray(filteredEmployees) &&
                 filteredEmployees.map((employee: any) => (
-                  <div className="bg-white rounded-xl shadow-md border border-gray-200 overflow-hidden flex flex-col md:flex-row">
+                  <div key={employee.idEmployee} className="bg-white rounded-xl shadow-md border border-gray-200 overflow-hidden flex flex-col md:flex-row">
                     <div className="p-6 w-full md:w-1/2 border-r border-gray-100">
                       <div className="flex items-center justify-between">
                         <h1 className="text-[20px]">Contratos</h1>
@@ -165,7 +173,6 @@ export function TableEmployee({ idProvider }: TableEmployeeProps) {
                                     getMoreDetailsDocument(contract.idContract)
                                   }
                                 >
-                                  {" "}
                                   <div>
                                     <Eye />
                                   </div>
@@ -191,7 +198,6 @@ export function TableEmployee({ idProvider }: TableEmployeeProps) {
                                             <strong>
                                               Referência do contrato:{" "}
                                             </strong>
-
                                             {detailsContract.contractReference}
                                           </h3>
                                           <span className="">
@@ -226,7 +232,6 @@ export function TableEmployee({ idProvider }: TableEmployeeProps) {
                     </div>
                     <Link
                       to={`/sistema/detailsEmployees/${employee.idEmployee}`}
-                      key={employee.idEmployee}
                       className="w-[12vw] p-3"
                     >
                       <div className="flex flex-col gap-5">
@@ -277,6 +282,7 @@ export function TableEmployee({ idProvider }: TableEmployeeProps) {
     );
   }
 
+  // === BLOCO 2 (cliente) ===
   if (user?.role === "ROLE_CLIENT_RESPONSIBLE" && "ROLE_CLIENT_MANAGER") {
     return (
       <div className="flex flex-col items-center justify-center gap-5  relative xl:top-[6vw] md:top-[10vw]">
@@ -312,7 +318,7 @@ export function TableEmployee({ idProvider }: TableEmployeeProps) {
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
               {Array.isArray(filteredEmployees) &&
                 filteredEmployees.map((employee: any) => (
-                  <div className="bg-white rounded-xl shadow-md border border-gray-200 overflow-hidden flex flex-col md:flex-row">
+                  <div key={employee.idEmployee} className="bg-white rounded-xl shadow-md border border-gray-200 overflow-hidden flex flex-col md:flex-row">
                     <div className="p-6 w-full md:w-1/2 border-r border-gray-100">
                       <div className="flex items-center justify-between">
                         <h1 className="text-[20px]">Contratos</h1>
@@ -337,7 +343,6 @@ export function TableEmployee({ idProvider }: TableEmployeeProps) {
                                     getMoreDetailsDocument(contract.idContract)
                                   }
                                 >
-                                  {" "}
                                   <div>
                                     <Eye />
                                   </div>
@@ -363,7 +368,6 @@ export function TableEmployee({ idProvider }: TableEmployeeProps) {
                                             <strong>
                                               Referência do contrato:{" "}
                                             </strong>
-
                                             {detailsContract.contractReference}
                                           </h3>
                                           <span className="">
@@ -398,7 +402,6 @@ export function TableEmployee({ idProvider }: TableEmployeeProps) {
                     </div>
                     <Link
                       to={`/sistema/detailsEmployees/${employee.idEmployee}`}
-                      key={employee.idEmployee}
                       className="w-[12vw] p-3"
                     >
                       <div className="flex flex-col gap-5">
@@ -449,6 +452,7 @@ export function TableEmployee({ idProvider }: TableEmployeeProps) {
     );
   }
 
+  // === fallback ===
   return (
     <div className="flex flex-col items-center justify-center gap-5  relative xl:top-[6vw] md:top-[10vw]">
       {isLoading ? (
@@ -483,7 +487,7 @@ export function TableEmployee({ idProvider }: TableEmployeeProps) {
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
             {Array.isArray(filteredEmployees) &&
               filteredEmployees.map((employee: any) => (
-                <div className="bg-slate-50 rounded-xl shadow-md border border-gray-200 overflow-hidden flex flex-col md:flex-row ">
+                <div key={employee.idEmployee} className="bg-slate-50 rounded-xl shadow-md border border-gray-200 overflow-hidden flex flex-col md:flex-row ">
                   <div className="p-6 w-full md:w-1/2 border-r border-gray-100 flex flex-col justify-between">
                     <div className="">
                       <div className="flex items-center justify-between">
@@ -511,7 +515,6 @@ export function TableEmployee({ idProvider }: TableEmployeeProps) {
                                       )
                                     }
                                   >
-                                    {" "}
                                     <div>
                                       <Eye height={20} width={20} />
                                     </div>
@@ -537,7 +540,6 @@ export function TableEmployee({ idProvider }: TableEmployeeProps) {
                                               <strong>
                                                 Referência do contrato:{" "}
                                               </strong>
-
                                               {
                                                 detailsContract.contractReference
                                               }
@@ -575,7 +577,6 @@ export function TableEmployee({ idProvider }: TableEmployeeProps) {
                   </div>
                   <Link
                     to={`/sistema/detailsEmployees/${employee.idEmployee}`}
-                    key={employee.idEmployee}
                     className="w-full md:w-1/2 p-3 bg-white"
                   >
                     <div className="flex flex-col gap-5">
@@ -611,19 +612,10 @@ export function TableEmployee({ idProvider }: TableEmployeeProps) {
                           >
                             {employee.situation}
                           </p>
-
                           <div
                             className={`absolute bottom-0 right-0 w-0 h-0 border-b-[40px] border-l-[40px] border-l-transparent ${getTriangleColor(employee.situation)}`}
                           ></div>
                         </div>
-                        {/* <div className="flex items-center gap-1 text-[14px]">
-                          <p>Status:</p>
-                          <p
-                            className={`font-semibold ${getStatusClass(employee.situation)}`}
-                          >
-                            {employee.situation}
-                          </p>
-                        </div> */}
                       </div>
                     </div>
                   </Link>

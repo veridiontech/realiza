@@ -19,6 +19,14 @@ interface Document {
   creationDate: string;
 }
 
+interface Contract {
+  idContract: string;
+  contractReference: string;
+  description?: string;
+  dateStart?: string;
+  serviceName?: string;
+}
+
 export function DetailsEmployee() {
   const { id } = useParams<{ id: string }>();
   const { user } = useUser();
@@ -28,6 +36,7 @@ export function DetailsEmployee() {
 
   const [employee, setEmployee] = useState<any | null>(null);
   const [documents, setDocuments] = useState<Document[]>([]);
+  const [contracts, setContracts] = useState<Contract[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -52,6 +61,14 @@ export function DetailsEmployee() {
     return map[situation] || situation;
   };
 
+  const formatDateBR = (value?: string) => {
+    if (!value) return "-";
+    const d = new Date(value);
+    if (isNaN(d.getTime())) return "-";
+    return d.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit", year: "2-digit" });
+    // se preferir ano com 4 dígitos, troque "2-digit" por "numeric" em year
+  };
+
   const handleStatusChange = (idDoc: string, newStatus: string) => {
     setDocuments((prev) =>
       prev.map((d) => (d.idDocument === idDoc ? { ...d, status: newStatus } : d))
@@ -61,7 +78,8 @@ export function DetailsEmployee() {
   const exemptDocument = async (documentId: string, documentTitle: string) => {
     try {
       const token = localStorage.getItem("tokenClient");
-      const contractId = employee?.contracts?.[0]?.idContract;
+      const contractId =
+        employee?.contracts?.[0]?.idContract || contracts?.[0]?.idContract;
 
       if (!contractId) {
         toast.error("Contrato não encontrado para isentar o documento.");
@@ -92,7 +110,6 @@ export function DetailsEmployee() {
   const fetchEmployee = async () => {
     const token = localStorage.getItem("tokenClient");
     try {
-      // 1) rota padrão com enterprise quando for fornecedor
       const res = await axios.get(`${ip}/employee/brazilian/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
         params: isSupplier ? { enterprise: "SUPPLIER" } : undefined,
@@ -100,7 +117,6 @@ export function DetailsEmployee() {
       setEmployee(res.data);
       setError(null);
     } catch (err: any) {
-      // 2) fallback: tenta rota alternativa simples
       try {
         const res2 = await axios.get(`${ip}/employee/${id}`, {
           headers: { Authorization: `Bearer ${token}` },
@@ -140,12 +156,35 @@ export function DetailsEmployee() {
     }
   };
 
+  const fetchContracts = async () => {
+    const token = localStorage.getItem("tokenClient");
+    try {
+      const res = await axios.get(`${ip}/contract/find-by-employee/${id}`, {
+        params: {
+          page: 0,
+          size: 20,
+          sort: "contractReference",
+          direction: "ASC",
+        },
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const items = Array.isArray(res.data?.content) ? res.data.content : res.data || [];
+      setContracts(items);
+    } catch (err: any) {
+      console.error("Erro ao carregar os contratos:", err?.response?.data || err?.message);
+      setContracts([]);
+    }
+  };
+
   useEffect(() => {
     setIsLoading(true);
-    Promise.all([fetchEmployee(), fetchDocuments()]).finally(() => setIsLoading(false));
-  }, [id]); // eslint-disable-line react-hooks/exhaustive-deps
+    Promise.all([fetchEmployee(), fetchDocuments(), fetchContracts()]).finally(() =>
+      setIsLoading(false)
+    );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id]);
 
-  // =================== TABELA ===================
+  // =================== TABELA DE DOCUMENTOS (já existente) ===================
 
   const columns: {
     key: keyof Document;
@@ -157,26 +196,17 @@ export function DetailsEmployee() {
     {
       key: "creationDate",
       label: "Data de Envio",
-      render: (value) =>
-        value
-          ? new Date(value).toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit", year: "2-digit" })
-          : "-",
+      render: (value) => formatDateBR(value),
     },
     {
       key: "assignDate",
       label: "Data de Atribuição",
-      render: (value) =>
-        value
-          ? new Date(value).toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit", year: "2-digit" })
-          : "-",
+      render: (value) => formatDateBR(value),
     },
     {
       key: "expirationDate",
       label: "Data de Validade",
-      render: (value) =>
-        value
-          ? new Date(value).toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit", year: "2-digit" })
-          : "-",
+      render: (value) => formatDateBR(value),
     },
     {
       key: "status",
@@ -286,24 +316,46 @@ export function DetailsEmployee() {
           <div className="flex-[2]">
             <Table<Document> data={documents} columns={columns} />
           </div>
+
+          {/* ======= Lado direito: TABELA de Contratos ======= */}
           <div className="flex flex-1 flex-col">
-            <h2 className="text-lg font-medium">Histórico</h2>
+            <h2 className="text-lg font-medium">Contratos</h2>
             <div className="h-[40vh] overflow-auto rounded-md bg-white p-4 shadow-md">
-              <table className="w-full">
-                <thead>
-                  <tr>
-                    <th className="p-2 text-left text-sm text-stone-600">Atividade</th>
-                    <th className="p-2 text-left text-sm text-stone-600">Tipo de Atividade</th>
-                    <th className="p-2 text-left text-sm text-stone-600">Feito por</th>
-                    <th className="p-2 text-left text-sm text-stone-600">Data</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr></tr>
-                </tbody>
-              </table>
+              {contracts.length === 0 ? (
+                <p className="text-sm text-stone-600">Nenhum contrato encontrado.</p>
+              ) : (
+                <table className="w-full border-collapse">
+                  <thead>
+                    <tr className="border-b">
+                      <th className="p-2 text-left text-sm text-stone-600">Referência</th>
+                      <th className="p-2 text-left text-sm text-stone-600">Serviço</th>
+                      <th className="p-2 text-left text-sm text-stone-600">Início</th>
+                      <th className="p-2 text-left text-sm text-stone-600">Descrição</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {contracts.map((c) => (
+                      <tr key={c.idContract} className="border-b hover:bg-stone-50">
+                        <td className="p-2 text-sm font-semibold">
+                          {c.contractReference || "-"}
+                        </td>
+                        <td className="p-2 text-sm">
+                          {c.serviceName || "-"}
+                        </td>
+                        <td className="p-2 text-sm">
+                          {formatDateBR(c.dateStart)}
+                        </td>
+                        <td className="p-2 text-sm text-stone-700">
+                          {c.description || "-"}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
             </div>
           </div>
+          {/* ================================================ */}
         </div>
       </div>
 
