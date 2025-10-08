@@ -2,9 +2,12 @@ package bl.tech.realiza.gateways.requests.users;
 
 import bl.tech.realiza.domains.user.User;
 import lombok.*;
+import lombok.extern.jackson.Jacksonized;
 
 @Getter
 @Setter
+@Builder
+@Jacksonized
 @NoArgsConstructor
 @AllArgsConstructor
 public class UserManagerRequestDto {

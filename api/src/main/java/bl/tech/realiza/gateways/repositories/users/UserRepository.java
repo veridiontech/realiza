@@ -19,4 +19,6 @@ public interface UserRepository extends JpaRepository<User, String> {
     List<User> findAllByForgotPasswordCodeIsNotNull();
     Page<User> findAllByContractsIsEmpty(Boolean isContractEmpty, Pageable pageable);
     List<User> findAllByProfile_Id(String profileId);
+
+    boolean existsByEmail(String mail);
 }
