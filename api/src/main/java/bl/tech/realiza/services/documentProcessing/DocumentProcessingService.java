@@ -166,7 +166,6 @@ public class DocumentProcessingService {
         headers.setContentType(MediaType.APPLICATION_JSON);
         log.info("Document Type Name: {}",documentTypeName);
         String prompt = buildPrompt(documentTypeName);
-        log.info("Prompt: {}",prompt);
 
         Map<String, Object> imageContent = Map.of(
                 "type", "image_url",

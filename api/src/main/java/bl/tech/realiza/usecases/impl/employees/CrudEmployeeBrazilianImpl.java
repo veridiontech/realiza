@@ -92,17 +92,7 @@ public class CrudEmployeeBrazilianImpl implements CrudEmployeeBrazilian {
             }
         }
 
-        if (employeeBrazilianRequestDto.getBranch() != null && !employeeBrazilianRequestDto.getBranch().isEmpty()) {
-            Optional<Branch> branchOptional = branchRepository.findById(employeeBrazilianRequestDto.getBranch());
-            branch = branchOptional.orElseThrow(() -> new NotFoundException("Branch not found"));
-
-            List<DocumentBranch> documentBranches = documentBranchRepository.findAllByBranch_IdBranchAndDocumentMatrix_Group_GroupNameAndIsActive(employeeBrazilianRequestDto.getBranch(), "Documento pessoa", true);
-
-            documentMatrixList = documentBranches.stream()
-                    .map(DocumentBranch::getDocumentMatrix)
-                    .toList();
-
-        } else if (employeeBrazilianRequestDto.getSupplier() != null && !employeeBrazilianRequestDto.getSupplier().isEmpty()) {
+        if (employeeBrazilianRequestDto.getSupplier() != null && !employeeBrazilianRequestDto.getSupplier().isEmpty()) {
             Optional<ProviderSupplier> providerSupplierOptional = providerSupplierRepository.findById(employeeBrazilianRequestDto.getSupplier());
             providerSupplier = providerSupplierOptional.orElseThrow(() -> new NotFoundException("Supplier not found"));
 

@@ -18,4 +18,5 @@ public class DocumentEmployeeRequestDto {
     private Date versionDate;
     private Date expirationDate;
     private String employee;
+    private String documentMatrixId;
 }

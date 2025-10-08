@@ -60,10 +60,14 @@ public class CrudDocumentProviderSubcontractorImpl implements CrudDocumentProvid
         ProviderSubcontractor providerSubcontractor = providerSubcontractorRepository.findById(documentProviderSubcontractorRequestDto.getSubcontractor())
                 .orElseThrow(() -> new EntityNotFoundException("Subcontractor not found"));
 
+        DocumentMatrix matrix = documentMatrixRepository.findById(documentProviderSubcontractorRequestDto.getDocumentMatrixId())
+                .orElseThrow(() -> new NotFoundException("Document Matrix not found"));
+
         DocumentProviderSubcontractor savedDocumentSubcontractor = documentSubcontractorRepository.save(DocumentProviderSubcontractor.builder()
                 .title(documentProviderSubcontractorRequestDto.getTitle())
                 .status(documentProviderSubcontractorRequestDto.getStatus())
                 .providerSubcontractor(providerSubcontractor)
+                        .documentMatrix(matrix)
                 .build());
 
         return DocumentResponseDto.builder()
@@ -180,7 +184,7 @@ public class CrudDocumentProviderSubcontractorImpl implements CrudDocumentProvid
 
         if (file != null && !file.isEmpty()) {
             try {
-                String gcsUrl = googleCloudService.uploadFile(file, "branch-documents");
+                String gcsUrl = googleCloudService.uploadFile(file, "documents/subcontractor");
 
                 savedFileDocument = fileRepository.save(FileDocument.builder()
                         .name(file.getOriginalFilename())
