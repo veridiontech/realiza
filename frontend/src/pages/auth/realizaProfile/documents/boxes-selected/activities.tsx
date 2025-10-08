@@ -8,10 +8,16 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { toast } from "sonner";
 import { Blocks } from "react-loader-spinner";
 
+interface DocumentData {
+  idDocument: string;
+  title: string;
+  selected: boolean;
+}
+
 export function ActivitiesBox() {
   const [activitieSelected, setActivitieSelected] = useState<any>(null);
   const [activities, setActivities] = useState<any[]>([]);
-  const [documentsByActivitie, setDocumentsByActivitie] = useState<any[]>([]);
+  const [documentsByActivitie, setDocumentsByActivitie] = useState<DocumentData[]>([]);
   const { selectedBranch, branch } = useBranch();
   const [loadingDocumentId, setLoadingDocumentId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -32,7 +38,6 @@ export function ActivitiesBox() {
         }
       );
       setActivities(resSelected.data);
-      console.log("Atividades buscadas com sucesso.");
     } catch (err) {
       console.log("erro ao buscar atividades:", err);
     } finally {
@@ -41,27 +46,29 @@ export function ActivitiesBox() {
   };
 
   const getDocumentByActivitie = async () => {
+    if (!activitieSelected?.idActivity) {
+      return;
+    }
+
     setIsLoading(true);
+    const tokenFromStorage = localStorage.getItem("tokenClient");
+    const activityId = activitieSelected.idActivity;
+
     try {
-      const tokenFromStorage = localStorage.getItem("tokenClient");
-      const idBranch = selectedBranch?.idBranch;
-      const isSelected = true;
-      if (!idBranch) {
-        console.log("ID da filial não encontrado.");
-        setIsLoading(false);
-        return;
-      }
-      const res = await axios.get(
-        `${ip}/document/branch/document-matrix/${idBranch}?isSelected=${isSelected}`,
+      const res = await axios.get<DocumentData[]>(
+        `${ip}/document/branch/document-matrix/all-and-selected-by-activity/${activityId}`,
         {
           headers: { Authorization: `Bearer ${tokenFromStorage}` },
         }
       );
-      setDocumentsByActivitie(res.data);
+      
+      const selectedDocuments = res.data.filter(doc => doc.selected === true);
+      
+      setDocumentsByActivitie(selectedDocuments);
       setSearchTerm("");
-      console.log("Documentos da matriz buscados com sucesso:", res.data);
     } catch (err) {
-      console.log("Erro ao buscar documentos da atividade:", err);
+      console.error("Erro ao buscar documentos da atividade:", err);
+      setDocumentsByActivitie([]);
     } finally {
       setIsLoading(false);
     }
@@ -84,7 +91,6 @@ export function ActivitiesBox() {
           },
         }
       );
-      console.log("Documento removido com sucesso.");
     } catch (err: any) {
       console.log("Erro ao remover documento:", err);
       throw err;
@@ -108,24 +114,23 @@ export function ActivitiesBox() {
           },
         }
       );
-      console.log("Documento adicionado com sucesso.");
     } catch (err: any) {
       console.log("Erro ao adicionar documento:", err);
       throw err;
     }
   };
 
-  const handleSelectDocument = async (_document: any, idDocument: string) => {
+  const handleSelectDocument = async (document: DocumentData, idDocument: string) => {
     const idActivity = activitieSelected?.idActivity;
     if (!idActivity) return;
 
     setLoadingDocumentId(idDocument);
 
     setPendingOperation({
-      type: _document.selected === true ? "remove" : "add",
+      type: document.selected === true ? "remove" : "add",
       idActivity: idActivity,
       idDocumentBranch: idDocument,
-      document: _document,
+      document: document,
     });
 
     setShowReplicateConfirmation(true);
@@ -139,21 +144,22 @@ export function ActivitiesBox() {
 
     try {
       if (type === "remove") {
-        await removeDocumentByActivitie(idActivity, idDocumentBranch, selectedBranches, confirmed);
-        setDocumentsByActivitie((prevDocs: any) =>
-          prevDocs.map((doc: any) =>
-            doc.idDocument === idDocumentBranch ? { ...doc, selected: false } : doc
-          )
+        await removeDocumentByActivitie(
+          idActivity,
+          idDocumentBranch,
+          selectedBranches,
+          confirmed
         );
-        console.log("Confirmação de remoção concluída.");
+        setDocumentsByActivitie((prevDocs) =>
+          prevDocs.filter((doc) => doc.idDocument !== idDocumentBranch)
+        );
       } else {
-        await addDocumentByActivitie(idActivity, idDocumentBranch, selectedBranches, confirmed);
-        setDocumentsByActivitie((prevDocs: any) =>
-          prevDocs.map((doc: any) =>
-            doc.idDocument === idDocumentBranch ? { ...doc, selected: true } : doc
-          )
+        await addDocumentByActivitie(
+          idActivity,
+          idDocumentBranch,
+          selectedBranches,
+          confirmed
         );
-        console.log("Confirmação de adição concluída.");
       }
       toast.success("Operação realizada com sucesso!");
     } catch (err) {
@@ -181,7 +187,7 @@ export function ActivitiesBox() {
     }
     const lowercasedSearchTerm = searchTerm.toLowerCase();
     return documentsByActivitie.filter((document) =>
-      document.documentTitle?.toLowerCase().includes(lowercasedSearchTerm)
+      document.title?.toLowerCase().includes(lowercasedSearchTerm)
     );
   }, [documentsByActivitie, searchTerm]);
 
@@ -194,6 +200,8 @@ export function ActivitiesBox() {
   useEffect(() => {
     if (activitieSelected?.idActivity) {
       getDocumentByActivitie();
+    } else {
+      setDocumentsByActivitie([]);
     }
   }, [activitieSelected]);
 
@@ -203,7 +211,9 @@ export function ActivitiesBox() {
         <BoxActivities
           activities={activities}
           isLoading={isLoading}
-          onSelectActivitie={(activitie: any) => setActivitieSelected(activitie)}
+          onSelectActivitie={(activitie: any) =>
+            setActivitieSelected(activitie)
+          }
         />
       </div>
 
@@ -221,23 +231,35 @@ export function ActivitiesBox() {
           <ScrollArea className="h-[30vh]">
             {isLoading ? (
               <div className="flex items-center justify-center py-10">
-                <Blocks height="80" width="80" color="#4fa94d" visible={true} />
+                <Blocks
+                  height="80"
+                  width="80"
+                  color="#4fa94d"
+                  visible={true}
+                />
               </div>
             ) : (
               <div>
                 {filteredDocuments.length > 0 ? (
-                  filteredDocuments.map((document: any) => (
+                  filteredDocuments.map((document) => (
                     <div
                       key={document.idDocument}
                       className="flex cursor-pointer items-center gap-2 rounded-sm p-1 hover:bg-gray-200"
                     >
                       {loadingDocumentId === document.idDocument ? (
-                        <Blocks height="50" width="50" color="#4fa94d" visible={true} />
+                        <Blocks
+                          height="50"
+                          width="50"
+                          color="#4fa94d"
+                          visible={true}
+                        />
                       ) : (
                         <input
                           type="checkbox"
                           checked={document.selected === true}
-                          onChange={() => handleSelectDocument(document, document.idDocument)}
+                          onChange={() =>
+                            handleSelectDocument(document, document.idDocument)
+                          }
                           className="cursor-pointer"
                         />
                       )}
@@ -248,7 +270,7 @@ export function ActivitiesBox() {
                   <p className="p-4 text-center text-gray-500">
                     {searchTerm
                       ? "Nenhum documento encontrado com este termo."
-                      : "Selecione uma atividade para ver os documentos ou adicione um termo de pesquisa."}
+                      : "Nenhum documento alocado para esta atividade."}
                   </p>
                 )}
               </div>
@@ -260,8 +282,12 @@ export function ActivitiesBox() {
       {showReplicateConfirmation && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white p-6 rounded-lg shadow-lg max-w-md w-full max-h-[80vh] overflow-hidden flex flex-col">
-            <h3 className="text-lg font-semibold mb-4">Replicar Alteração?</h3>
-            <p className="mb-4">Deseja replicar esta alteração para outras filiais?</p>
+            <h3 className="text-lg font-semibold mb-4">
+              Replicar Alteração?
+            </h3>
+            <p className="mb-4">
+              Deseja replicar esta alteração para outras filiais?
+            </p>
 
             <div className="flex items-center gap-2 justify-center mb-4">
               <input
@@ -296,9 +322,14 @@ export function ActivitiesBox() {
                           onChange={(e) => {
                             const { value, checked } = e.target;
                             if (checked) {
-                              setSelectedBranches([...selectedBranches, value]);
+                              setSelectedBranches([
+                                ...selectedBranches,
+                                value,
+                              ]);
                             } else {
-                              setSelectedBranches(selectedBranches.filter((id) => id !== value));
+                              setSelectedBranches(
+                                selectedBranches.filter((id) => id !== value)
+                              );
                             }
                           }}
                           className="h-4 w-4"
