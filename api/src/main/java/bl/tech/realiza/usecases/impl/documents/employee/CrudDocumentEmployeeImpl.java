@@ -7,6 +7,7 @@ import bl.tech.realiza.domains.services.FileDocument;
 import bl.tech.realiza.domains.user.User;
 import bl.tech.realiza.exceptions.BadRequestException;
 import bl.tech.realiza.exceptions.NotFoundException;
+import bl.tech.realiza.gateways.repositories.contracts.RequirementRepository;
 import bl.tech.realiza.gateways.repositories.documents.employee.DocumentEmployeeRepository;
 import bl.tech.realiza.gateways.repositories.documents.matrix.DocumentMatrixRepository;
 import bl.tech.realiza.gateways.repositories.employees.EmployeeRepository;
@@ -54,6 +55,7 @@ public class CrudDocumentEmployeeImpl implements CrudDocumentEmployee {
     private final JwtService jwtService;
     private final GoogleCloudService googleCloudService;
     private final CrudNotification crudNotification;
+    private final RequirementRepository requirementRepository;
 
     @Override
     public DocumentResponseDto save(DocumentEmployeeRequestDto documentEmployeeRequestDto) {
@@ -64,10 +66,14 @@ public class CrudDocumentEmployeeImpl implements CrudDocumentEmployee {
         Employee employee = employeeRepository.findById(documentEmployeeRequestDto.getEmployee())
                 .orElseThrow(() -> new EntityNotFoundException("Employee not found"));
 
+        DocumentMatrix matrix = documentMatrixRepository.findById(documentEmployeeRequestDto.getDocumentMatrixId())
+                .orElseThrow(() -> new NotFoundException("Document Matrix not found"));
+
         DocumentEmployee savedDocumentEmployee = documentEmployeeRepository.save(DocumentEmployee.builder()
                 .title(documentEmployeeRequestDto.getTitle())
                 .status(documentEmployeeRequestDto.getStatus())
                 .employee(employee)
+                        .documentMatrix(matrix)
                 .build());
 
         return DocumentResponseDto.builder()
@@ -182,7 +188,7 @@ public class CrudDocumentEmployeeImpl implements CrudDocumentEmployee {
 
         if (file != null && !file.isEmpty()) {
             try {
-                String gcsUrl = googleCloudService.uploadFile(file, "branch-documents");
+                String gcsUrl = googleCloudService.uploadFile(file, "documents/employee");
 
                 savedFileDocument = fileRepository.save(FileDocument.builder()
                         .name(file.getOriginalFilename())

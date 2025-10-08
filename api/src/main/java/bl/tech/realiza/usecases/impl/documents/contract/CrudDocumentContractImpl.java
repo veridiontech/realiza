@@ -88,28 +88,41 @@ public class CrudDocumentContractImpl implements CrudDocumentContract {
                 .comparing(ContractDocumentAndEmployeeResponseDto.EmployeeDto::getName, String.CASE_INSENSITIVE_ORDER));
 
         if (contract instanceof ContractProviderSupplier contractProviderSupplier) {
-            if (contractProviderSupplier.getProviderSupplier() != null) {
-                if (contractProviderSupplier.getProviderSupplier().getDocumentProviderSuppliers() != null) {
-                    for (DocumentProviderSupplier documentProviderSupplier : contractProviderSupplier.getProviderSupplier().getDocumentProviderSuppliers().stream()
-                            .filter(doc -> doc.getDocumentMatrix().getGroup().getGroupName().equals("Documento empresa") ||
-                                            doc.getDocumentMatrix().getGroup().getGroupName().equals("Documentos empresa-serviço")).toList()) {
-                        documentDtos.add(ContractDocumentAndEmployeeResponseDto.DocumentDto.builder()
-                                .id(documentProviderSupplier.getIdDocumentation())
-                                .title(documentProviderSupplier.getTitle())
-                                .status(documentProviderSupplier.getStatus())
-                                .type(documentProviderSupplier.getType())
-                                .ownerName(documentProviderSupplier.getProviderSupplier() != null
-                                        ? documentProviderSupplier.getProviderSupplier().getCorporateName()
-                                        : null)
-                                .isUnique(documentProviderSupplier.getDocumentMatrix().getIsDocumentUnique())
-                                .hasDoc(documentProviderSupplier.getIdDocumentation() != null
-                                        && !documentProviderSupplier.getIdDocumentation().isEmpty())
-                                .expirationDate(documentProviderSupplier.getExpirationDate())
-                                .uploadDate(documentProviderSupplier.getVersionDate())
-                                .lastCheck(documentProviderSupplier.getLastCheck())
-                                .enterprise(true)
-                                .build());
-                    }
+            if (contractProviderSupplier.getProviderSupplier() != null && contractProviderSupplier.getProviderSupplier().getDocumentProviderSuppliers() != null) {
+
+                // Lista dos nomes de grupo que você quer encontrar
+                List<String> targetGroups = List.of("Documento empresa", "Documentos empresa-serviço");
+
+                // 1. Filtre a lista de documentos com segurança
+                List<DocumentProviderSupplier> filteredDocuments = contractProviderSupplier.getProviderSupplier().getDocumentProviderSuppliers().stream()
+                        .filter(doc -> {
+                            // Verificação de segurança contra nulos
+                            if (doc.getDocumentMatrix() == null || doc.getDocumentMatrix().getGroup() == null || doc.getDocumentMatrix().getGroup().getGroupName() == null) {
+                                return false; // Ignora documentos com matriz, grupo ou nome de grupo nulos
+                            }
+                            // Retorna true se o nome do grupo estiver na nossa lista de alvos
+                            return targetGroups.contains(doc.getDocumentMatrix().getGroup().getGroupName());
+                        })
+                        .toList(); // 2. Converte o resultado do stream para uma lista
+
+                // 3. Agora, itere sobre a lista JÁ FILTRADA
+                for (DocumentProviderSupplier documentProviderSupplier : filteredDocuments) {
+                    documentDtos.add(ContractDocumentAndEmployeeResponseDto.DocumentDto.builder()
+                            .id(documentProviderSupplier.getIdDocumentation())
+                            .title(documentProviderSupplier.getTitle())
+                            .status(documentProviderSupplier.getStatus())
+                            .type(documentProviderSupplier.getType())
+                            .ownerName(documentProviderSupplier.getProviderSupplier() != null
+                                    ? documentProviderSupplier.getProviderSupplier().getCorporateName()
+                                    : null)
+                            .isUnique(documentProviderSupplier.getDocumentMatrix().getIsDocumentUnique())
+                            .hasDoc(documentProviderSupplier.getIdDocumentation() != null
+                                    && !documentProviderSupplier.getIdDocumentation().isEmpty())
+                            .expirationDate(documentProviderSupplier.getExpirationDate())
+                            .uploadDate(documentProviderSupplier.getVersionDate())
+                            .lastCheck(documentProviderSupplier.getLastCheck())
+                            .enterprise(true)
+                            .build());
                 }
             }
 
