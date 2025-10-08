@@ -1,3 +1,5 @@
+// TableServiceProvider.jsx/tsx
+
 import { useBranch } from "@/context/Branch-provider";
 import { ip } from "@/utils/ip";
 import axios from "axios";
@@ -119,8 +121,8 @@ function Modal({
           <div className="flex items-center gap-2">
             <div className="bg-yellow-400 p-[6px] rounded-sm flex items-center justify-center">
               <ScrollText className="w-4 h-4 text-[#2E3C4D]" />
+              <h2 className="text-white text-base font-semibold">{title}</h2>
             </div>
-            <h2 className="text-white text-base font-semibold">{title}</h2>
           </div>
           <button
             onClick={onClose}
@@ -239,13 +241,15 @@ export function TableServiceProvider() {
     try {
       const tokenFromStorage = localStorage.getItem("tokenClient");
       const base = { idSearch: selectedBranch.idBranch };
-
+      
+      // FUNÇÃO AJUSTADA: Adiciona 'size: 9999' para despaginar
       const fetchPage = async (extraParams: Record<string, any>) => {
-        const params = { ...base, ...extraParams };
+        const params = { ...base, ...extraParams, size: 9999 }; // <--- AJUSTE AQUI
         const res = await axios.get(`${ip}/contract/supplier/filtered-client`, {
           params,
           headers: { Authorization: `Bearer ${tokenFromStorage}` },
         });
+        // A API retorna o conteúdo da página (que agora é grande)
         return res.data?.content ?? [];
       };
 

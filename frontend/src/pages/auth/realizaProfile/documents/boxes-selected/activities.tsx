@@ -17,7 +17,10 @@ interface DocumentData {
 export function ActivitiesBox() {
   const [activitieSelected, setActivitieSelected] = useState<any>(null);
   const [activities, setActivities] = useState<any[]>([]);
-  const [documentsByActivitie, setDocumentsByActivitie] = useState<DocumentData[]>([]);
+  // Mantido para compatibilidade e controle interno dos selecionados
+  const [, setDocumentsByActivitie] = useState<DocumentData[]>([]);
+  // NOVO ESTADO: Armazena todos os documentos da filial (selecionados ou não pela atividade)
+  const [allDocumentsByBranch, setAllDocumentsByBranch] = useState<DocumentData[]>([]); 
   const { selectedBranch, branch } = useBranch();
   const [loadingDocumentId, setLoadingDocumentId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -31,6 +34,7 @@ export function ActivitiesBox() {
     const tokenFromStorage = localStorage.getItem("tokenClient");
     setIsLoading(true);
     try {
+      console.log(`LOG - Buscando atividades para a filial: ${selectedBranch?.idBranch}`);
       const resSelected = await axios.get(
         `${ip}/contract/activity/find-by-branch/${selectedBranch?.idBranch}`,
         {
@@ -38,37 +42,89 @@ export function ActivitiesBox() {
         }
       );
       setActivities(resSelected.data);
+      console.log("LOG - Atividades buscadas com sucesso.");
     } catch (err) {
-      console.log("erro ao buscar atividades:", err);
+      console.error("LOG - Erro ao buscar atividades:", err);
     } finally {
       setIsLoading(false);
     }
   };
 
-  const getDocumentByActivitie = async () => {
-    if (!activitieSelected?.idActivity) {
+  const getAllDocuments = async () => {
+    if (!selectedBranch?.idBranch) {
+      setAllDocumentsByBranch([]);
       return;
     }
 
     setIsLoading(true);
     const tokenFromStorage = localStorage.getItem("tokenClient");
-    const activityId = activitieSelected.idActivity;
+    const branchId = selectedBranch.idBranch;
+    const activityId = activitieSelected?.idActivity;
 
+    // 1. Busca os documentos *selecionados* pela atividade (para manter a flag 'selected' precisa)
+    let selectedDocs: DocumentData[] = [];
+    if (activityId) {
+      try {
+        console.log(
+          `LOG - Buscando documentos SELECIONADOS para a atividade: ${activityId}`
+        );
+        const resSelected = await axios.get<DocumentData[]>(
+          `${ip}/document/branch/document-matrix/all-and-selected-by-activity/${activityId}`,
+          {
+            headers: { Authorization: `Bearer ${tokenFromStorage}` },
+          }
+        );
+        // Apenas documentos que vieram como 'selected: true'
+        selectedDocs = resSelected.data.filter(doc => doc.selected === true);
+        setDocumentsByActivitie(selectedDocs); 
+      } catch (err) {
+        console.error("LOG - Erro ao buscar documentos selecionados da atividade:", err);
+      }
+    } else {
+        setDocumentsByActivitie([]);
+    }
+
+    // 2. Busca *todos* os documentos da filial (endpoint da Imagem 1)
     try {
-      const res = await axios.get<DocumentData[]>(
-        `${ip}/document/branch/document-matrix/all-and-selected-by-activity/${activityId}`,
+      const params = {
+        // documentTypeName: undefined, // Omitido conforme solicitado
+        isSelected: true // Parâmetro isSelected=true conforme solicitado
+      };
+      const url = `${ip}/document/branch/document-matrix/${branchId}`;
+
+      console.log(
+        `LOG - Buscando TODOS os documentos da filial: ${branchId}. URL: ${url}, Parâmetros:`, 
+        params
+      );
+
+      const resAll = await axios.get<DocumentData[]>(
+        url, 
         {
+          params: params,
           headers: { Authorization: `Bearer ${tokenFromStorage}` },
         }
       );
       
-      const selectedDocuments = res.data.filter(doc => doc.selected === true);
+      let allDocs: DocumentData[] = resAll.data || [];
       
-      setDocumentsByActivitie(selectedDocuments);
+      // Cria um Set de IDs dos documentos selecionados pela atividade para comparação rápida
+      const selectedIds = new Set(selectedDocs.map(d => d.idDocument));
+      
+      // Mescla as duas listas: usa a lista de todos e sobrescreve a flag 'selected' 
+      // se o documento estiver na lista de documentos selecionados pela atividade.
+      const mergedDocs = allDocs.map(doc => ({
+        ...doc,
+        // Garante que o documento tenha 'selected: true' se estiver alocado à atividade
+        selected: selectedIds.has(doc.idDocument) || doc.selected === true
+      }));
+      
+      setAllDocumentsByBranch(mergedDocs);
       setSearchTerm("");
+      console.log(`LOG - ${mergedDocs.length} documentos da filial mesclados e prontos para exibição.`);
+      
     } catch (err) {
-      console.error("Erro ao buscar documentos da atividade:", err);
-      setDocumentsByActivitie([]);
+      console.error("LOG - Erro ao buscar todos os documentos da filial:", err);
+      setAllDocumentsByBranch([]);
     } finally {
       setIsLoading(false);
     }
@@ -82,6 +138,7 @@ export function ActivitiesBox() {
   ) => {
     const tokenFromStorage = localStorage.getItem("tokenClient");
     try {
+      console.log(`LOG - Removendo documento ${idDocumentBranch} da atividade ${idActivity}. Replicar: ${replicate}. Filiais: ${branches.join(", ")}`);
       await axios.post(
         `${ip}/contract/activity/remove-document-from-activity/${idActivity}?idDocumentBranch=${idDocumentBranch}&replicate=${replicate}`,
         branches,
@@ -91,8 +148,9 @@ export function ActivitiesBox() {
           },
         }
       );
+      console.log("LOG - Remoção concluída com sucesso.");
     } catch (err: any) {
-      console.log("Erro ao remover documento:", err);
+      console.error("LOG - Erro ao remover documento:", err);
       throw err;
     }
   };
@@ -105,6 +163,7 @@ export function ActivitiesBox() {
   ) => {
     const tokenFromStorage = localStorage.getItem("tokenClient");
     try {
+      console.log(`LOG - Adicionando documento ${idDocumentBranch} na atividade ${idActivity}. Replicar: ${replicate}. Filiais: ${branches.join(", ")}`);
       await axios.post(
         `${ip}/contract/activity/add-document-to-activity/${idActivity}?idDocumentBranch=${idDocumentBranch}&replicate=${replicate}`,
         branches,
@@ -114,8 +173,9 @@ export function ActivitiesBox() {
           },
         }
       );
+      console.log("LOG - Adição concluída com sucesso.");
     } catch (err: any) {
-      console.log("Erro ao adicionar documento:", err);
+      console.error("LOG - Erro ao adicionar documento:", err);
       throw err;
     }
   };
@@ -126,21 +186,26 @@ export function ActivitiesBox() {
 
     setLoadingDocumentId(idDocument);
 
+    const operationType = document.selected === true ? "remove" : "add";
+
     setPendingOperation({
-      type: document.selected === true ? "remove" : "add",
+      type: operationType,
       idActivity: idActivity,
       idDocumentBranch: idDocument,
       document: document,
     });
 
     setShowReplicateConfirmation(true);
+    console.log(`LOG - Tentativa de ${operationType} documento: ${idDocument}. Aguardando confirmação de replicação.`);
   };
 
   const handleConfirmReplication = async (confirmed: boolean) => {
     setShowReplicateConfirmation(false);
     if (!pendingOperation) return;
 
-    const { type, idActivity, idDocumentBranch } = pendingOperation;
+    const { type, idActivity, idDocumentBranch, document } = pendingOperation;
+
+    console.log(`LOG - Confirmação: ${type} para o documento: ${idDocumentBranch}. Replicar: ${confirmed}.`);
 
     try {
       if (type === "remove") {
@@ -150,6 +215,13 @@ export function ActivitiesBox() {
           selectedBranches,
           confirmed
         );
+        // Atualiza o estado visual removendo a seleção na lista COMPLETA
+        setAllDocumentsByBranch((prevDocs) =>
+          prevDocs.map((doc) =>
+            doc.idDocument === idDocumentBranch ? { ...doc, selected: false } : doc
+          )
+        );
+        // Atualiza o estado de documentos selecionados
         setDocumentsByActivitie((prevDocs) =>
           prevDocs.filter((doc) => doc.idDocument !== idDocumentBranch)
         );
@@ -160,10 +232,21 @@ export function ActivitiesBox() {
           selectedBranches,
           confirmed
         );
+        // Atualiza o estado visual adicionando a seleção na lista COMPLETA
+        setAllDocumentsByBranch((prevDocs) =>
+          prevDocs.map((doc) =>
+            doc.idDocument === idDocumentBranch ? { ...doc, selected: true } : doc
+          )
+        );
+        // Atualiza o estado de documentos selecionados
+        setDocumentsByActivitie((prevDocs) => [
+            ...prevDocs,
+            { ...document, selected: true } 
+        ]);
       }
       toast.success("Operação realizada com sucesso!");
     } catch (err) {
-      console.error("Erro na operação:", err);
+      console.error("LOG - Erro na operação:", err);
       toast.error("Erro ao realizar a operação.");
     } finally {
       setLoadingDocumentId(null);
@@ -181,15 +264,16 @@ export function ActivitiesBox() {
     }
   };
 
+  // useMemo agora usa a lista completa de documentos
   const filteredDocuments = useMemo(() => {
     if (!searchTerm) {
-      return documentsByActivitie;
+      return allDocumentsByBranch;
     }
     const lowercasedSearchTerm = searchTerm.toLowerCase();
-    return documentsByActivitie.filter((document) =>
+    return allDocumentsByBranch.filter((document) =>
       document.title?.toLowerCase().includes(lowercasedSearchTerm)
     );
-  }, [documentsByActivitie, searchTerm]);
+  }, [allDocumentsByBranch, searchTerm]);
 
   useEffect(() => {
     if (selectedBranch?.idBranch) {
@@ -197,13 +281,14 @@ export function ActivitiesBox() {
     }
   }, [selectedBranch?.idBranch]);
 
+  // Chama a nova função de busca de todos os documentos
   useEffect(() => {
-    if (activitieSelected?.idActivity) {
-      getDocumentByActivitie();
+    if (selectedBranch?.idBranch) {
+      getAllDocuments();
     } else {
-      setDocumentsByActivitie([]);
+      setAllDocumentsByBranch([]);
     }
-  }, [activitieSelected]);
+  }, [selectedBranch, activitieSelected]); // Recarrega sempre que a filial ou a atividade mudar
 
   return (
     <div className="flex items-center justify-center gap-10 p-10">
@@ -229,7 +314,7 @@ export function ActivitiesBox() {
             />
           </div>
           <ScrollArea className="h-[30vh]">
-            {isLoading ? (
+            {isLoading && !allDocumentsByBranch.length ? (
               <div className="flex items-center justify-center py-10">
                 <Blocks
                   height="80"
@@ -270,7 +355,9 @@ export function ActivitiesBox() {
                   <p className="p-4 text-center text-gray-500">
                     {searchTerm
                       ? "Nenhum documento encontrado com este termo."
-                      : "Nenhum documento alocado para esta atividade."}
+                      : activitieSelected 
+                        ? "Nenhum documento alocado ou disponível para esta atividade/filial."
+                        : "Selecione uma atividade para ver os documentos."}
                   </p>
                 )}
               </div>
