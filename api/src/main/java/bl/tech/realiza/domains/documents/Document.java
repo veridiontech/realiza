@@ -110,4 +110,44 @@ public abstract class Document {
         int year = date.getYear();
         return String.format("%s - %s", this.documentMatrix != null ? this.documentMatrix.getName() : "", year).trim();
     }
+
+    @PrePersist
+    public void setDefaultsOnPersist() {
+        if (status == null) {
+            status = Status.PENDENTE;
+        }
+        if (creationDate == null) {
+            creationDate = LocalDateTime.now();
+        }
+        if (expirationDateAmount == null) {
+            expirationDateAmount = 1;
+        }
+        if (expirationDateUnit == null) {
+            expirationDateUnit = DocumentMatrix.DayUnitEnum.MONTHS;
+        }
+        if (documentDate == null) {
+            documentDate = LocalDateTime.now();
+        }
+        if (validity == null) {
+            validity = DocumentValidityEnum.INDEFINITE;
+        }
+        if (isActive == null) {
+            isActive = true;
+        }
+        if (adherent == null) {
+            adherent = false;
+        }
+        if (conforming == null) {
+            conforming = false;
+        }
+        if (doesBlock == null) {
+            doesBlock = false;
+        }
+        if (required == null) {
+            required = true;
+        }
+        if (isValidityDone == null) {
+            isValidityDone = false;
+        }
+    }
 }
