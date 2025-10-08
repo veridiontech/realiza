@@ -23,9 +23,9 @@ EXCEL_FILE = "SISTEMA NOVO_ITAMINAS.xlsx"
 SHEET_RESULTS = "Resultado da consulta"
 
 # ID do cliente para buscar os dados do banco
-CLIENT_ID = "23f05e50-6328-43b0-8283-ec73b4ce2ac1"
+CLIENT_ID = "8a291eb6-e627-4215-a622-3aa9fc39300e"
 # ID do usuário que está fazendo a requisição do contrato
-REQUESTER_ID = "140e89bb-9777-4bcb-a65c-b7dc2ebdc85c" # Exemplo, troque pelo ID correto
+REQUESTER_ID = "fbbcae2f-8bd8-47a2-8049-6c5f98d2da91" # Exemplo, troque pelo ID correto
 
 # NOVO: Configuração do banco de dados (verifique se está correta)
 DB_CONFIG = {

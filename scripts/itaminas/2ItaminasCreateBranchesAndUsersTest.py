@@ -15,8 +15,8 @@ global branches
 global users
 global profile_id
 branches = {}
-profile_id = "8bfd38b5-a120-492a-af88-12ac012a2742"
-client_global_id = "23f05e50-6328-43b0-8283-ec73b4ce2ac1"
+profile_id = "9dbf8db2-6f0c-476e-bb38-aa4e0b33d821"
+client_global_id = "8a291eb6-e627-4215-a622-3aa9fc39300e"
 
 def mask_email(email: str) -> str:
     if not email or "@" not in email:

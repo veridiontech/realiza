@@ -16,7 +16,7 @@ import unicodedata
 APP_URL = "http://localhost:8080".rstrip("/")
 EXCEL_FILE = "SISTEMA NOVO_ITAMINAS.xlsx"
 SHEET_RESULTS = "Resultado da consulta"
-CLIENT_ID = "23f05e50-6328-43b0-8283-ec73b4ce2ac1"
+CLIENT_ID = "8a291eb6-e627-4215-a622-3aa9fc39300e"
 USER_LOGIN = {"email": "realiza@assessoria.com", "password": "senha123"}
 DB_CONFIG = {
     "host": "177.170.30.9", "port": 8004, "user": "veridion_user",
