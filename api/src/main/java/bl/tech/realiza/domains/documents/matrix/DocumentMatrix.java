@@ -65,4 +65,32 @@ public class DocumentMatrix {
     // -------------------------------
     @OneToMany(mappedBy = "documentMatrix", cascade = CascadeType.REMOVE)
     private List<Document> documents;
+
+    @PrePersist
+    public void setDefaultsOnPersist() {
+        if (expirationDateAmount == null) {
+            expirationDateAmount = 1;
+        }
+        if (expirationDateUnit == null) {
+            expirationDateUnit = DayUnitEnum.MONTHS;
+        }
+        if (doesBlock == null) {
+            doesBlock = false;
+        }
+        if (required == null) {
+            required = true;
+        }
+        if (isDocumentUnique == null) {
+            isDocumentUnique = true;
+        }
+        if (validity == null) {
+            validity = DocumentValidityEnum.INDEFINITE;
+        }
+        if (isValidityFixed == null) {
+            isValidityFixed = false;
+        }
+        if (creationDate == null) {
+            creationDate = LocalDateTime.now();
+        }
+    }
 }
