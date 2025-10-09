@@ -13,10 +13,10 @@ import unicodedata
 # ==============================================================================
 # CONFIGURAÇÕES GERAIS
 # ==============================================================================
-APP_URL = "http://localhost:8080".rstrip("/")
+APP_URL = "https://realiza-api-development.onrender.com".rstrip("/")
 EXCEL_FILE = "SISTEMA NOVO_ITAMINAS.xlsx"
 SHEET_RESULTS = "Resultado da consulta"
-CLIENT_ID = "8a291eb6-e627-4215-a622-3aa9fc39300e"
+CLIENT_ID = "d2bd8165-95ac-4d11-9e97-968979b9bc5f"
 USER_LOGIN = {"email": "realiza@assessoria.com", "password": "senha123"}
 DB_CONFIG = {
     "host": "177.170.30.9", "port": 8004, "user": "veridion_user",

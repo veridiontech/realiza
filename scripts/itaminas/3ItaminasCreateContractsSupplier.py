@@ -11,7 +11,7 @@ import mysql.connector  # NOVO: Import para conexão com o banco
 # ==============================================================================
 # CONFIGURAÇÕES GERAIS
 # ==============================================================================
-APP_URL = "http://localhost:8080".rstrip("/")
+APP_URL = "https://realiza.onrender.com".rstrip("/")
 
 USER_LOGIN = {
     "email": "realiza@assessoria.com",
@@ -23,9 +23,9 @@ EXCEL_FILE = "SISTEMA NOVO_ITAMINAS.xlsx"
 SHEET_RESULTS = "Resultado da consulta"
 
 # ID do cliente para buscar os dados do banco
-CLIENT_ID = "8a291eb6-e627-4215-a622-3aa9fc39300e"
+CLIENT_ID = "d2bd8165-95ac-4d11-9e97-968979b9bc5f"
 # ID do usuário que está fazendo a requisição do contrato
-REQUESTER_ID = "fbbcae2f-8bd8-47a2-8049-6c5f98d2da91" # Exemplo, troque pelo ID correto
+REQUESTER_ID = "0eef7b0b-e2cf-4bd8-b799-9ecc21c5d1df" # Exemplo, troque pelo ID correto
 
 # NOVO: Configuração do banco de dados (verifique se está correta)
 DB_CONFIG = {

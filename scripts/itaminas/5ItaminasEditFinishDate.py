@@ -7,14 +7,19 @@ import hashlib
 import pandas as pd
 import requests
 
-APP_URL = "http://localhost:8080".rstrip("/")
+APP_URL = "https://realiza.onrender.com".rstrip("/")
 
 # ====== PREENCHA AQUI ======
 EXCEL_FILE = "SISTEMA NOVO_ITAMINAS.xlsx"  # na mesma pasta do script
 SHEET_RESULTS = "Resultado da consulta"
 
-CLIENT_ID = "b4be52d6-e9db-44f0-85a6-22d1dfae5ba3"  # caso precise
-REQUESTER_ID = "COLOQUE_ID_DO_REQUISITANTE"
+CLIENT_ID = "d2bd8165-95ac-4d11-9e97-968979b9bc5f"  # caso precise
+REQUESTER_ID = "0eef7b0b-e2cf-4bd8-b799-9ecc21c5d1df"
+
+USER_LOGIN = {
+    "email": "realiza@assessoria.com",    # <-- Substitua pelo seu email
+    "password": "senha123", # <-- Substitua pela sua senha
+}
 
 # Dicionários fornecidos por você:
 BRANCH_MAP = {

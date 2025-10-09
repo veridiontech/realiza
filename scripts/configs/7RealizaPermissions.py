@@ -1,7 +1,7 @@
 import requests
 from itertools import product
 
-APP_URL = "http://localhost:8080".rstrip("/")
+APP_URL = "https://realiza.onrender.com".rstrip("/")
 
 USER_LOGIN = {
     "email": "realiza@assessoria.com",

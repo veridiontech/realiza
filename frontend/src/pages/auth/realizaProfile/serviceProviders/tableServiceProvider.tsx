@@ -60,12 +60,12 @@ function getContractStatusFromSupplier(
   ) {
     return ContractStatusEnum.SUSPENDED;
   }
-  
+
   // ALTERAÇÃO AQUI: FINISH_REQUESTED agora é tratado como FINISHED (vermelho)
   if (["FINISHED", "DENIED", "FINISH_REQUESTED"].includes(s)) {
     return ContractStatusEnum.FINISHED;
   }
-  
+
   if (["ACTIVE", "PENDING"].includes(s)) {
     return ContractStatusEnum.ACTIVE;
   }
@@ -241,7 +241,7 @@ export function TableServiceProvider() {
     try {
       const tokenFromStorage = localStorage.getItem("tokenClient");
       const base = { idSearch: selectedBranch.idBranch };
-      
+
       // FUNÇÃO AJUSTADA: Adiciona 'size: 9999' para despaginar
       const fetchPage = async (extraParams: Record<string, any>) => {
         const params = { ...base, ...extraParams, size: 9999 }; // <--- AJUSTE AQUI
@@ -257,15 +257,21 @@ export function TableServiceProvider() {
 
       if (statusFilter === "Todos") {
         // Busca ativos, finalizados, solicitando finalização, suspensos e solicitando suspensão/reativação
-        const [active, finished, suspended, suspendReq, reactivateReq, finishReq] = 
-          await Promise.all([
-            fetchPage({ isActive: true }),
-            fetchPage({ status: "FINISHED" }),
-            fetchPage({ status: "SUSPENDED" }),
-            fetchPage({ status: "SUSPEND_REQUESTED" }),
-            fetchPage({ status: "REACTIVATION_REQUESTED" }),
-            fetchPage({ status: "FINISH_REQUESTED" }), // Chamada para FINISH_REQUESTED
-          ]);
+        const [
+          active,
+          finished,
+          suspended,
+          suspendReq,
+          reactivateReq,
+          finishReq,
+        ] = await Promise.all([
+          fetchPage({ isActive: true }),
+          fetchPage({ status: "FINISHED" }),
+          fetchPage({ status: "SUSPENDED" }),
+          fetchPage({ status: "SUSPEND_REQUESTED" }),
+          fetchPage({ status: "REACTIVATION_REQUESTED" }),
+          fetchPage({ status: "FINISH_REQUESTED" }), // Chamada para FINISH_REQUESTED
+        ]);
         list = uniqueBy(
           [
             ...active,
@@ -283,8 +289,8 @@ export function TableServiceProvider() {
       } else if (statusFilter === "Finalizado") {
         // Busca finalizados E solicitando finalização
         const [finished, finishReq] = await Promise.all([
-            fetchPage({ status: "FINISHED" }),
-            fetchPage({ status: "FINISH_REQUESTED" }),
+          fetchPage({ status: "FINISHED" }),
+          fetchPage({ status: "FINISH_REQUESTED" }),
         ]);
         list = uniqueBy([...finished, ...finishReq], (x) => x.idContract);
       } else if (statusFilter === "Suspenso") {
@@ -657,157 +663,160 @@ export function TableServiceProvider() {
           </div>
           <ModalTesteSendSupplier />
         </div>
-
-        <table className="w-full border-collapse border border-gray-300">
-          <thead className="bg-[#345D5C33]">
-            <tr>
-              <th className="border border-gray-300 p-2 text-left">
-                Referência do Contrato
-              </th>
-              <th className="border border-gray-300 p-2 text-left">
-                Nome do Fornecedor
-              </th>
-              <th className="border border-gray-300 p-2 text-left">CNPJ</th>
-              <th className="border border-gray-300 p-2 text-left">
-                Nome do Serviço
-              </th>
-              <th className="border border-gray-300 p-2 text-left">
-                Data de Ínicio
-              </th>
-              <th className="border border-gray-300 p-2 text-left">
-                Data de finalização
-              </th>
-              <th className="border border-gray-300 p-2 text-left">Gestor</th>
-              <th className="border border-gray-300 p-2 text-left">Status</th>
-              <th className="border border-gray-300 p-2 text-left">Ações</th>
-            </tr>
-          </thead>
-          <tbody>
-            {loading ? (
+        <div className="overflow-y-auto max-h-[60vh] border border-t-0 rounded-lg">
+          <table className="w-full border-collapse border-t-0">
+            <thead className="bg-[#d6def3] sticky top-0 z-10">
               <tr>
-                <td
-                  colSpan={9}
-                  className="border border-gray-300 p-2 text-center"
-                >
-                  Carregando...
-                </td>
+                <th className="border border-gray-300 p-2 text-left">
+                  Referência do Contrato
+                </th>
+                <th className="border border-gray-300 p-2 text-left">
+                  Nome do Fornecedor
+                </th>
+                <th className="border border-gray-300 p-2 text-left">CNPJ</th>
+                <th className="border border-gray-300 p-2 text-left">
+                  Nome do Serviço
+                </th>
+                <th className="border border-gray-300 p-2 text-left">
+                  Data de Ínicio
+                </th>
+                <th className="border border-gray-300 p-2 text-left">
+                  Data de finalização
+                </th>
+                <th className="border border-gray-300 p-2 text-left">Gestor</th>
+                <th className="border border-gray-300 p-2 text-left">Status</th>
+                <th className="border border-gray-300 p-2 text-left">Ações</th>
               </tr>
-            ) : filteredSuppliers.length > 0 ? (
-              filteredSuppliers.map((supplier) => (
-                <tr key={supplier.idProvider}>
-                  <td className="border border-gray-300 p-2">
-                    {supplier.contractReference}
-                  </td>
-                  <td className="border border-gray-300 p-2">
-                    {supplier.providerSupplierName}
-                  </td>
-                  <td className="border border-gray-300 p-2">
-                    {supplier.providerSupplierCnpj}
-                  </td>
-                  <td className="border border-gray-300 p-2">
-                    {supplier.serviceName}
-                  </td>
-                  <td className="border border-gray-300 p-2">
-                    {new Date(supplier.dateStart).toLocaleDateString("pt-BR")}
-                  </td>
-                  <td className="border border-gray-300 p-2">
-                    {supplier.dateFinish
-                      ? new Date(supplier.dateFinish).toLocaleDateString(
-                          "pt-BR"
-                        )
-                      : "-"}
-                  </td>
-                  <td className="border border-gray-300 p-2">
-                    {supplier.responsible}
-                  </td>
-                  <td className="border border-gray-300 p-2">
-                    <StatusBadge
-                      status={getContractStatusFromSupplier(supplier)}
-                    />
-                  </td>
-                  <td className="border border-gray-300 p-2 text-center align-middle">
-                    <div className="relative inline-block text-left">
-                      <button
-                        onClick={() =>
-                          setOpenMenuId(
-                            openMenuId === supplier.idContract
-                              ? null
-                              : supplier.idContract
-                          )
-                        }
-                        className="p-1 hover:bg-gray-200 rounded"
-                      >
-                        <MoreVertical className="w-5 h-5" />
-                      </button>
-
-                      {openMenuId === supplier.idContract && (
-                        <div className="absolute right-0 mt-2 w-60 bg-white border border-gray-200 rounded-md shadow-lg z-50">
-                          <ModalCadastroSubcontratado idContract={supplier.idContract} />
-                          <button
-                            onClick={() =>
-                              navigate(
-                                `/sistema/fornecedor/${supplier.providerSupplier}`
-                              )
-                            }
-                            className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2"
-                          >
-                            <FileCog className="w-4 h-4" /> Gerenciar
-                          </button>
-                          <button
-                            onClick={() => {
-                              handleEditClick(supplier);
-                              setOpenMenuId(null);
-                            }}
-                            className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2"
-                          >
-                            <Pencil className="w-4 h-4" /> Editar/Visualizar
-                          </button>
-                          <button
-                            onClick={() => {
-                              handleHistoryClick(supplier);
-                              setOpenMenuId(null);
-                            }}
-                            className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2"
-                          >
-                            <History className="w-4 h-4" /> Histórico
-                          </button>
-                          <button
-                            onClick={() => {
-                              setTargetContractId(supplier.idContract);
-                              setIsFinalizeModalOpen(true);
-                              setOpenMenuId(null);
-                            }}
-                            className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2"
-                          >
-                            <BadgeCheck className="w-4 h-4" /> Finalizar
-                          </button>
-                          <button
-                            onClick={() => {
-                              handleSuspendClick(supplier);
-                              setOpenMenuId(null);
-                            }}
-                            className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2"
-                          >
-                            <X className="w-4 h-4" /> Suspender
-                          </button>
-                        </div>
-                      )}
-                    </div>
+            </thead>
+            <tbody>
+              {loading ? (
+                <tr>
+                  <td
+                    colSpan={9}
+                    className="border border-gray-300 p-2 text-center"
+                  >
+                    Carregando...
                   </td>
                 </tr>
-              ))
-            ) : (
-              <tr>
-                <td
-                  colSpan={9}
-                  className="border border-gray-300 p-2 text-center"
-                >
-                  Nenhum fornecedor encontrado.
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
+              ) : filteredSuppliers.length > 0 ? (
+                filteredSuppliers.map((supplier) => (
+                  <tr key={supplier.idProvider}>
+                    <td className="border border-gray-300 p-2">
+                      {supplier.contractReference}
+                    </td>
+                    <td className="border border-gray-300 p-2">
+                      {supplier.providerSupplierName}
+                    </td>
+                    <td className="border border-gray-300 p-2">
+                      {supplier.providerSupplierCnpj}
+                    </td>
+                    <td className="border border-gray-300 p-2">
+                      {supplier.serviceName}
+                    </td>
+                    <td className="border border-gray-300 p-2">
+                      {new Date(supplier.dateStart).toLocaleDateString("pt-BR")}
+                    </td>
+                    <td className="border border-gray-300 p-2">
+                      {supplier.dateFinish
+                        ? new Date(supplier.dateFinish).toLocaleDateString(
+                            "pt-BR"
+                          )
+                        : "-"}
+                    </td>
+                    <td className="border border-gray-300 p-2">
+                      {supplier.responsible}
+                    </td>
+                    <td className="border border-gray-300 p-2">
+                      <StatusBadge
+                        status={getContractStatusFromSupplier(supplier)}
+                      />
+                    </td>
+                    <td className="border border-gray-300 p-2 text-center align-middle">
+                      <div className="relative inline-block text-left">
+                        <button
+                          onClick={() =>
+                            setOpenMenuId(
+                              openMenuId === supplier.idContract
+                                ? null
+                                : supplier.idContract
+                            )
+                          }
+                          className="p-1 hover:bg-gray-200 rounded"
+                        >
+                          <MoreVertical className="w-5 h-5" />
+                        </button>
+
+                        {openMenuId === supplier.idContract && (
+                          <div className="absolute right-0 mt-2 w-60 bg-white border border-gray-200 rounded-md shadow-lg z-50">
+                            <ModalCadastroSubcontratado
+                              idContract={supplier.idContract}
+                            />
+                            <button
+                              onClick={() =>
+                                navigate(
+                                  `/sistema/fornecedor/${supplier.providerSupplier}`
+                                )
+                              }
+                              className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2"
+                            >
+                              <FileCog className="w-4 h-4" /> Gerenciar
+                            </button>
+                            <button
+                              onClick={() => {
+                                handleEditClick(supplier);
+                                setOpenMenuId(null);
+                              }}
+                              className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2"
+                            >
+                              <Pencil className="w-4 h-4" /> Editar/Visualizar
+                            </button>
+                            <button
+                              onClick={() => {
+                                handleHistoryClick(supplier);
+                                setOpenMenuId(null);
+                              }}
+                              className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2"
+                            >
+                              <History className="w-4 h-4" /> Histórico
+                            </button>
+                            <button
+                              onClick={() => {
+                                setTargetContractId(supplier.idContract);
+                                setIsFinalizeModalOpen(true);
+                                setOpenMenuId(null);
+                              }}
+                              className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2"
+                            >
+                              <BadgeCheck className="w-4 h-4" /> Finalizar
+                            </button>
+                            <button
+                              onClick={() => {
+                                handleSuspendClick(supplier);
+                                setOpenMenuId(null);
+                              }}
+                              className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2"
+                            >
+                              <X className="w-4 h-4" /> Suspender
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td
+                    colSpan={9}
+                    className="border border-gray-300 p-2 text-center"
+                  >
+                    Nenhum fornecedor encontrado.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
 
         <div className="mt-4 text-sm text-gray-600 flex gap-4 items-center justify-end">
           <div className="flex items-center gap-1">

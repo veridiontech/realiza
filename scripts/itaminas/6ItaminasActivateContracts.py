@@ -8,7 +8,7 @@ import mysql.connector
 # ==============================================================================
 # CONFIGURAÇÕES GERAIS
 # ==============================================================================
-APP_URL = "http://localhost:8080".rstrip("/")
+APP_URL = "https://realiza.onrender.com".rstrip("/")
 USER_LOGIN = {"email": "realiza@assessoria.com", "password": "senha123"}
 DB_CONFIG = {
     "host": "177.170.30.9", "port": 8004, "user": "veridion_user",

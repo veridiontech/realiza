@@ -33,10 +33,15 @@ def popular_cargos_itaminas():
     """
     # --- 1. LEITURA E PREPARAÇÃO DO ARQUIVO EXCEL ---
     try:
-        caminho_excel = "SISTEMA NOVO_ITAMINAS.xlsx"
-        print(f"Iniciando leitura do arquivo: '{caminho_excel}'...")
+        diretorio_script = os.path.dirname(os.path.abspath(__file__))
+        nome_arquivo = "SISTEMA NOVO_ITAMINAS.xlsx"
+    
+        # Cria o caminho absoluto correto
+        caminho_excel = os.path.join(diretorio_script, nome_arquivo)
+    
+        print(f"Iniciando leitura do arquivo: '{caminho_excel}'...") # Note que agora ele imprime o caminho ABSOLUTO
 
-        # Lê apenas a coluna 'V', ignora linhas sem cabeçalho e nomeia a coluna
+        # Tenta ler o arquivo
         df = pd.read_excel(caminho_excel, usecols="V", header=None, names=['cargo'])
 
         # Limpeza e preparação dos dados:

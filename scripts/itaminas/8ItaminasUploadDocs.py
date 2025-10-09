@@ -12,7 +12,7 @@ import uuid
 # ==============================================================================
 # CONFIGURAÇÕES GERAIS
 # ==============================================================================
-APP_URL = "http://localhost:8080".rstrip("/")
+APP_URL = "https://realiza-api-development.onrender.com".rstrip("/")
 BASE_DOCS_FOLDER = "IS-508"
 MAP_FILE_NAME = "Mapa.xlsx"
 MAP_SHEET_NAME = "DOCS"
@@ -121,8 +121,10 @@ def create_document_record(session, subject_type, subject_id, doc_matrix_id, doc
 # LÓGICA PRINCIPAL - UPLOAD DE DOCUMENTOS
 # ==============================================================================
 def upload_documents(token: str):
-    script_dir = os.path.dirname(__file__)
-    base_folder_path = os.path.join(script_dir, BASE_DOCS_FOLDER)
+    # Removido script_dir e a lógica original, usando o caminho fixo:
+    base_folder_path = r"C:\Users\User\Downloads\IS-508"
+    
+    # Esta linha agora usa o novo caminho base
     map_file_path = os.path.join(base_folder_path, MAP_FILE_NAME)
 
     ok, created, fail, skipped, matrix_created = 0, 0, 0, 0, 0

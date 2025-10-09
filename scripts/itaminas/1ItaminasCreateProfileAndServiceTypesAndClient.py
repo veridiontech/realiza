@@ -2,7 +2,7 @@ import pandas as pd
 import os
 import requests
 
-app_url = "http://localhost:8080"
+app_url = "https://realiza.onrender.com"
 user_data = {
     "email": "realiza@assessoria.com",
     "password": "senha123"

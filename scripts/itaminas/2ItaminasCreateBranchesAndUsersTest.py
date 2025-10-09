@@ -4,7 +4,7 @@ import requests
 import hashlib
 import time
 
-APP_URL = "http://localhost:8080".rstrip("/")
+APP_URL = "https://realiza.onrender.com".rstrip("/")
 
 USER_LOGIN = {
     "email": "realiza@assessoria.com",
@@ -15,8 +15,8 @@ global branches
 global users
 global profile_id
 branches = {}
-profile_id = "9dbf8db2-6f0c-476e-bb38-aa4e0b33d821"
-client_global_id = "8a291eb6-e627-4215-a622-3aa9fc39300e"
+profile_id = "e0a7ec33-5ac9-4c2f-9ecd-24adb11ee387"
+client_global_id = "d2bd8165-95ac-4d11-9e97-968979b9bc5f"
 
 def mask_email(email: str) -> str:
     if not email or "@" not in email:

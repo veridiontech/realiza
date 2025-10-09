@@ -8,7 +8,7 @@ import unicodedata
 import pandas as pd
 import requests
 
-APP_URL = "http://localhost:8080".rstrip("/")
+APP_URL = "https://realiza.onrender.com".rstrip("/")
 
 USER_LOGIN = {
     "email": "realiza@assessoria.com",
