@@ -153,6 +153,8 @@ export function ConfigPanel() {
     const [cboCode, setCboCode] = useState("");
     const [cboTitle, setCboTitle] = useState("");
     const [positions, setPositions] = useState<Position[]>([]);
+    // NOVO ESTADO DE BUSCA PARA CARGOS
+    const [positionSearchTerm, setPositionSearchTerm] = useState(""); 
     const [selectedPosition, setSelectedPosition] = useState<Position | null>(
         null
     );
@@ -562,7 +564,8 @@ export function ConfigPanel() {
             const normalized: Service[] = raw.map((s: ServiceResponse) => ({
                 id: s.idServiceType,
                 title: s.title,
-                risk: s.risk
+                // Garantir que 'risk' existe, caso contrário, usa 'LOW'
+                risk: s.risk || 'LOW'
             })).filter((s: Service) => !!s.id);
 
             setServices(normalized);
@@ -679,7 +682,7 @@ export function ConfigPanel() {
             );
 
             const sortedProfiles = response.data.sort((a, b) =>
-                a.name.localeCompare(b.name, "pt-BR", { sensitivity: "base" })
+                (a.name || "").localeCompare((b.name || ""), "pt-BR", { sensitivity: "base" })
             );
 
             setProfilesRepoItems(sortedProfiles);
@@ -836,7 +839,7 @@ export function ConfigPanel() {
             }));
 
             const sorted = normalized.sort((a: any, b: any) =>
-                a.name.localeCompare(b.name, "pt-BR", { sensitivity: "base" })
+                (a.name || "").localeCompare((b.name || ""), "pt-BR", { sensitivity: "base" })
             );
 
             setProfiles(sorted);
@@ -947,7 +950,7 @@ export function ConfigPanel() {
             fetchProfiles();
 
         } catch (error) {
-            console.error("Erro ao reatribuir e excluir:", error);
+            console.log("Erro ao reatribuir e excluir:", error);
             toast.error("Ocorreu um erro durante a operação.");
         } finally {
             setIsLoadingProfilesRepo(false);
@@ -959,10 +962,11 @@ export function ConfigPanel() {
         () =>
             documents
                 .filter((d) =>
-                    d.documentTitle.toLowerCase().includes(searchTerm.toLowerCase())
+                    // CORREÇÃO do erro de 'toLowerCase' em undefined
+                    (d.documentTitle || "").toLowerCase().includes((searchTerm || "").toLowerCase())
                 )
                 .sort((a, b) =>
-                    a.documentTitle.localeCompare(b.documentTitle, "pt-BR", {
+                    (a.documentTitle || "").localeCompare((b.documentTitle || ""), "pt-BR", {
                         sensitivity: "base",
                     })
                 ),
@@ -974,27 +978,51 @@ export function ConfigPanel() {
             cbos
                 .filter(
                     (cbo) =>
-                        cbo.code.toLowerCase().includes(cboSearchTerm.toLowerCase()) ||
-                        cbo.title.toLowerCase().includes(cboSearchTerm.toLowerCase())
+                        // CORREÇÃO do erro de 'toLowerCase' em undefined
+                        (cbo.code || "").toLowerCase().includes((cboSearchTerm || "").toLowerCase()) ||
+                        (cbo.title || "").toLowerCase().includes((cboSearchTerm || "").toLowerCase())
                 )
                 .sort((a, b) =>
-                    a.code.localeCompare(b.code, "pt-BR", { sensitivity: "base" })
+                    (a.code || "").localeCompare((b.code || ""), "pt-BR", { sensitivity: "base" })
                 ),
         [cbos, cboSearchTerm]
+    );
+    
+    // NOVO useMemo PARA FILTRAR CARGOS
+    const filteredPositions = useMemo(
+        () =>
+            positions
+                .filter((pos) => 
+                    // Garante que o title existe e faz a busca case-insensitive
+                    (pos.title || "").toLowerCase().includes((positionSearchTerm || "").toLowerCase())
+                )
+                .sort((a, b) =>
+                    (a.title || "").localeCompare((b.title || ""), "pt-BR", { sensitivity: "base" })
+                ),
+        [positions, positionSearchTerm]
     );
 
     const filteredServices = useMemo(
         () =>
             services
                 .filter(
-                    (s) =>
-                        s.title.toLowerCase().includes(serviceSearchTerm.toLowerCase()) ||
-                        riskTranslations[s.risk.toUpperCase()]
-                            ?.toLowerCase()
-                            .includes(serviceSearchTerm.toLowerCase())
+                    (s) => {
+                        // CORREÇÃO: Usa uma string vazia se o risco for null/undefined para toUpperCase e para checagem da tradução.
+                        const riskUpper = (s.risk || '').toUpperCase();
+                        // CORREÇÃO: Usa uma string vazia se s.title for null/undefined
+                        const titleMatch = (s.title || "").toLowerCase().includes((serviceSearchTerm || "").toLowerCase());
+                        
+                        // Garante que o toLowerCase só é chamado em uma string válida, se houver tradução.
+                        const riskTranslationLower = riskTranslations[riskUpper]?.toLowerCase() || '';
+
+                        const riskMatch = riskTranslationLower.includes((serviceSearchTerm || "").toLowerCase());
+                        
+                        return titleMatch || riskMatch;
+                    }
                 )
                 .sort((a, b) =>
-                    a.title.localeCompare(b.title, "pt-BR", { sensitivity: "base" })
+                    // CORREÇÃO: Usa uma string vazia se a.title for null/undefined
+                    (a.title || "").localeCompare((b.title || ""), "pt-BR", { sensitivity: "base" })
                 ),
         [services, serviceSearchTerm, riskTranslations]
     );
@@ -1003,15 +1031,23 @@ export function ConfigPanel() {
         () =>
             activities
                 .filter(
-                    (a) =>
-                        a.title.toLowerCase().includes(activitySearchTerm.toLowerCase()) ||
-                        (a.risk &&
-                            riskTranslations[a.risk.toUpperCase()]
-                                ?.toLowerCase()
-                                .includes(activitySearchTerm.toLowerCase()))
+                    (a) => {
+                        // CORREÇÃO: Usa uma string vazia se o risco for null/undefined para toUpperCase e para checagem da tradução.
+                        const riskUpper = (a.risk || '').toUpperCase();
+                        // CORREÇÃO: Usa uma string vazia se a.title for null/undefined
+                        const titleMatch = (a.title || "").toLowerCase().includes((activitySearchTerm || "").toLowerCase());
+
+                        // Garante que o toLowerCase só é chamado em uma string válida, se houver tradução.
+                        const riskTranslationLower = riskTranslations[riskUpper]?.toLowerCase() || '';
+                        
+                        const riskMatch = riskTranslationLower.includes((activitySearchTerm || "").toLowerCase());
+
+                        return titleMatch || riskMatch;
+                    }
                 )
                 .sort((a, b) =>
-                    a.title.localeCompare(b.title, "pt-BR", { sensitivity: "base" })
+                    // CORREÇÃO: Usa uma string vazia se a.title for null/undefined
+                    (a.title || "").localeCompare((b.title || ""), "pt-BR", { sensitivity: "base" })
                 ),
         [activities, activitySearchTerm, riskTranslations]
     );
@@ -1019,7 +1055,8 @@ export function ConfigPanel() {
     const filteredProfiles = useMemo(
         () =>
             profiles.filter((profile) =>
-                profile.name.toLowerCase().includes(profileSearchTerm.toLowerCase())
+                // CORREÇÃO: Usa uma string vazia se profile.name for null/undefined
+                (profile.name || "").toLowerCase().includes((profileSearchTerm || "").toLowerCase())
             ),
         [profiles, profileSearchTerm]
     );
@@ -1103,8 +1140,8 @@ export function ConfigPanel() {
         }
         const lowerCaseSearchTerm = docsSearchTerm.toLowerCase();
         return docsList.filter((doc) =>
-            doc.name.toLowerCase().includes(lowerCaseSearchTerm) ||
-            doc.type.toLowerCase().includes(lowerCaseSearchTerm)
+            (doc.name || "").toLowerCase().includes(lowerCaseSearchTerm) ||
+            (doc.type || "").toLowerCase().includes(lowerCaseSearchTerm)
         );
     }, [docsList, docsSearchTerm]);
 
@@ -1263,7 +1300,7 @@ export function ConfigPanel() {
             { wch: 20 },
         ];
 
-        const fileName = `Documentos_${groupName.replace(/[^a-zA-Z0-9]/g, '_')}.xlsx`;
+        const fileName = `Documentos_${(groupName || '').replace(/[^a-zA-Z0-9]/g, '_')}.xlsx`;
         XLSX.writeFile(workbook, fileName);
         toast.success("Download do Excel iniciado.");
     };
@@ -1459,32 +1496,49 @@ export function ConfigPanel() {
                     <div className="flex gap-10">
                         <div className="w-1/2 space-y-4">
                             <h2 className="text-xl font-bold">Cargos</h2>
+                            {/* NOVO INPUT DE BUSCA PARA CARGOS */}
+                            <input
+                                type="text"
+                                placeholder="Buscar por nome do cargo..."
+                                className="w-full p-2 border rounded"
+                                value={positionSearchTerm}
+                                onChange={(e) => setPositionSearchTerm(e.target.value)}
+                            />
+                            {/* RENDERIZA OS CARGOS FILTRADOS */}
                             <ul className="max-h-[60vh] overflow-auto space-y-2">
-                                {positions.map((pos) => (
-                                    <li
-                                        key={pos.id}
-                                        className="p-3 border rounded flex justify-between"
-                                    >
-                                        <span>{pos.title}</span>
-                                        <div className="flex gap-2">
-                                            <button
-                                                onClick={() => {
-                                                    setSelectedPosition(pos);
-                                                    setPositionName(pos.title);
-                                                }}
-                                                className="text-blue-600"
-                                            >
-                                                <Pencil className="w-5 h-5" />
-                                            </button>
-                                            <button
-                                                onClick={() => handleDeletePosition(pos.id)}
-                                                className="text-red-600"
-                                            >
-                                                <Trash2 className="w-5 h-5" />
-                                            </button>
-                                        </div>
-                                    </li>
-                                ))}
+                                {filteredPositions.length > 0 ? (
+                                    filteredPositions.map((pos) => (
+                                        <li
+                                            key={pos.id}
+                                            className="p-3 border rounded flex justify-between"
+                                        >
+                                            <span>{pos.title}</span>
+                                            <div className="flex gap-2">
+                                                <button
+                                                    onClick={() => {
+                                                        setSelectedPosition(pos);
+                                                        setPositionName(pos.title);
+                                                    }}
+                                                    className="text-blue-600"
+                                                >
+                                                    <Pencil className="w-5 h-5" />
+                                                </button>
+                                                <button
+                                                    onClick={() => handleDeletePosition(pos.id)}
+                                                    className="text-red-600"
+                                                >
+                                                    <Trash2 className="w-5 h-5" />
+                                                </button>
+                                            </div>
+                                        </li>
+                                    ))
+                                ) : (
+                                    <p className="text-gray-400">
+                                        {positionSearchTerm
+                                            ? "Nenhum cargo encontrado com o termo de busca."
+                                            : "Nenhum cargo cadastrado."}
+                                    </p>
+                                )}
                             </ul>
                         </div>
                         <div className="w-1/2 border-l pl-6 space-y-4">
@@ -1539,7 +1593,7 @@ export function ConfigPanel() {
                                             >
                                                 <div>
                                                     <strong>{service.title}</strong> (Risco:{" "}
-                                                    {riskTranslations[service.risk.toUpperCase()] ||
+                                                    {riskTranslations[(service.risk || '').toUpperCase()] ||
                                                         service.risk}
                                                     )
                                                 </div>
@@ -1634,7 +1688,7 @@ export function ConfigPanel() {
                                             >
                                                 <div>
                                                     <strong>{activity.title}</strong> (Risco:{" "}
-                                                    {riskTranslations[activity.risk.toUpperCase()] ||
+                                                    {riskTranslations[(activity.risk || '').toUpperCase()] ||
                                                         activity.risk}
                                                     )
                                                 </div>
