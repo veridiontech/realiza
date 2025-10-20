@@ -27,32 +27,33 @@ export function TableEmployee({ idTarget, targetType }: TableEmployeeProps) {
 
   const { user } = useUser();
 
-  const page = 0;
-  const limit = 10;
+const getEmployee = async () => {
+  if (!idTarget) {
+    setEmployee([]);
+    return;
+  }
 
-  const getEmployee = async () => {
-    if (!idTarget) {
-      setEmployee([]);
-      return;
-    }
-    setIsLoading(true);
-    try {
-      const tokenFromStorage = localStorage.getItem("tokenClient");
-      const enterprise = targetType === "supplier" ? "SUPPLIER" : "SUBCONTRACTOR";
-      const res = await axios.get(
-        `${ip}/employee?idSearch=${idTarget}&enterprise=${enterprise}`,
-        {
-          params: { page, limit },
-          headers: { Authorization: `Bearer ${tokenFromStorage}` },
-        }
-      );
-      setEmployee(res.data?.content ?? []);
-    } catch (error) {
-      console.error("Erro ao buscar colaboradores:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  setIsLoading(true);
+  try {
+    const tokenFromStorage = localStorage.getItem("tokenClient");
+    const enterprise = targetType === "supplier" ? "SUPPLIER" : "SUBCONTRACTOR";
+    const res = await axios.get(
+      `${ip}/employee?idSearch=${idTarget}&enterprise=${enterprise}`,
+      {
+        params: { 
+            page: 0, 
+            size: 10000 
+        }, 
+        headers: { Authorization: `Bearer ${tokenFromStorage}` },
+      }
+    );
+    setEmployee(res.data?.content ?? []); 
+  } catch (error) {
+    console.error("Erro ao buscar colaboradores:", error);
+  } finally {
+    setIsLoading(false);
+  }
+};
 
   const filteredEmployees = employees.filter((employee: any) =>
     `${employee.name} ${employee.surname}`.toLowerCase().includes(searchTerm.toLowerCase())
