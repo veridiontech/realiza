@@ -41,7 +41,7 @@ export function GeneralDocumentsTable({
   clientId,
   filters,
 }: GeneralDocumentsTableProps) {
-  const USE_MOCK_DATA = true;
+  const USE_MOCK_DATA = false;
   const mockDocumentosData: Documento[] = [
     {
       documentTitle: "NR-35 - Trabalho em Altura",
