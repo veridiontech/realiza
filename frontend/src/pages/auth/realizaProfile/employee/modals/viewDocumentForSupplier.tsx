@@ -106,7 +106,9 @@ export function DocumentViewer({
     try {
       const token = localStorage.getItem("tokenClient");
       if (!token) {
-        setOldPdfError("Autenticação necessária. Por favor, faça login novamente.");
+        setOldPdfError(
+          "Autenticação necessária. Por favor, faça login novamente."
+        );
         return;
       }
 
@@ -122,15 +124,23 @@ export function DocumentViewer({
         setOldPdfUrl(url);
         setShowOldDocumentViewer(true);
       } else {
-        setOldPdfError("Nenhum documento encontrado para este log de auditoria. Resposta da API vazia.");
+        setOldPdfError(
+          "Nenhum documento encontrado para este log de auditoria. Resposta da API vazia."
+        );
       }
     } catch (err) {
-      console.log("id: " , auditLogId);
+      console.log("id: ", auditLogId);
       console.error("Erro completo ao buscar documento por auditLogId:", err);
       if (axios.isAxiosError(err)) {
-        setOldPdfError(`Erro ao carregar a versão do documento: ${err.response?.data?.message || err.message}.`);
+        setOldPdfError(
+          `Erro ao carregar a versão do documento: ${
+            err.response?.data?.message || err.message
+          }.`
+        );
       } else {
-        setOldPdfError("Erro desconhecido ao carregar a versão do documento. Tente novamente.");
+        setOldPdfError(
+          "Erro desconhecido ao carregar a versão do documento. Tente novamente."
+        );
       }
     } finally {
       setLoadingOldPdf(false);
@@ -199,24 +209,34 @@ export function DocumentViewer({
       try {
         const token = localStorage.getItem("tokenClient");
         const requestBody = { status, justification };
-        
+
         await axios.post(
           `${ip}/document/${documentId}/change-status`,
           requestBody,
-          { headers: { Authorization: `Bearer ${token}` } }
+          {
+            headers: { Authorization: `Bearer ${token}` },
+            // CORREÇÃO: Força o Axios a não tentar parsear o corpo da resposta como JSON.
+            // Isso resolve o erro de "Request failed with status code 200" quando o backend 
+            // retorna 200 (Sucesso) mas com um corpo vazio.
+            responseType: 'text',
+            validateStatus: (status) => status >= 200 && status < 300,
+          }
         );
-        
+
         toast.success(
           `Documento ${
             status === "APROVADO" ? "aprovado" : "reprovado"
           } com sucesso!`
         );
+        
+        // Ações pós-sucesso
         onStatusChange?.(documentId, status);
         await fetchLogs();
         onClose();
       } catch (error) {
+        // Se cair aqui, é um erro real de requisição ou comunicação.
         console.error("Erro na requisição changeStatus:", error);
-        toast.error("Erro ao atualizar o status do documento.");
+        toast.error("Erro ao atualizar o status do documento. Consulte o console para mais detalhes.");
       } finally {
         setLoadingStatus(false);
       }
@@ -241,7 +261,7 @@ export function DocumentViewer({
     >
       <div
         className={`relative ${
-          isJustificationPanelOpen ? "max-w-7xl" : "max-w-6xl" 
+          isJustificationPanelOpen ? "max-w-7xl" : "max-w-6xl"
         } w-full h-[98vh] bg-white p-6 shadow-lg flex`}
         onClick={(e) => e.stopPropagation()}
       >
@@ -252,7 +272,11 @@ export function DocumentViewer({
           ✖
         </button>
 
-        <div className={`flex-1 flex flex-col ${isJustificationPanelOpen ? "pr-6" : ""}`}>
+        <div
+          className={`flex-1 flex flex-col ${
+            isJustificationPanelOpen ? "pr-6" : ""
+          }`}
+        >
           <h2 className="mb-4 text-center text-xl font-bold">
             Visualizar Documento
           </h2>
