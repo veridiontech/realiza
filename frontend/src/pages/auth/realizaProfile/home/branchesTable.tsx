@@ -63,9 +63,11 @@ export function BranchesTable() {
                 className="rounded-lg border border-gray-300 bg-white p-4 shadow-sm"
               >
                 <p className="bg-[#345D5C33] text-sm font-semibold text-gray-700">
+                  {/* COR DE FUNDO (Mobile - Fundo opaco para tags): #345D5C33 */}
                   Filial:
                 </p>
                 <p className="text-realizaBlue mb-2">{branch.name}</p>
+                {/* COR DA BOLINHA/TEXTO (Mobile): text-realizaBlue */}
                 <p className="bg-[#345D5C33] text-sm font-semibold text-gray-700">
                   CNPJ:
                 </p>
@@ -94,8 +96,8 @@ export function BranchesTable() {
           <div className="mt-4 max-h-[300px] overflow-y-auto rounded-lg">
             <table className="w-full border-collapse border border-gray-300">
               <thead>
-                {/* FINAL: Cabeçalho opaco (bg-gray-200), fixo (sticky top-0) e acima do conteúdo (z-10) */}
-                <tr className="sticky top-0 bg-gray-200 z-10">
+                {/* ALTERAÇÃO: Fundo do header da tabela agora usa o tom de azul escuro dos botões (#37474F) */}
+                <tr className="sticky top-0 bg-[#37474F] text-white z-10">
                   <th className="px-4 py-2 text-start">Filiais</th>
                   <th className="px-4 py-2 text-start">CNPJ</th>
                 </tr>
