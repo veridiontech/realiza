@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import axios from "axios";
 import * as XLSX from "xlsx";
 import { ip } from "@/utils/ip";
@@ -153,8 +153,7 @@ export function ConfigPanel() {
     const [cboCode, setCboCode] = useState("");
     const [cboTitle, setCboTitle] = useState("");
     const [positions, setPositions] = useState<Position[]>([]);
-    // NOVO ESTADO DE BUSCA PARA CARGOS
-    const [positionSearchTerm, setPositionSearchTerm] = useState(""); 
+    const [positionSearchTerm, setPositionSearchTerm] = useState("");
     const [selectedPosition, setSelectedPosition] = useState<Position | null>(
         null
     );
@@ -564,7 +563,6 @@ export function ConfigPanel() {
             const normalized: Service[] = raw.map((s: ServiceResponse) => ({
                 id: s.idServiceType,
                 title: s.title,
-                // Garantir que 'risk' existe, caso contrário, usa 'LOW'
                 risk: s.risk || 'LOW'
             })).filter((s: Service) => !!s.id);
 
@@ -962,7 +960,6 @@ export function ConfigPanel() {
         () =>
             documents
                 .filter((d) =>
-                    // CORREÇÃO do erro de 'toLowerCase' em undefined
                     (d.documentTitle || "").toLowerCase().includes((searchTerm || "").toLowerCase())
                 )
                 .sort((a, b) =>
@@ -978,7 +975,6 @@ export function ConfigPanel() {
             cbos
                 .filter(
                     (cbo) =>
-                        // CORREÇÃO do erro de 'toLowerCase' em undefined
                         (cbo.code || "").toLowerCase().includes((cboSearchTerm || "").toLowerCase()) ||
                         (cbo.title || "").toLowerCase().includes((cboSearchTerm || "").toLowerCase())
                 )
@@ -987,13 +983,11 @@ export function ConfigPanel() {
                 ),
         [cbos, cboSearchTerm]
     );
-    
-    // NOVO useMemo PARA FILTRAR CARGOS
+
     const filteredPositions = useMemo(
         () =>
             positions
-                .filter((pos) => 
-                    // Garante que o title existe e faz a busca case-insensitive
+                .filter((pos) =>
                     (pos.title || "").toLowerCase().includes((positionSearchTerm || "").toLowerCase())
                 )
                 .sort((a, b) =>
@@ -1007,12 +1001,9 @@ export function ConfigPanel() {
             services
                 .filter(
                     (s) => {
-                        // CORREÇÃO: Usa uma string vazia se o risco for null/undefined para toUpperCase e para checagem da tradução.
                         const riskUpper = (s.risk || '').toUpperCase();
-                        // CORREÇÃO: Usa uma string vazia se s.title for null/undefined
                         const titleMatch = (s.title || "").toLowerCase().includes((serviceSearchTerm || "").toLowerCase());
                         
-                        // Garante que o toLowerCase só é chamado em uma string válida, se houver tradução.
                         const riskTranslationLower = riskTranslations[riskUpper]?.toLowerCase() || '';
 
                         const riskMatch = riskTranslationLower.includes((serviceSearchTerm || "").toLowerCase());
@@ -1021,7 +1012,6 @@ export function ConfigPanel() {
                     }
                 )
                 .sort((a, b) =>
-                    // CORREÇÃO: Usa uma string vazia se a.title for null/undefined
                     (a.title || "").localeCompare((b.title || ""), "pt-BR", { sensitivity: "base" })
                 ),
         [services, serviceSearchTerm, riskTranslations]
@@ -1032,12 +1022,9 @@ export function ConfigPanel() {
             activities
                 .filter(
                     (a) => {
-                        // CORREÇÃO: Usa uma string vazia se o risco for null/undefined para toUpperCase e para checagem da tradução.
                         const riskUpper = (a.risk || '').toUpperCase();
-                        // CORREÇÃO: Usa uma string vazia se a.title for null/undefined
                         const titleMatch = (a.title || "").toLowerCase().includes((activitySearchTerm || "").toLowerCase());
 
-                        // Garante que o toLowerCase só é chamado em uma string válida, se houver tradução.
                         const riskTranslationLower = riskTranslations[riskUpper]?.toLowerCase() || '';
                         
                         const riskMatch = riskTranslationLower.includes((activitySearchTerm || "").toLowerCase());
@@ -1046,7 +1033,6 @@ export function ConfigPanel() {
                     }
                 )
                 .sort((a, b) =>
-                    // CORREÇÃO: Usa uma string vazia se a.title for null/undefined
                     (a.title || "").localeCompare((b.title || ""), "pt-BR", { sensitivity: "base" })
                 ),
         [activities, activitySearchTerm, riskTranslations]
@@ -1055,7 +1041,6 @@ export function ConfigPanel() {
     const filteredProfiles = useMemo(
         () =>
             profiles.filter((profile) =>
-                // CORREÇÃO: Usa uma string vazia se profile.name for null/undefined
                 (profile.name || "").toLowerCase().includes((profileSearchTerm || "").toLowerCase())
             ),
         [profiles, profileSearchTerm]
@@ -1148,6 +1133,8 @@ export function ConfigPanel() {
     async function saveMatrixEntry() {
         if (!selectedMatrixEntry) return;
 
+        setIsCreatingDocument(true);
+
         const payload = {
             ...selectedMatrixEntry,
             name: editName,
@@ -1185,6 +1172,8 @@ export function ConfigPanel() {
         } catch (err) {
             console.error("❌ Erro ao atualizar documento de matriz:", err);
             toast.error("Erro ao atualizar documento.");
+        } finally {
+            setIsCreatingDocument(false);
         }
     }
 
@@ -1496,7 +1485,6 @@ export function ConfigPanel() {
                     <div className="flex gap-10">
                         <div className="w-1/2 space-y-4">
                             <h2 className="text-xl font-bold">Cargos</h2>
-                            {/* NOVO INPUT DE BUSCA PARA CARGOS */}
                             <input
                                 type="text"
                                 placeholder="Buscar por nome do cargo..."
@@ -1504,7 +1492,6 @@ export function ConfigPanel() {
                                 value={positionSearchTerm}
                                 onChange={(e) => setPositionSearchTerm(e.target.value)}
                             />
-                            {/* RENDERIZA OS CARGOS FILTRADOS */}
                             <ul className="max-h-[60vh] overflow-auto space-y-2">
                                 {filteredPositions.length > 0 ? (
                                     filteredPositions.map((pos) => (
@@ -2119,6 +2106,7 @@ export function ConfigPanel() {
                                                     type="checkbox"
                                                     checked={editIsRequired}
                                                     onChange={(e) => setEditIsRequired(e.target.checked)}
+                                                    disabled={isCreatingDocument}
                                                 />
                                                 Documento Obrigatório
                                             </label>
@@ -2130,6 +2118,7 @@ export function ConfigPanel() {
                                                     type="checkbox"
                                                     checked={editDoesBlock}
                                                     onChange={(e) => setEditDoesBlock(e.target.checked)}
+                                                    disabled={isCreatingDocument}
                                                 />
                                                 Bloqueia pendência
                                             </label>
@@ -2144,6 +2133,7 @@ export function ConfigPanel() {
                                                     onChange={(e) =>
                                                         setEditIsDocumentUnique(e.target.checked)
                                                     }
+                                                    disabled={isCreatingDocument}
                                                 />
                                                 Documento único
                                             </label>
@@ -2152,8 +2142,12 @@ export function ConfigPanel() {
                                             </p>
                                         </div>
                                         <div className="flex gap-2 pt-2">
-                                            <Button onClick={saveMatrixEntry} className="w-full">
-                                                Salvar Alterações
+                                            <Button
+                                                onClick={saveMatrixEntry}
+                                                className="w-full"
+                                                disabled={isCreatingDocument}
+                                            >
+                                                {isCreatingDocument ? "Salvando..." : "Salvar Alterações"}
                                             </Button>
                                             <Button
                                                 onClick={() => {
@@ -2161,6 +2155,7 @@ export function ConfigPanel() {
                                                     setIsEditingMatrix(false);
                                                 }}
                                                 className="w-full bg-gray-300 text-black hover:bg-gray-400"
+                                                disabled={isCreatingDocument}
                                             >
                                                 Cancelar
                                             </Button>

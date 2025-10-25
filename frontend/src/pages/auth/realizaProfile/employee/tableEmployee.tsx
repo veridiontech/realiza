@@ -221,7 +221,7 @@ const getEmployee = async () => {
                         <p>{employee.contractType}</p>
                       </div>
                       <div className="flex items-center gap-1 text-[14px]">
-                        <p>CBO:</p>
+                        <p>CARGO:</p>
                         <p>{employee.cboTitle}</p>
                       </div>
                       <div className="relative flex py-2 items-center overflow-hidden gap-1 text-[14px]">
