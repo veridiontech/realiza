@@ -82,21 +82,33 @@ export function BranchesTable() {
         </div>
 
         {/* Bloco para visualização em telas maiores (desktop) */}
-        <div className="hidden rounded-lg border bg-white p-4 shadow-lg md:block">
-          <div className="flex w-64 items-center gap-4 rounded-md border p-2">
-            <Search />
-            <input
-              type="text"
-              value={searchTerm}
-              onChange={handleSearch}
-              placeholder="Pesquisar filiais"
-              className="outline-none"
-            />
+        {/* Este bloco parece ser o contêiner do seu dropdown ou painel flutuante */}
+        <div className="hidden bg-white md:block">
+          {/* Se a sobreposição ocorre, o problema pode estar aqui ou no elemento pai.
+              Mantendo as classes de busca, mas removendo border/shadow/p-4 deste div principal
+              para que ele não "invada" o espaço do componente pai (se este for um painel flutuante).
+              Se for um componente dentro do fluxo normal, as classes anteriores (rounded-lg border bg-white p-4 shadow-lg)
+              seriam as corretas para o estilo visual da imagem. Vou manter o seu estilo original
+              dentro do componente.
+          */}
+          <div className="flex w-full items-center gap-4 border-b border-gray-200 p-4">
+            <div className="flex w-64 items-center gap-4 rounded-md border p-2">
+              <Search className="h-4 w-4 text-gray-500" />
+              <input
+                type="text"
+                value={searchTerm}
+                onChange={handleSearch}
+                placeholder="Pesquisar filiais"
+                className="outline-none"
+              />
+            </div>
           </div>
-          <div className="mt-4 max-h-[300px] overflow-y-auto rounded-lg">
-            <table className="w-full border-collapse border border-gray-300">
+
+          {/* O contêiner de rolagem é crucial aqui */}
+          <div className="max-h-[300px] overflow-y-auto rounded-lg">
+            <table className="w-full border-collapse">
               <thead>
-                {/* ALTERAÇÃO: Fundo do header da tabela agora usa o tom de azul escuro dos botões (#37474F) */}
+                {/* 'z-10' garante que o cabeçalho sobreponha o corpo da tabela ao rolar */}
                 <tr className="sticky top-0 bg-[#37474F] text-white z-10">
                   <th className="px-4 py-2 text-start">Filiais</th>
                   <th className="px-4 py-2 text-start">CNPJ</th>
@@ -114,9 +126,12 @@ export function BranchesTable() {
                   </tr>
                 ) : filteredBranches && filteredBranches.length > 0 ? (
                   filteredBranches.map((branch: any) => (
-                    <tr key={branch.idBranch}>
+                    <tr 
+                        key={branch.idBranch} 
+                        className="border-b border-gray-200 last:border-b-0 hover:bg-gray-50 cursor-pointer" // Adicionando estilo de linha
+                    >
                       <td className="px-4 py-2">
-                        <li className="text-realizaBlue">{branch.name}</li>
+                        <li className="text-realizaBlue list-disc ml-4">{branch.name}</li>
                       </td>
                       <td className="text-start px-4 py-2">{branch.cnpj}</td>
                     </tr>
@@ -125,7 +140,7 @@ export function BranchesTable() {
                   <tr>
                     <td
                       colSpan={2}
-                      className="border border-gray-300 px-4 py-2 text-center"
+                      className="px-4 py-2 text-center border-t border-gray-300"
                     >
                       Nenhuma filial encontrada
                     </td>
