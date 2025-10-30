@@ -63,11 +63,9 @@ export function BranchesTable() {
                 className="rounded-lg border border-gray-300 bg-white p-4 shadow-sm"
               >
                 <p className="bg-[#345D5C33] text-sm font-semibold text-gray-700">
-                  {/* COR DE FUNDO (Mobile - Fundo opaco para tags): #345D5C33 */}
                   Filial:
                 </p>
                 <p className="text-realizaBlue mb-2">{branch.name}</p>
-                {/* COR DA BOLINHA/TEXTO (Mobile): text-realizaBlue */}
                 <p className="bg-[#345D5C33] text-sm font-semibold text-gray-700">
                   CNPJ:
                 </p>
@@ -82,22 +80,28 @@ export function BranchesTable() {
         </div>
 
         {/* Bloco para visualização em telas maiores (desktop) */}
-        <div className="hidden rounded-lg border bg-white p-4 shadow-lg md:block">
-          <div className="flex w-64 items-center gap-4 rounded-md border p-2">
-            <Search />
-            <input
-              type="text"
-              value={searchTerm}
-              onChange={handleSearch}
-              placeholder="Pesquisar filiais"
-              className="outline-none"
-            />
+        {/* Adicionado rounded-lg/shadow/border aqui, assumindo que BranchesTable é o conteúdo principal do Card */}
+        <div className="hidden bg-white md:block rounded-lg shadow-md border"> 
+          
+          <div className="flex w-full items-center gap-4 border-b border-gray-200 p-4">
+            <div className="flex w-64 items-center gap-4 rounded-md border p-2">
+              <Search className="h-4 w-4 text-gray-500" />
+              <input
+                type="text"
+                value={searchTerm}
+                onChange={handleSearch}
+                placeholder="Pesquisar filiais"
+                className="outline-none"
+              />
+            </div>
           </div>
-          <div className="mt-4 max-h-[300px] overflow-y-auto rounded-lg">
-            <table className="w-full border-collapse border border-gray-300">
-              <thead>
-                {/* ALTERAÇÃO: Fundo do header da tabela agora usa o tom de azul escuro dos botões (#37474F) */}
-                <tr className="sticky top-0 bg-[#37474F] text-white z-10">
+
+          {/* AJUSTE CRÍTICO: Usando h-[300px] (altura fixa) e overflow-x-hidden no contêiner de rolagem */}
+          <div className="h-[300px] overflow-y-auto overflow-x-hidden relative z-0">
+            <table className="w-full border-collapse">
+              <thead className="relative z-20"> 
+                {/* Mantendo sticky top-0 e z-20 para garantir que o cabeçalho não seja vazado */}
+                <tr className="sticky top-0 bg-[#37474F] text-white z-20"> 
                   <th className="px-4 py-2 text-start">Filiais</th>
                   <th className="px-4 py-2 text-start">CNPJ</th>
                 </tr>
@@ -114,9 +118,16 @@ export function BranchesTable() {
                   </tr>
                 ) : filteredBranches && filteredBranches.length > 0 ? (
                   filteredBranches.map((branch: any) => (
-                    <tr key={branch.idBranch}>
+                    <tr 
+                        key={branch.idBranch} 
+                        className="border-b border-gray-200 last:border-b-0 hover:bg-gray-50 cursor-pointer"
+                    >
                       <td className="px-4 py-2">
-                        <li className="text-realizaBlue">{branch.name}</li>
+                        {/* Emulação da bolinha com flexbox e span */}
+                        <div className="flex items-center space-x-2">
+                          <span className="h-2 w-2 rounded-full bg-realizaBlue flex-shrink-0"></span>
+                          <span className="text-realizaBlue">{branch.name}</span>
+                        </div>
                       </td>
                       <td className="text-start px-4 py-2">{branch.cnpj}</td>
                     </tr>
@@ -125,7 +136,7 @@ export function BranchesTable() {
                   <tr>
                     <td
                       colSpan={2}
-                      className="border border-gray-300 px-4 py-2 text-center"
+                      className="px-4 py-2 text-center border-t border-gray-300"
                     >
                       Nenhuma filial encontrada
                     </td>

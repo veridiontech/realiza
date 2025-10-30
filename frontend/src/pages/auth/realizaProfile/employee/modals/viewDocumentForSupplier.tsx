@@ -197,52 +197,80 @@ export function DocumentViewer({
   ];
 
   const changeStatus = useCallback(
-    async (status: "APROVADO" | "REPROVADO", justification = "") => {
-      if (status === "REPROVADO" && justification.length > 1000) {
-        setJustificationError("Máximo de 1000 caracteres na justificativa.");
-        return;
-      }
-      setJustificationError(null);
-      setLoadingStatus(true);
-      setShowApprovalConfirmation(false);
+  async (status: "APROVADO" | "REPROVADO", justification = "") => {
+    if (status === "REPROVADO" && justification.length > 1000) {
+      setJustificationError("Máximo de 1000 caracteres na justificativa.");
+      return;
+    }
+    setJustificationError(null);
+    setLoadingStatus(true);
+    setShowApprovalConfirmation(false);
 
-      try {
-        const token = localStorage.getItem("tokenClient");
-        const requestBody = { status, justification };
+    try {
+      const token = localStorage.getItem("tokenClient");
+      const requestBody = { status, justification };
 
-        await axios.post(
-          `${ip}/document/${documentId}/change-status`,
-          requestBody,
-          {
-            headers: { Authorization: `Bearer ${token}` },
-            // CORREÇÃO: Força o Axios a não tentar parsear o corpo da resposta como JSON.
-            // Isso resolve o erro de "Request failed with status code 200" quando o backend 
-            // retorna 200 (Sucesso) mas com um corpo vazio.
-            responseType: 'text',
-            validateStatus: (status) => status >= 200 && status < 300,
-          }
-        );
+      // LOG DO PAYLOAD ANTES DE ENVIAR
+      console.log("[changeStatus] Preparando requisição:", {
+        endpoint: `${ip}/document/${documentId}/change-status`,
+        headers: {
+          Authorization: `Bearer ${token ? "***TOKEN_PRESENTE***" : "SEM_TOKEN"}`,
+        },
+        body: requestBody,
+        meta: {
+          documentId,
+          acao: status,
+          temJustificativa: justification?.trim()?.length > 0,
+          justificativaLen: justification?.length || 0,
+        },
+      });
 
-        toast.success(
-          `Documento ${
-            status === "APROVADO" ? "aprovado" : "reprovado"
-          } com sucesso!`
-        );
-        
-        // Ações pós-sucesso
-        onStatusChange?.(documentId, status);
-        await fetchLogs();
-        onClose();
-      } catch (error) {
-        // Se cair aqui, é um erro real de requisição ou comunicação.
-        console.error("Erro na requisição changeStatus:", error);
-        toast.error("Erro ao atualizar o status do documento. Consulte o console para mais detalhes.");
-      } finally {
-        setLoadingStatus(false);
-      }
-    },
-    [documentId, onClose, onStatusChange, fetchLogs]
-  );
+      const response = await axios.post(
+        `${ip}/document/${documentId}/change-status`,
+        requestBody,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+          responseType: "text",
+          validateStatus: (status) => status >= 200 && status < 300,
+        }
+      );
+
+      // LOG DE SUCESSO
+      console.log("[changeStatus] Sucesso na atualização do status:", {
+        statusHttp: response.status,
+        dataResposta: response.data,
+      });
+
+      toast.success(
+        `Documento ${
+          status === "APROVADO" ? "aprovado" : "reprovado"
+        } com sucesso!`
+      );
+
+      // Ações pós-sucesso
+      onStatusChange?.(documentId, status);
+      await fetchLogs();
+      onClose();
+    } catch (error: any) {
+      // LOG DE ERRO DETALHADO
+      console.error("[changeStatus] Erro na requisição:", {
+        message: error?.message,
+        statusHttp: error?.response?.status,
+        dataResposta: error?.response?.data,
+        endpoint: `${ip}/document/${documentId}/change-status`,
+        bodyEnviado: { status, justification },
+      });
+
+      toast.error(
+        "Erro ao atualizar o status do documento. Consulte o console para mais detalhes."
+      );
+    } finally {
+      setLoadingStatus(false);
+    }
+  },
+  [documentId, onClose, onStatusChange, fetchLogs]
+);
+
 
   useEffect(() => {
     if (!isOpen || !documentId) return;
