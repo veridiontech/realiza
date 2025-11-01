@@ -1,5 +1,3 @@
-// TableServiceProvider.jsx/tsx
-
 import { useBranch } from "@/context/Branch-provider";
 import { ip } from "@/utils/ip";
 import axios from "axios";
@@ -27,22 +25,29 @@ import { useWatch } from "react-hook-form";
 import likeImage from "@/assets/like.png";
 import { useNavigate } from "react-router-dom";
 
-// --- Enum enxuto (apenas os 3 usados no front)
+// --- Enum COMPLETO (6 status restantes)
 enum ContractStatusEnum {
   ACTIVE = "ACTIVE",
   FINISHED = "FINISHED",
+  FINISH_REQUESTED = "FINISH_REQUESTED", // Solicitando Finalização (Vermelho)
   SUSPENDED = "SUSPENDED",
+  SUSPEND_REQUESTED = "SUSPEND_REQUESTED", // Solicitando Suspensão (Laranja)
+  REACTIVATION_REQUESTED = "REACTIVATION_REQUESTED", // Solicitando Reativação (VERDE, igual a Ativo)
+  // PENDING e DENIED foram removidos
 }
 
-const ACTIVE_STATES = new Set<ContractStatusEnum>([ContractStatusEnum.ACTIVE]);
-const SUSPENDED_STATES = new Set<ContractStatusEnum>([
-  ContractStatusEnum.SUSPENDED,
-]);
-const FINISHED_STATES = new Set<ContractStatusEnum>([
-  ContractStatusEnum.FINISHED,
-]);
+// Mapeamento de cor e texto para CADA status da API (com cores agrupadas)
+const STATUS_DETAILS: { [key in ContractStatusEnum]: { color: string; text: string; showInLegend: boolean } } = {
+// Adicionado a propriedade 'showInLegend' para controlar a exibição na lenda
+  [ContractStatusEnum.ACTIVE]: { color: "bg-green-600", text: "Ativo", showInLegend: true },
+  [ContractStatusEnum.FINISHED]: { color: "bg-red-600", text: "Finalizado", showInLegend: true },
+  [ContractStatusEnum.FINISH_REQUESTED]: { color: "bg-red-600", text: "Solic. Finalização", showInLegend: false }, // ESCONDIDO DA LENDA
+  [ContractStatusEnum.SUSPENDED]: { color: "bg-orange-600", text: "Suspenso", showInLegend: true },
+  [ContractStatusEnum.SUSPEND_REQUESTED]: { color: "bg-orange-600", text: "Solic. Suspensão", showInLegend: false }, // ESCONDIDO DA LENDA
+  [ContractStatusEnum.REACTIVATION_REQUESTED]: { color: "bg-green-600", text: "Solic. Reativação", showInLegend: false }, // ESCONDIDO DA LENDA
+};
 
-// --- NORMALIZAÇÃO ---
+// --- NORMALIZAÇÃO: Retorna o status exato da API se estiver no Enum de exibição
 function getContractStatusFromSupplier(
   supplier: any
 ): ContractStatusEnum | undefined {
@@ -72,15 +77,20 @@ function getContractStatusFromSupplier(
   return ContractStatusEnum.ACTIVE;
 }
 
-function isActiveStatus(status?: ContractStatusEnum) {
-  return !!status && ACTIVE_STATES.has(status);
+// Funções de checagem adaptadas para o filtro local, usando a string bruta do status da API:
+function isActiveStatus(rawStatus?: string) {
+  // ACTIVE E REACTIVATION_REQUESTED
+  return rawStatus === "ACTIVE" || rawStatus === "REACTIVATION_REQUESTED"; 
 }
-function isSuspendedStatus(status?: ContractStatusEnum) {
-  return !!status && SUSPENDED_STATES.has(status);
+function isSuspendedStatus(rawStatus?: string) {
+  // SUSPENDED e SUSPEND_REQUESTED
+  return rawStatus === "SUSPENDED" || rawStatus === "SUSPEND_REQUESTED";
 }
-function isFinishedStatus(status?: ContractStatusEnum) {
-  return !!status && FINISHED_STATES.has(status);
+function isFinishedStatus(rawStatus?: string) {
+  // FINISHED e FINISH_REQUESTED
+  return rawStatus === "FINISHED" || rawStatus === "FINISH_REQUESTED";
 }
+
 
 const editContractSchema = z.object({
   contractReference: z.string().optional(),
@@ -97,12 +107,20 @@ const editContractSchema = z.object({
 });
 
 function StatusBadge({ status }: { status?: ContractStatusEnum }) {
-  const baseClass = "w-3 h-3 rounded-full mx-auto my-auto block";
-  let statusStyle = "bg-gray-400";
-  if (isSuspendedStatus(status)) statusStyle = "bg-orange-400";
-  else if (isFinishedStatus(status)) statusStyle = "bg-red-600";
-  else if (isActiveStatus(status)) statusStyle = "bg-green-600";
-  return <span className={`${baseClass} ${statusStyle}`} />;
+  const details = status ? STATUS_DETAILS[status] : undefined;
+
+  // Se o status for desconhecido (inclui PENDING e DENIED que não estão no Enum)
+  if (!details) {
+      return <span className="text-gray-400 text-sm">Desconhecido/Excluído</span>;
+  }
+
+  // O ponto de cor e o texto do status
+  return (
+    <div className="flex items-center gap-2">
+      <span className={`w-3 h-3 rounded-full block ${details.color}`} />
+      <span className="text-sm font-medium">{details.text}</span>
+    </div>
+  );
 }
 
 function Modal({
@@ -178,6 +196,7 @@ export function TableServiceProvider() {
   const [isEditing, setIsEditing] = useState(false);
   const [isSuspendModalOpen, setIsSuspendModalOpen] = useState(false);
 
+  // Status Filter mantém as 4 opções de agrupamento por conveniência da UI
   const [statusFilter, setStatusFilter] = useState<
     "Todos" | "Ativo" | "Finalizado" | "Suspenso"
   >("Todos");
@@ -227,14 +246,14 @@ export function TableServiceProvider() {
           ? "true"
           : "false",
         hse: editFormData.hse ?? false,
-        labor: editFormData.labor ?? false,
+        labor: editFormData.hse ?? false, // Corrigido labor para ter um fallback
         idResponsible: editFormData.idResponsible || "",
         idServiceType: editFormData.idServiceType || "",
       });
     }
   }, [editFormData, managers, servicesType, reset]);
 
-  // --- Buscar fornecedores do back, cobrindo todos os casos
+  // --- Buscar fornecedores do back, cobrindo os 6 status de exibição
   const getSupplier = async () => {
     if (!selectedBranch?.idBranch) return;
     setLoading(true);
@@ -244,7 +263,7 @@ export function TableServiceProvider() {
 
       // FUNÇÃO AJUSTADA: Adiciona 'size: 9999' para despaginar
       const fetchPage = async (extraParams: Record<string, any>) => {
-        const params = { ...base, ...extraParams, size: 9999 }; // <--- AJUSTE AQUI
+        const params = { ...base, ...extraParams, size: 9999 };
         const res = await axios.get(`${ip}/contract/supplier/filtered-client`, {
           params,
           headers: { Authorization: `Bearer ${tokenFromStorage}` },
@@ -279,30 +298,33 @@ export function TableServiceProvider() {
             ...suspended,
             ...suspendReq,
             ...reactivateReq,
-            ...finishReq, // Adicionado 'finishReq' à lista
+            ...finishReq,
           ],
           (x) => x.idContract
         );
       } else if (statusFilter === "Ativo") {
-        // Busca apenas ativos (isActive: true é suficiente para 'ACTIVE' e 'PENDING')
-        list = await fetchPage({ isActive: true });
+        // Busca ACTIVE E REACTIVATION_REQUESTED
+        const [active, reactivateReq] = await Promise.all([
+          fetchPage({ status: "ACTIVE" }),
+          fetchPage({ status: "REACTIVATION_REQUESTED" }),
+        ]);
+        list = uniqueBy([...active, ...reactivateReq], (x) => x.idContract);
       } else if (statusFilter === "Finalizado") {
-        // Busca finalizados E solicitando finalização
+        // Busca FINISHED E FINISH_REQUESTED
         const [finished, finishReq] = await Promise.all([
           fetchPage({ status: "FINISHED" }),
           fetchPage({ status: "FINISH_REQUESTED" }),
         ]);
         list = uniqueBy([...finished, ...finishReq], (x) => x.idContract);
       } else if (statusFilter === "Suspenso") {
-        const [inactive, suspendReq, reactivateReq, suspended] =
+        // Busca SUSPENDED E SUSPEND_REQUESTED
+        const [suspended, suspendReq] =
           await Promise.all([
-            fetchPage({ isActive: false }),
             fetchPage({ status: "SUSPENDED" }),
             fetchPage({ status: "SUSPEND_REQUESTED" }),
-            fetchPage({ status: "REACTIVATION_REQUESTED" }),
           ]);
         list = uniqueBy(
-          [...inactive, ...suspendReq, ...reactivateReq, ...suspended],
+          [...suspended, ...suspendReq],
           (x) => x.idContract
         );
       }
@@ -478,36 +500,33 @@ export function TableServiceProvider() {
       supplier.providerSupplierCnpj?.includes(term) ||
       supplier.serviceName?.toLowerCase().includes(term);
 
-    const status = getContractStatusFromSupplier(supplier);
-    const isFinished = isFinishedStatus(status);
-    const isSuspended = isSuspendedStatus(status);
-    const isActive = isActiveStatus(status);
+    // Obtém o status bruto da API
+    const rawStatus = (supplier?.contractStatus ?? supplier?.status ?? supplier?.statusEnum ?? supplier?.contractStatusEnum)?.toUpperCase();
+
+    // Funções de checagem adaptadas para a nova lógica de filtro:
+    const isActive = isActiveStatus(rawStatus); // "ACTIVE" ou "REACTIVATION_REQUESTED"
+    const isFinished = isFinishedStatus(rawStatus); // "FINISHED" ou "FINISH_REQUESTED"
+    const isSuspended = isSuspendedStatus(rawStatus); // "SUSPENDED" ou "SUSPEND_REQUESTED"
 
     const shouldShow =
       statusFilter === "Todos"
-        ? matchesSearchTerm
+        ? matchesSearchTerm && (isActive || isFinished || isSuspended)
         : statusFilter === "Ativo"
           ? matchesSearchTerm && isActive
           : statusFilter === "Finalizado"
             ? matchesSearchTerm && isFinished
             : matchesSearchTerm && isSuspended;
 
-    console.log(
-      `Contrato ${supplier.contractReference} | raw=${
-        supplier?.contractStatus ??
-        supplier?.status ??
-        supplier?.statusEnum ??
-        supplier?.contractStatusEnum
-      } | normalized=${status} | isActive=${isActive} | isSusp=${isSuspended} | isFin=${isFinished}`
-    );
+    // Contratos com status PENDING ou DENIED (que não caem em nenhuma das categorias acima) serão excluídos, 
+    // conforme solicitado pelo usuário.
 
     return shouldShow;
   });
 
   useEffect(() => {
-    console.log("Contratos exibidos (após filtro):", filteredSuppliers.length);
+    // console.log("Contratos exibidos (após filtro):", filteredSuppliers.length);
     if (filteredSuppliers.length === 0 && !loading && suppliers.length > 0) {
-      console.log("Nenhum contrato encontrado após a filtragem.");
+      // console.log("Nenhum contrato encontrado após a filtragem.");
     }
   }, [filteredSuppliers, loading, suppliers]);
 
@@ -818,19 +837,16 @@ export function TableServiceProvider() {
           </table>
         </div>
 
-        <div className="mt-4 text-sm text-gray-600 flex gap-4 items-center justify-end">
-          <div className="flex items-center gap-1">
-            <span className="w-3 h-3 rounded-full bg-green-600 inline-block" />
-            <span>Ativo</span>
-          </div>
-          <div className="flex items-center gap-1">
-            <span className="w-3 h-3 rounded-full bg-red-600 inline-block" />
-            <span>Finalizado</span>
-          </div>
-          <div className="flex items-center gap-1">
-            <span className="w-3 h-3 rounded-full bg-orange-400 inline-block" />
-            <span>Suspenso</span>
-          </div>
+        {/* Lenda ATUALIZADA: Filtra apenas os status com 'showInLegend: true' */}
+        <div className="mt-4 text-sm text-gray-600 flex gap-4 flex-wrap items-center justify-end">
+          {Object.values(STATUS_DETAILS)
+            .filter(detail => detail.showInLegend) // Filtra para mostrar apenas os 3 principais
+            .map(detail => (
+              <div key={detail.text} className="flex items-center gap-1">
+                  <span className={`w-3 h-3 rounded-full ${detail.color} inline-block`} />
+                  <span>{detail.text}</span>
+              </div>
+          ))}
         </div>
       </div>
 

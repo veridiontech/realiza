@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import axios from "axios";
 import * as XLSX from "xlsx";
 import { ip } from "@/utils/ip";
@@ -153,6 +153,7 @@ export function ConfigPanel() {
     const [cboCode, setCboCode] = useState("");
     const [cboTitle, setCboTitle] = useState("");
     const [positions, setPositions] = useState<Position[]>([]);
+    const [positionSearchTerm, setPositionSearchTerm] = useState("");
     const [selectedPosition, setSelectedPosition] = useState<Position | null>(
         null
     );
@@ -562,7 +563,7 @@ export function ConfigPanel() {
             const normalized: Service[] = raw.map((s: ServiceResponse) => ({
                 id: s.idServiceType,
                 title: s.title,
-                risk: s.risk
+                risk: s.risk || 'LOW'
             })).filter((s: Service) => !!s.id);
 
             setServices(normalized);
@@ -679,7 +680,7 @@ export function ConfigPanel() {
             );
 
             const sortedProfiles = response.data.sort((a, b) =>
-                a.name.localeCompare(b.name, "pt-BR", { sensitivity: "base" })
+                (a.name || "").localeCompare((b.name || ""), "pt-BR", { sensitivity: "base" })
             );
 
             setProfilesRepoItems(sortedProfiles);
@@ -836,7 +837,7 @@ export function ConfigPanel() {
             }));
 
             const sorted = normalized.sort((a: any, b: any) =>
-                a.name.localeCompare(b.name, "pt-BR", { sensitivity: "base" })
+                (a.name || "").localeCompare((b.name || ""), "pt-BR", { sensitivity: "base" })
             );
 
             setProfiles(sorted);
@@ -947,7 +948,7 @@ export function ConfigPanel() {
             fetchProfiles();
 
         } catch (error) {
-            console.error("Erro ao reatribuir e excluir:", error);
+            console.log("Erro ao reatribuir e excluir:", error);
             toast.error("Ocorreu um erro durante a operação.");
         } finally {
             setIsLoadingProfilesRepo(false);
@@ -959,10 +960,10 @@ export function ConfigPanel() {
         () =>
             documents
                 .filter((d) =>
-                    d.documentTitle.toLowerCase().includes(searchTerm.toLowerCase())
+                    (d.documentTitle || "").toLowerCase().includes((searchTerm || "").toLowerCase())
                 )
                 .sort((a, b) =>
-                    a.documentTitle.localeCompare(b.documentTitle, "pt-BR", {
+                    (a.documentTitle || "").localeCompare((b.documentTitle || ""), "pt-BR", {
                         sensitivity: "base",
                     })
                 ),
@@ -974,27 +975,44 @@ export function ConfigPanel() {
             cbos
                 .filter(
                     (cbo) =>
-                        cbo.code.toLowerCase().includes(cboSearchTerm.toLowerCase()) ||
-                        cbo.title.toLowerCase().includes(cboSearchTerm.toLowerCase())
+                        (cbo.code || "").toLowerCase().includes((cboSearchTerm || "").toLowerCase()) ||
+                        (cbo.title || "").toLowerCase().includes((cboSearchTerm || "").toLowerCase())
                 )
                 .sort((a, b) =>
-                    a.code.localeCompare(b.code, "pt-BR", { sensitivity: "base" })
+                    (a.code || "").localeCompare((b.code || ""), "pt-BR", { sensitivity: "base" })
                 ),
         [cbos, cboSearchTerm]
+    );
+
+    const filteredPositions = useMemo(
+        () =>
+            positions
+                .filter((pos) =>
+                    (pos.title || "").toLowerCase().includes((positionSearchTerm || "").toLowerCase())
+                )
+                .sort((a, b) =>
+                    (a.title || "").localeCompare((b.title || ""), "pt-BR", { sensitivity: "base" })
+                ),
+        [positions, positionSearchTerm]
     );
 
     const filteredServices = useMemo(
         () =>
             services
                 .filter(
-                    (s) =>
-                        s.title.toLowerCase().includes(serviceSearchTerm.toLowerCase()) ||
-                        riskTranslations[s.risk.toUpperCase()]
-                            ?.toLowerCase()
-                            .includes(serviceSearchTerm.toLowerCase())
+                    (s) => {
+                        const riskUpper = (s.risk || '').toUpperCase();
+                        const titleMatch = (s.title || "").toLowerCase().includes((serviceSearchTerm || "").toLowerCase());
+                        
+                        const riskTranslationLower = riskTranslations[riskUpper]?.toLowerCase() || '';
+
+                        const riskMatch = riskTranslationLower.includes((serviceSearchTerm || "").toLowerCase());
+                        
+                        return titleMatch || riskMatch;
+                    }
                 )
                 .sort((a, b) =>
-                    a.title.localeCompare(b.title, "pt-BR", { sensitivity: "base" })
+                    (a.title || "").localeCompare((b.title || ""), "pt-BR", { sensitivity: "base" })
                 ),
         [services, serviceSearchTerm, riskTranslations]
     );
@@ -1003,15 +1021,19 @@ export function ConfigPanel() {
         () =>
             activities
                 .filter(
-                    (a) =>
-                        a.title.toLowerCase().includes(activitySearchTerm.toLowerCase()) ||
-                        (a.risk &&
-                            riskTranslations[a.risk.toUpperCase()]
-                                ?.toLowerCase()
-                                .includes(activitySearchTerm.toLowerCase()))
+                    (a) => {
+                        const riskUpper = (a.risk || '').toUpperCase();
+                        const titleMatch = (a.title || "").toLowerCase().includes((activitySearchTerm || "").toLowerCase());
+
+                        const riskTranslationLower = riskTranslations[riskUpper]?.toLowerCase() || '';
+                        
+                        const riskMatch = riskTranslationLower.includes((activitySearchTerm || "").toLowerCase());
+
+                        return titleMatch || riskMatch;
+                    }
                 )
                 .sort((a, b) =>
-                    a.title.localeCompare(b.title, "pt-BR", { sensitivity: "base" })
+                    (a.title || "").localeCompare((b.title || ""), "pt-BR", { sensitivity: "base" })
                 ),
         [activities, activitySearchTerm, riskTranslations]
     );
@@ -1019,7 +1041,7 @@ export function ConfigPanel() {
     const filteredProfiles = useMemo(
         () =>
             profiles.filter((profile) =>
-                profile.name.toLowerCase().includes(profileSearchTerm.toLowerCase())
+                (profile.name || "").toLowerCase().includes((profileSearchTerm || "").toLowerCase())
             ),
         [profiles, profileSearchTerm]
     );
@@ -1103,13 +1125,15 @@ export function ConfigPanel() {
         }
         const lowerCaseSearchTerm = docsSearchTerm.toLowerCase();
         return docsList.filter((doc) =>
-            doc.name.toLowerCase().includes(lowerCaseSearchTerm) ||
-            doc.type.toLowerCase().includes(lowerCaseSearchTerm)
+            (doc.name || "").toLowerCase().includes(lowerCaseSearchTerm) ||
+            (doc.type || "").toLowerCase().includes(lowerCaseSearchTerm)
         );
     }, [docsList, docsSearchTerm]);
 
     async function saveMatrixEntry() {
         if (!selectedMatrixEntry) return;
+
+        setIsCreatingDocument(true);
 
         const payload = {
             ...selectedMatrixEntry,
@@ -1148,6 +1172,8 @@ export function ConfigPanel() {
         } catch (err) {
             console.error("❌ Erro ao atualizar documento de matriz:", err);
             toast.error("Erro ao atualizar documento.");
+        } finally {
+            setIsCreatingDocument(false);
         }
     }
 
@@ -1263,7 +1289,7 @@ export function ConfigPanel() {
             { wch: 20 },
         ];
 
-        const fileName = `Documentos_${groupName.replace(/[^a-zA-Z0-9]/g, '_')}.xlsx`;
+        const fileName = `Documentos_${(groupName || '').replace(/[^a-zA-Z0-9]/g, '_')}.xlsx`;
         XLSX.writeFile(workbook, fileName);
         toast.success("Download do Excel iniciado.");
     };
@@ -1459,32 +1485,47 @@ export function ConfigPanel() {
                     <div className="flex gap-10">
                         <div className="w-1/2 space-y-4">
                             <h2 className="text-xl font-bold">Cargos</h2>
+                            <input
+                                type="text"
+                                placeholder="Buscar por nome do cargo..."
+                                className="w-full p-2 border rounded"
+                                value={positionSearchTerm}
+                                onChange={(e) => setPositionSearchTerm(e.target.value)}
+                            />
                             <ul className="max-h-[60vh] overflow-auto space-y-2">
-                                {positions.map((pos) => (
-                                    <li
-                                        key={pos.id}
-                                        className="p-3 border rounded flex justify-between"
-                                    >
-                                        <span>{pos.title}</span>
-                                        <div className="flex gap-2">
-                                            <button
-                                                onClick={() => {
-                                                    setSelectedPosition(pos);
-                                                    setPositionName(pos.title);
-                                                }}
-                                                className="text-blue-600"
-                                            >
-                                                <Pencil className="w-5 h-5" />
-                                            </button>
-                                            <button
-                                                onClick={() => handleDeletePosition(pos.id)}
-                                                className="text-red-600"
-                                            >
-                                                <Trash2 className="w-5 h-5" />
-                                            </button>
-                                        </div>
-                                    </li>
-                                ))}
+                                {filteredPositions.length > 0 ? (
+                                    filteredPositions.map((pos) => (
+                                        <li
+                                            key={pos.id}
+                                            className="p-3 border rounded flex justify-between"
+                                        >
+                                            <span>{pos.title}</span>
+                                            <div className="flex gap-2">
+                                                <button
+                                                    onClick={() => {
+                                                        setSelectedPosition(pos);
+                                                        setPositionName(pos.title);
+                                                    }}
+                                                    className="text-blue-600"
+                                                >
+                                                    <Pencil className="w-5 h-5" />
+                                                </button>
+                                                <button
+                                                    onClick={() => handleDeletePosition(pos.id)}
+                                                    className="text-red-600"
+                                                >
+                                                    <Trash2 className="w-5 h-5" />
+                                                </button>
+                                            </div>
+                                        </li>
+                                    ))
+                                ) : (
+                                    <p className="text-gray-400">
+                                        {positionSearchTerm
+                                            ? "Nenhum cargo encontrado com o termo de busca."
+                                            : "Nenhum cargo cadastrado."}
+                                    </p>
+                                )}
                             </ul>
                         </div>
                         <div className="w-1/2 border-l pl-6 space-y-4">
@@ -1539,7 +1580,7 @@ export function ConfigPanel() {
                                             >
                                                 <div>
                                                     <strong>{service.title}</strong> (Risco:{" "}
-                                                    {riskTranslations[service.risk.toUpperCase()] ||
+                                                    {riskTranslations[(service.risk || '').toUpperCase()] ||
                                                         service.risk}
                                                     )
                                                 </div>
@@ -1634,7 +1675,7 @@ export function ConfigPanel() {
                                             >
                                                 <div>
                                                     <strong>{activity.title}</strong> (Risco:{" "}
-                                                    {riskTranslations[activity.risk.toUpperCase()] ||
+                                                    {riskTranslations[(activity.risk || '').toUpperCase()] ||
                                                         activity.risk}
                                                     )
                                                 </div>
@@ -2065,6 +2106,7 @@ export function ConfigPanel() {
                                                     type="checkbox"
                                                     checked={editIsRequired}
                                                     onChange={(e) => setEditIsRequired(e.target.checked)}
+                                                    disabled={isCreatingDocument}
                                                 />
                                                 Documento Obrigatório
                                             </label>
@@ -2076,6 +2118,7 @@ export function ConfigPanel() {
                                                     type="checkbox"
                                                     checked={editDoesBlock}
                                                     onChange={(e) => setEditDoesBlock(e.target.checked)}
+                                                    disabled={isCreatingDocument}
                                                 />
                                                 Bloqueia pendência
                                             </label>
@@ -2090,6 +2133,7 @@ export function ConfigPanel() {
                                                     onChange={(e) =>
                                                         setEditIsDocumentUnique(e.target.checked)
                                                     }
+                                                    disabled={isCreatingDocument}
                                                 />
                                                 Documento único
                                             </label>
@@ -2098,8 +2142,12 @@ export function ConfigPanel() {
                                             </p>
                                         </div>
                                         <div className="flex gap-2 pt-2">
-                                            <Button onClick={saveMatrixEntry} className="w-full">
-                                                Salvar Alterações
+                                            <Button
+                                                onClick={saveMatrixEntry}
+                                                className="w-full"
+                                                disabled={isCreatingDocument}
+                                            >
+                                                {isCreatingDocument ? "Salvando..." : "Salvar Alterações"}
                                             </Button>
                                             <Button
                                                 onClick={() => {
@@ -2107,6 +2155,7 @@ export function ConfigPanel() {
                                                     setIsEditingMatrix(false);
                                                 }}
                                                 className="w-full bg-gray-300 text-black hover:bg-gray-400"
+                                                disabled={isCreatingDocument}
                                             >
                                                 Cancelar
                                             </Button>
