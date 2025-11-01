@@ -16,14 +16,26 @@ USER_LOGIN = {
 }
 
 # ====== PREENCHA AQUI ======
-EXCEL_FILE = "ITAMINAS_CONFIGURACOES.xlsx"     # na mesma pasta do script
+EXCEL_FILE = "SISTEMA NOVO_ITAMINAS.xlsx"     # na mesma pasta do script
 SHEET_RESULTS = "Resultado da consulta"
 
-REQUESTER_ID = "COLOQUE_ID_DO_REQUISITANTE"
+REQUESTER_ID = "0ae16fa5-e3de-4f79-9c24-555a047a1e29"
 
 # Map: CNPJ do FORNECEDOR PRINCIPAL -> idContractSupplier
 SUPPLIER_CONTRACT_MAP = {
     # "12.345.678/0001-99": "ID_CONTRATO_SUPPLIER_ABC",
+'01.673.948/0001-70':'5f0de3c7-5cb4-401a-8243-7ec122eab1d8',
+'07.257.635/0001-18':'a0db7582-c11a-4d31-9434-bd3dc56e748b',
+'07.435.569/0001-29':'85b517c5-317f-49ae-9fbf-f28df6d6a865',
+'10.800.476/0001-60':'0c5b29ed-34ab-412f-938a-9e9dae5ef428',
+'15.001.448/0001-05':'1f21fcf4-aa2f-454d-a928-a94024e1a017',
+'16.622.284/0017-55':'aaf4bb49-f6cb-4256-b0f5-a4c70f1c406c',
+'16.909.605/0001-30':'a66e1ceb-c298-44bb-98f1-cd1ccff340d7',
+'18.689.125/0002-17':'36070b5d-e506-4033-952e-2ea9016cbfa2',
+'23.776.343/0001-48':'faa318de-3a71-4790-9910-f9f54c648c13',
+'25.040.960/0001-06':'73ee2eb1-a41e-4c7a-97ee-54b2d3850067',
+'40.408.094/0001-57':'cdd69d8e-e2eb-4424-9234-22b38148743b',
+'58.319.589/0002-56':'9b9cfc5e-b77b-40c0-8270-0d9bd579e717'
 }
 
 # ====== Config de rede/log ======
@@ -158,7 +170,10 @@ def build_subcontract_body(row, cols, warnings_list):
 
     # idContractSupplier
     supplier_cnpj = (row.get(cols["cnpj_fornecedor"]) or "").strip()
+    print(supplier_cnpj)
+    print(SUPPLIER_CONTRACT_MAP)
     id_contract_supplier = SUPPLIER_CONTRACT_MAP.get(supplier_cnpj)
+    print(id_contract_supplier)
     if not id_contract_supplier:
         warnings_list.append(f"idContractSupplier não mapeado para CNPJ do fornecedor: '{supplier_cnpj or '—'}'")
 
@@ -267,7 +282,8 @@ def create_subcontracts():
                     print(f"↷ subcontrato já existia (409): ({unidade} | {subc_nome}) | chk={chk}")
                     already += 1
                 else:
-                    print(f"✖ falha criar subcontrato ({r.status_code}): ({unidade} | {subc_nome}) | resp={r.text[:220]} | chk={chk}")
+                    print(body)
+                    print(f"✖ falha criar subcontrato ({r.status_code}): ({unidade} | {subc_nome}) | resp={r.text} | chk={chk}")
                     fail += 1
 
             except Exception as e:

@@ -30,7 +30,7 @@ public class ContractSupplierResponseDto {
     private Contract.IsActive isActive;
     private List<String> activities;
     private String idBranch;
-    private String nameBranch;
+    private String name;
     private String idSupplier;
     private String nameSupplier;
 }

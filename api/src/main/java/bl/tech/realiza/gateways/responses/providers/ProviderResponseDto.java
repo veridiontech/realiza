@@ -39,6 +39,6 @@ public class ProviderResponseDto {
     @Builder
     public static class BranchDto {
         private String idBranch;
-        private String nameBranch;
+        private String name;
     }
 }

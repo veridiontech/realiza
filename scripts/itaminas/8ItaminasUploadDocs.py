@@ -12,7 +12,9 @@ import uuid
 # ==============================================================================
 # CONFIGURAÇÕES GERAIS
 # ==============================================================================
-APP_URL = "https://realiza-api-development.onrender.com".rstrip("/")
+#APP_URL = "https://realiza-api-development.onrender.com".rstrip("/")
+APP_URL = "https://realiza.onrender.com".rstrip("/")
+
 BASE_DOCS_FOLDER = "IS-508"
 MAP_FILE_NAME = "Mapa.xlsx"
 MAP_SHEET_NAME = "DOCS"

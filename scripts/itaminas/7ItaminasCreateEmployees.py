@@ -13,10 +13,12 @@ import unicodedata
 # ==============================================================================
 # CONFIGURAÇÕES GERAIS
 # ==============================================================================
-APP_URL = "https://realiza-api-development.onrender.com".rstrip("/")
+#APP_URL = "https://realiza-api-development.onrender.com".rstrip("/")
+APP_URL = "https://realiza.onrender.com".rstrip("/")
+
 EXCEL_FILE = "SISTEMA NOVO_ITAMINAS.xlsx"
 SHEET_RESULTS = "Resultado da consulta"
-CLIENT_ID = "d2bd8165-95ac-4d11-9e97-968979b9bc5f"
+CLIENT_ID = "57a731ee-6deb-440a-bc69-c0b59b38b3c0"
 USER_LOGIN = {"email": "realiza@assessoria.com", "password": "senha123"}
 DB_CONFIG = {
     "host": "177.170.30.9", "port": 8004, "user": "veridion_user",
@@ -255,7 +257,7 @@ def create_employees(token: str, client_id: str):
                     print(f"↷ Funcionário '{full_name}' (CPF: {cpf_val}) já existe.")
                     already += 1
                 else:
-                    print(f"✖ Falha ao criar '{full_name}' (Status: {r.status_code}): {r.text[:250]}")
+                    print(f"✖ Falha ao criar '{full_name}' (Status: {r.status_code}): {r.text}")
                     fail += 1
             except requests.RequestException as e:
                 print(f"✖ Exceção de rede ao criar '{full_name}': {e}")

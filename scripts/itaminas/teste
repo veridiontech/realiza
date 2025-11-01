@@ -1,0 +1,436 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Realiza Importer (refatorado)
+--------------------------------
+- Lê um Excel com abas UNIDADES e USUARIOS
+- Cria filiais (branches) e usuários via API do Realiza
+- Idempotente sempre que possível (detecta duplicados por 409/500)
+- Relatórios em CSV no fim (sucesso/falha/ignorados)
+- Máscara de e-mail em logs, checksum de payload sem expor PII
+- Sessão HTTP com timeouts, retries e backoff
+- Suporte a --dry-run (não envia nada), --only (branches|users)
+- Config por variáveis de ambiente (.env é suportado, se presente)
+
+Requisitos:
+- Python 3.9+
+- pip install requests python-dotenv pandas openpyxl
+
+Uso:
+  python realiza_importer.py --excel ITAMINAS_CONFIGURACOES.xlsx
+  python realiza_importer.py --excel ITAMINAS_CONFIGURACOES.xlsx --only branches
+  python realiza_importer.py --excel ITAMINAS_CONFIGURACOES.xlsx --only users
+  python realiza_importer.py --excel ITAMINAS_CONFIGURACOES.xlsx --dry-run
+
+Env (.env opcional):
+  APP_URL=https://realiza.onrender.com
+  USER_EMAIL=realiza@assessoria.com
+  USER_PASSWORD=senha123
+  CLIENT_GLOBAL_ID=57a731ee-6deb-440a-bc69-c0b59b38b3c0
+  DEFAULT_PROFILE_NAME=Padrão
+"""
+
+import os
+import re
+import csv
+import json
+import time
+import hashlib
+import argparse
+from typing import Dict, Any, Optional, Tuple
+
+import pandas as pd
+import requests
+from requests.adapters import HTTPAdapter, Retry
+
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except Exception:
+    # dotenv é opcional
+    pass
+
+
+def env_str(name: str, default: Optional[str] = None) -> str:
+    v = os.getenv(name, default)
+    if v is None:
+        raise RuntimeError(f"Variável de ambiente obrigatória ausente: {name}")
+    return v.strip()
+
+
+APP_URL = env_str("APP_URL", "https://realiza.onrender.com").rstrip("/")
+USER_EMAIL = env_str("USER_EMAIL", "realiza@assessoria.com")
+USER_PASSWORD = env_str("USER_PASSWORD", "senha123")
+CLIENT_GLOBAL_ID = env_str("CLIENT_GLOBAL_ID", "57a731ee-6deb-440a-bc69-c0b59b38b3c0")
+DEFAULT_PROFILE_NAME = os.getenv("DEFAULT_PROFILE_NAME", "Padrão")
+
+
+def mask_email(email: str) -> str:
+    if not email or "@" not in email:
+        return str(email)
+    name, dom = email.split("@", 1)
+    return (name[:2] + "***@" + dom) if len(name) > 2 else ("***@" + dom)
+
+
+def checksum(payload: Dict[str, Any]) -> str:
+    # Útil para rastrear payloads sem expor PII
+    try:
+        h = hashlib.sha1(repr(sorted(payload.items())).encode("utf-8")).hexdigest()
+        return h[:10]
+    except Exception:
+        return "checksum_err"
+
+
+def strip_null(s: Optional[str]) -> Optional[str]:
+    if s is None:
+        return None
+    s = str(s).strip()
+    return s or None
+
+
+def sanitize_only_digits(doc: Optional[str]) -> Optional[str]:
+    if not doc:
+        return None
+    return re.sub(r"\D+", "", str(doc)) or None
+
+
+def split_fullname(fullname: Optional[str]) -> Tuple[Optional[str], Optional[str]]:
+    fullname = strip_null(fullname)
+    if not fullname:
+        return None, None
+    parts = fullname.split()
+    first_name = parts[0] if len(parts) > 0 else None
+    surname = " ".join(parts[1:]) if len(parts) > 1 else None
+    return first_name, surname
+
+
+class RealizaImporter:
+    def __init__(self, excel_path: str, dry_run: bool = False, only: Optional[str] = None):
+        self.excel_path = excel_path
+        self.dry_run = dry_run
+        self.only = only  # "branches" | "users" | None (ambos)
+        self.session = self._make_session()
+        self.token = None
+        self.headers = {"Content-Type": "application/json"}
+        self.branches_map: Dict[str, str] = {}  # name -> idBranch
+        self.profile_id: Optional[str] = None
+
+        self.results = {
+            "branches": [],  # dicts: action, name, status, msg
+            "users": [],     # dicts: action, emailMasked, status, msg
+        }
+
+    def _make_session(self) -> requests.Session:
+        s = requests.Session()
+        retries = Retry(
+            total=5,
+            backoff_factor=0.8,
+            status_forcelist=[408, 429, 500, 502, 503, 504],
+            allowed_methods=["GET", "POST", "PUT", "DELETE", "PATCH"]
+        )
+        adapter = HTTPAdapter(max_retries=retries, pool_connections=20, pool_maxsize=50)
+        s.mount("http://", adapter)
+        s.mount("https://", adapter)
+        return s
+
+    def _auth_headers(self) -> Dict[str, str]:
+        h = dict(self.headers)
+        if self.token:
+            h["Authorization"] = f"Bearer {self.token}"
+        return h
+
+    def login(self):
+        url = f"{APP_URL}/login"
+        payload = {"email": USER_EMAIL, "password": USER_PASSWORD}
+        if self.dry_run:
+            print("[DRY-RUN] Pular login")
+            self.token = "dry-run-token"
+            return
+        r = self.session.post(url, json=payload, timeout=20)
+        r.raise_for_status()
+        data = r.json()
+        token = data.get("token") or data.get("access_token")
+        if not token:
+            raise RuntimeError(f"Login OK, mas não veio token. Resposta: {data}")
+        self.token = token
+        print("Login OK.")
+
+    def load_excel(self) -> Dict[str, pd.DataFrame]:
+        try:
+            dados = pd.read_excel(
+                self.excel_path,
+                sheet_name=None,
+                engine="openpyxl",
+                dtype=str,
+                keep_default_na=False  # '' em vez de NaN
+            )
+            print(f"Excel carregado: {self.excel_path}")
+            return dados
+        except Exception as e:
+            raise RuntimeError(f"Erro ao importar o Excel: {e}")
+
+    # ---------- BRANCHES ----------
+    def create_branches(self, df_units: pd.DataFrame):
+        if df_units is None or df_units.empty:
+            print("Aba UNIDADES vazia ou não encontrada.")
+            return
+
+        for _, row in df_units.iterrows():
+            # Ignora linhas totalmente vazias
+            if not any(str(v).strip() for v in row.values):
+                self.results["branches"].append({
+                    "action": "skip",
+                    "name": None,
+                    "status": "ignored",
+                    "msg": "linha em branco"
+                })
+                continue
+
+            name = strip_null(row.get("Unidade*"))
+            if not name:
+                self.results["branches"].append({
+                    "action": "skip",
+                    "name": None,
+                    "status": "ignored",
+                    "msg": "sem Unidade*"
+                })
+                continue
+
+            payload = {
+                "name": name,
+                "cnpj": strip_null(row.get("CNPJ*")),
+                "address": strip_null(row.get("Endereço*")),
+                "number": strip_null(row.get("Número*")),
+                "cep": strip_null(row.get("CEP*")),
+                "city": strip_null(row.get("Cidade*")),
+                "state": strip_null(row.get("Estado*")),
+                "telephone": strip_null(row.get("Telefone - 1")),
+                "client": CLIENT_GLOBAL_ID,
+                "replicateFromBase": True,
+            }
+            pay_id = checksum(payload)
+
+            if self.dry_run:
+                print(f"[DRY-RUN] Criaria filial '{name}' (payload:{pay_id})")
+                self.results["branches"].append({
+                    "action": "create",
+                    "name": name,
+                    "status": "dry-run",
+                    "msg": f"payload:{pay_id}"
+                })
+                continue
+
+            try:
+                url = f"{APP_URL}/branch"
+                r = self.session.post(url, json=payload, headers=self._auth_headers(), timeout=30)
+                if r.status_code in (200, 201):
+                    data = r.json()
+                    self.branches_map[data["name"]] = data.get("idBranch") or data.get("id") or ""
+                    print(f"✔ Filial criada: {data['name']} (id:{self.branches_map[data['name']]})")
+                    self.results["branches"].append({
+                        "action": "create",
+                        "name": data["name"],
+                        "status": "created",
+                        "msg": ""
+                    })
+                elif r.status_code == 409:
+                    print(f"↷ Filial já existia: {name}")
+                    self.results["branches"].append({
+                        "action": "create",
+                        "name": name,
+                        "status": "exists",
+                        "msg": r.text[:160]
+                    })
+                else:
+                    print(f"✖ Falha filial '{name}': {r.status_code} {r.text[:160]}")
+                    self.results["branches"].append({
+                        "action": "create",
+                        "name": name,
+                        "status": f"error_{r.status_code}",
+                        "msg": r.text[:500]
+                    })
+            except Exception as e:
+                print(f"✖ Exceção criando filial '{name}': {e}")
+                self.results["branches"].append({
+                    "action": "create",
+                    "name": name,
+                    "status": "exception",
+                    "msg": str(e)
+                })
+
+    def resolve_default_profile_id(self) -> Optional[str]:
+        if self.dry_run:
+            print("[DRY-RUN] Pular busca de perfil; simulando id PERFIL-DRYRUN")
+            return "PERFIL-DRYRUN"
+        url = f"{APP_URL}/profile/by-name/{CLIENT_GLOBAL_ID}"
+        r = self.session.get(url, headers=self._auth_headers(), timeout=20)
+        if r.status_code != 200:
+            print(f"Falha ao buscar perfis: {r.status_code} {r.text[:160]}")
+            return None
+        profiles = r.json() or []
+        for p in profiles:
+            if p.get("profileName") == DEFAULT_PROFILE_NAME:
+                return p.get("id")
+        # fallback: primeiro perfil
+        return profiles[0].get("id") if profiles else None
+
+    # ---------- USERS ----------
+    def create_users(self, df_users: pd.DataFrame):
+        if df_users is None or df_users.empty:
+            print("Aba USUARIOS vazia ou não encontrada.")
+            return
+
+        if not self.profile_id:
+            self.profile_id = self.resolve_default_profile_id()
+            print(f"Profile ID: {self.profile_id}")
+
+        for _, row in df_users.iterrows():
+            if not any(str(v).strip() for v in row.values):
+                self.results["users"].append({
+                    "action": "skip",
+                    "emailMasked": None,
+                    "status": "ignored",
+                    "msg": "linha em branco"
+                })
+                continue
+
+            full_name = strip_null(row.get("Funcionário*"))
+            email = strip_null(row.get("E-mail*"))
+            if not full_name or not email:
+                self.results["users"].append({
+                    "action": "skip",
+                    "emailMasked": mask_email(email or ""),
+                    "status": "ignored",
+                    "msg": "sem nome ou e-mail"
+                })
+                continue
+
+            cpf = sanitize_only_digits(strip_null(row.get("CPF*")))
+            branch_name = strip_null(row.get("Unidade*"))
+            branch_id = self.branches_map.get(branch_name) if branch_name else None
+            first_name, surname = split_fullname(full_name)
+
+            payload = {
+                "cpf": cpf,
+                "role": "ROLE_CLIENT_MANAGER",
+                "firstName": first_name,
+                "surname": surname,
+                "email": email,
+                "branch": branch_id,
+                "enterprise": "CLIENT",
+                "idEnterprise": CLIENT_GLOBAL_ID,
+                "profileId": self.profile_id,
+            }
+            pay_id = checksum(payload)
+
+            if self.dry_run:
+                print(f"[DRY-RUN] Criaria usuário '{mask_email(email)}' (payload:{pay_id})")
+                self.results["users"].append({
+                    "action": "create",
+                    "emailMasked": mask_email(email),
+                    "status": "dry-run",
+                    "msg": f"payload:{pay_id}"
+                })
+                continue
+
+            try:
+                url = f"{APP_URL}/user/manager/new-user"
+                r = self.session.post(url, json=payload, headers=self._auth_headers(), timeout=30)
+                if r.status_code in (200, 201):
+                    print(f"✔ Usuário criado: {mask_email(email)}")
+                    self.results["users"].append({
+                        "action": "create",
+                        "emailMasked": mask_email(email),
+                        "status": "created",
+                        "msg": ""
+                    })
+                elif r.status_code == 500 and "Duplicate entry" in (r.text or ""):
+                    print(f"↷ Usuário já existe: {mask_email(email)}")
+                    self.results["users"].append({
+                        "action": "create",
+                        "emailMasked": mask_email(email),
+                        "status": "exists",
+                        "msg": "Duplicate entry"
+                    })
+                elif r.status_code == 409:
+                    print(f"↷ Usuário em conflito/duplicado: {mask_email(email)}")
+                    self.results["users"].append({
+                        "action": "create",
+                        "emailMasked": mask_email(email),
+                        "status": "exists",
+                        "msg": r.text[:160]
+                    })
+                else:
+                    print(f"✖ Falha usuário '{mask_email(email)}': {r.status_code} {r.text[:160]}")
+                    self.results["users"].append({
+                        "action": "create",
+                        "emailMasked": mask_email(email),
+                        "status": f"error_{r.status_code}",
+                        "msg": r.text[:500]
+                    })
+            except Exception as e:
+                print(f"✖ Exceção criando usuário '{mask_email(email)}': {e}")
+                self.results["users"].append({
+                    "action": "create",
+                    "emailMasked": mask_email(email),
+                    "status": "exception",
+                    "msg": str(e)
+                })
+
+    # ---------- REPORTS ----------
+    def save_reports(self, out_dir: str = "."):
+        os.makedirs(out_dir, exist_ok=True)
+
+        # Branches
+        branches_csv = os.path.join(out_dir, "report_branches.csv")
+        with open(branches_csv, "w", newline="", encoding="utf-8") as f:
+            w = csv.DictWriter(f, fieldnames=["action", "name", "status", "msg"])
+            w.writeheader()
+            for row in self.results["branches"]:
+                w.writerow(row)
+
+        # Users
+        users_csv = os.path.join(out_dir, "report_users.csv")
+        with open(users_csv, "w", newline="", encoding="utf-8") as f:
+            w = csv.DictWriter(f, fieldnames=["action", "emailMasked", "status", "msg"])
+            w.writeheader()
+            for row in self.results["users"]:
+                w.writerow(row)
+
+        print(f"Relatórios salvos em: {os.path.abspath(out_dir)}")
+        return branches_csv, users_csv
+
+    def run(self):
+        # 1) Login
+        self.login()
+
+        # 2) Excel
+        dados = self.load_excel()
+
+        # 3) BRANCHES
+        if self.only in (None, "branches"):
+            df_units = dados.get("UNIDADES")
+            self.create_branches(df_units)
+
+        # 4) USERS
+        if self.only in (None, "users"):
+            df_users = dados.get("USUARIOS")
+            self.create_users(df_users)
+
+        # 5) Reports
+        self.save_reports(out_dir="reports")
+
+
+def main():
+    parser = argparse.ArgumentParser(description="Importador de filiais e usuários para o Realiza")
+    parser.add_argument("--excel", required=True, help="Caminho do Excel (ex.: ITAMINAS_CONFIGURACOES.xlsx)")
+    parser.add_argument("--dry-run", action="store_true", help="Não envia requisições; apenas simula")
+    parser.add_argument("--only", choices=["branches", "users"], help="Executa apenas uma etapa")
+    args = parser.parse_args()
+
+    importer = RealizaImporter(excel_path=args.excel, dry_run=args.dry_run, only=args.only)
+    importer.run()
+
+
+if __name__ == "__main__":
+    main()
