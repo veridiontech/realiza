@@ -17,7 +17,13 @@ public interface ProviderSupplierRepository extends JpaRepository<ProviderSuppli
     Page<ProviderSupplier> findAllByBranches_IdBranchAndIsActiveIsTrue(String idSearch, Pageable pageable);
     List<ProviderSupplier> findAllByBranches_IdBranchAndIsActiveIsTrue(String idSearch);
     Optional<ProviderSupplier> findByCnpj(String cnpj);
-    int countByBranches_IdBranchAndIsActiveIsTrue(String idSearch);
+    @Query("""
+    SELECT COUNT(DISTINCT ps.id)
+    FROM ProviderSupplier ps
+    JOIN ps.branches b
+    WHERE b.idBranch = :branchId AND ps.isActive = true
+    """)
+    int countActiveSuppliersByBranch(@Param("branchId") String branchId);
     Page<ProviderSupplier> findAllByIsActiveIsTrue(Pageable pageable);
 
     @Query("""

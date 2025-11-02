@@ -185,7 +185,7 @@ public class DashboardService {
         + employeeRepository.countAllBySubcontract_ProviderSupplier_Branches_IdBranchAndSituation(branchId, DESALOCADO).intValue();
 
         // quantidade de fornecedores
-        supplierQuantity = providerSupplierRepository.countByBranches_IdBranchAndIsActiveIsTrue(branchId);
+        supplierQuantity = providerSupplierRepository.countActiveSuppliersByBranch(branchId);
 
         // quantidade de funcionarios alocados
         allocatedEmployeeQuantity = employeeRepository.countAllByBranch_IdBranchAndSituation(branchId, ALOCADO);
