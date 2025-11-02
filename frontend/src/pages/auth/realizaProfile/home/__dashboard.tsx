@@ -145,7 +145,7 @@ export function Dashboard() {
     conformity: number;
     activeContractQuantity: number;
     activeEmployeeQuantity: number;
-    activeSupplierQuantity: number;
+    supplierQuantity: number;
     allocatedEmployeeQuantity: number;
   } | null>(null);
 
@@ -458,7 +458,7 @@ export function Dashboard() {
           conformity: 0,
           activeContractQuantity: 0,
           activeEmployeeQuantity: 0,
-          activeSupplierQuantity: 0,
+          supplierQuantity: 0,
           allocatedEmployeeQuantity: 0,
         });
       } finally {
@@ -1053,7 +1053,7 @@ export function Dashboard() {
           <div className="mt-9 flex w-full">
             <ActiveContracts count={data?.activeContractQuantity ?? 0} />
             <Employees count={data?.activeEmployeeQuantity ?? 0} />
-            <Suppliers count={data?.activeSupplierQuantity ?? 0} />
+            <Suppliers count={data?.supplierQuantity ?? 0} />
             <AllocatedEmployees count={data?.allocatedEmployeeQuantity ?? 0} />
           </div>
           <div className="mt-5 w-full text-right">
