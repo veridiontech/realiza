@@ -18,7 +18,7 @@ public interface ProviderSupplierRepository extends JpaRepository<ProviderSuppli
     List<ProviderSupplier> findAllByBranches_IdBranchAndIsActiveIsTrue(String idSearch);
     Optional<ProviderSupplier> findByCnpj(String cnpj);
     @Query("""
-    SELECT COUNT(DISTINCT ps.id)
+    SELECT COUNT(DISTINCT ps.idProvider)
     FROM ProviderSupplier ps
     JOIN ps.branches b
     WHERE b.idBranch = :branchId AND ps.isActive = true
