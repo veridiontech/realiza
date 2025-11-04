@@ -163,12 +163,26 @@ public class CrudDocumentImpl implements CrudDocument {
     }
 
     @Override
+    @Transactional
     public String changeStatus(String documentId, DocumentStatusChangeRequestDto documentStatusChangeRequestDto) {
-        Document document = documentRepository.findById(documentId)
-                .orElseThrow(() -> new NotFoundException("Document not found"));
+        Document document = documentRepository.findById(documentId).orElse(null);
+
+        if (document == null) {
+            // Tenta resolver o ID como DocumentBranch
+            DocumentBranch documentBranch = documentBranchRepository.findById(documentId).orElse(null);
+            if (documentBranch != null) {
+                // Se for um DocumentBranch, tenta encontrar o Document mais recente
+                document = documentRepository.findTopByDocumentMatrixAndVersionDateBeforeOrderByVersionDateDesc(
+                        documentBranch.getDocumentMatrix(),
+                        documentBranch.getVersionDate()
+                ).orElseThrow(() -> new NotFoundException("Document not found for DocumentBranch ID"));
+            } else {
+                throw new NotFoundException("Document or DocumentBranch not found with ID: " + documentId);
+            }
+        }
         document.setStatus(documentStatusChangeRequestDto.getStatus());
         for (ContractDocument contractDocument : document.getContractDocuments()) {
-            contractDocument.setStatus(contractDocument.getStatus());
+            contractDocument.setStatus(documentStatusChangeRequestDto.getStatus()); // Corrigido para usar o novo status
         }
 
         if (document.getStatus() == APROVADO) {
@@ -258,8 +272,21 @@ public class CrudDocumentImpl implements CrudDocument {
 
     @Override
     public String documentExemptionRequest(String documentId, String contractId, String description) {
-        Document document = documentRepository.findById(documentId)
-                .orElseThrow(() -> new NotFoundException("Document not found"));
+        Document document = documentRepository.findById(documentId).orElse(null);
+
+        if (document == null) {
+            // Tenta resolver o ID como DocumentBranch
+            DocumentBranch documentBranch = documentBranchRepository.findById(documentId).orElse(null);
+            if (documentBranch != null) {
+                // Se for um DocumentBranch, tenta encontrar o Document mais recente
+                document = documentRepository.findTopByDocumentMatrixAndVersionDateBeforeOrderByVersionDateDesc(
+                        documentBranch.getDocumentMatrix(),
+                        documentBranch.getVersionDate()
+                ).orElseThrow(() -> new NotFoundException("Document not found for DocumentBranch ID"));
+            } else {
+                throw new NotFoundException("Document or DocumentBranch not found with ID: " + documentId);
+            }
+        }
 
         Contract contract = contractRepository.findById(contractId)
                 .orElseThrow(() -> new NotFoundException("Contract not found"));

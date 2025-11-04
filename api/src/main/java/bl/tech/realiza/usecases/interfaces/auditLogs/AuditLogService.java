@@ -9,7 +9,7 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.transaction.annotation.Transactional;
 
 public interface AuditLogService {
-    @Transactional
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     void createAuditLog(String id,
                         AuditLogTypeEnum typeEnum,
                         String description,

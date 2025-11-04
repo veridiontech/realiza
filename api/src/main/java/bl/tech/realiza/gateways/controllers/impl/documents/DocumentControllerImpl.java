@@ -22,31 +22,40 @@ public class DocumentControllerImpl implements DocumentController {
     private final CrudDocument crudDocument;
 
     @PostMapping("/{documentId}/change-status")
-    @ResponseStatus(HttpStatus.OK)
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     @PreAuthorize("hasRole('ROLE_REALIZA_BASIC')")
     @Override
-    public ResponseEntity<String> changeDocumentStatus(@PathVariable String documentId, @RequestBody DocumentStatusChangeRequestDto documentStatusChangeRequest) {
-        return ResponseEntity.ok(crudDocument.changeStatus(documentId, documentStatusChangeRequest));
+    public ResponseEntity<Void> changeDocumentStatus(@PathVariable String documentId, @RequestBody DocumentStatusChangeRequestDto documentStatusChangeRequest) {
+        crudDocument.changeStatus(documentId, documentStatusChangeRequest);
+        return ResponseEntity.noContent().build();
     }
 
     @PostMapping("/{documentId}/exempt")
-    @ResponseStatus(HttpStatus.OK)
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     @Override
     public ResponseEntity<String> documentExemption(@PathVariable String documentId, @RequestParam String contractId, @RequestParam String description) {
         return ResponseEntity.ok(crudDocument.documentExemptionRequest(documentId, contractId, description));
     }
 
     @GetMapping("/non-conforming/{enterpriseId}")
-    @ResponseStatus(HttpStatus.OK)
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     @Override
     public ResponseEntity<List<DocumentPendingResponseDto>> nonConformingDocumentsByEnterpriseId(@PathVariable String enterpriseId) {
         return ResponseEntity.ok(crudDocument.findNonConformingDocumentByEnterpriseId(enterpriseId));
     }
 
     @GetMapping("/find-by-audit-log/{auditLogId}")
-    @ResponseStatus(HttpStatus.OK)
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     @Override
     public ResponseEntity<String> getVersionByAuditLogId(@PathVariable String auditLogId) {
         return ResponseEntity.ok(crudDocument.findVersionByAuditLog(auditLogId));
+    }
+
+    @PostMapping("/branch/{documentBranchId}/change-status")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @PreAuthorize("hasRole('ROLE_REALIZA_BASIC')")
+    public ResponseEntity<Void> changeDocumentBranchStatus(@PathVariable String documentBranchId, @RequestBody DocumentStatusChangeRequestDto documentStatusChangeRequest) {
+        crudDocument.changeDocumentBranchStatus(documentBranchId, documentStatusChangeRequest);
+        return ResponseEntity.noContent().build();
     }
 }

@@ -1,0 +1,30 @@
+# Configuração para o perfil de desenvolvimento local (dev)
+# Este perfil é projetado para rodar o projeto com o mínimo de configuração e sem falhas de build.
+
+# Variáveis de Ambiente Mínimas para Evitar Falhas de Placeholder
+# Estes valores são mockados e apenas para permitir que o Spring Boot inicie.
+security:
+  user: dev
+  password: dev
+  secret: dev-secret-key
+  expiration: 3600000
+
+# Desabilita o RabbitMQ para evitar falhas de conexão
+spring:
+  rabbitmq:
+    listener:
+      simple:
+        auto-startup: false
+
+# Configurações Mínimas para Serviços Externos
+gcp:
+  storage:
+    bucket: mock-bucket-dev
+
+# Configurações de Erro para Stack Trace Completo
+server:
+  error:
+    include-stacktrace: always
+    include-message: always
+    include-binding-errors: always
+    include-exception: true
