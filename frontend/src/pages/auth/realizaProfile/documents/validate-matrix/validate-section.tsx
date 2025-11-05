@@ -27,38 +27,54 @@ export function ValidateSection({
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [amountEdit, ] = useState(0);
-  const [doesBlockEdit, ] = useState(false);
+  // Removendo estados não utilizados ou substituindo por busca na lista ao salvar
+  // const [amountEdit, ] = useState(0);
+  // const [doesBlockEdit, ] = useState(false);
 
   const fetchExpirations = async () => {
-    if (!idBranch || !documentTypeName) return;
-
-    const token = localStorage.getItem("tokenClient");
-    if (!token) {
-      console.error("Token não encontrado.");
+    console.log("Iniciando fetchExpirations...");
+    if (!idBranch || !documentTypeName) {
+      console.warn("fetchExpirations: idBranch ou documentTypeName ausentes. Abortando.");
       return;
     }
 
+    const token = localStorage.getItem("tokenClient");
+    if (!token) {
+      console.error("fetchExpirations: Token não encontrado. Abortando.");
+      return;
+    }
+
+    const url = `${ip}/document/branch/document-matrix/expiration/${idBranch}`;
+    const params = { documentTypeName, isSelected: true, replicate: false, _ts: Date.now() };
+
+    console.log(`fetchExpirations: Chamando GET ${url}`);
+    console.log("fetchExpirations: Parâmetros:", params);
+
     try {
-      const { data } = await axios.get<ExpirationItem[]>(
-        `${ip}/document/branch/document-matrix/expiration/${idBranch}`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-          params: { documentTypeName, isSelected: true, replicate: false, _ts: Date.now() },
-        }
-      );
+      const { data } = await axios.get<ExpirationItem[]>(url, {
+        headers: { Authorization: `Bearer ${token}` },
+        params: params,
+      });
+
+      console.log("fetchExpirations: Requisição concluída com sucesso.");
 
       const normalized = (data ?? []).map((d) => ({
         ...d,
+        // Garantindo que os campos sejam do tipo esperado
         expirationDateAmount: Number(d.expirationDateAmount ?? 0),
         expirationDateUnit: (d.expirationDateUnit as any) ?? "MONTHS",
         doesBlock: !!(d as any).doesBlock,
       }));
 
+      console.log("fetchExpirations: Dados normalizados e definidos na lista.");
       setExpirationList(normalized);
     } catch (err) {
-      console.error("Erro ao buscar validade dos documentos:", err);
+      console.error("fetchExpirations: Erro ao buscar validade dos documentos:", err);
+      if (axios.isAxiosError(err) && err.response) {
+        console.error("fetchExpirations: Detalhes do erro da resposta:", err.response.data);
+      }
     }
+    console.log("fetchExpirations: Processo finalizado.");
   };
 
   useEffect(() => {
@@ -81,44 +97,67 @@ export function ValidateSection({
 
   const handleSaveAll = async () => {
     setIsSaving(true);
+    console.log("Iniciando handleSaveAll...");
     try {
       const token = localStorage.getItem("tokenClient");
       if (!token) {
-        console.error("Token não encontrado.");
+        console.error("handleSaveAll: Token não encontrado. Abortando.");
         setIsSaving(false);
         return;
       }
 
       if (!editingId) {
-          console.error("Nenhum documento em edição.");
-          setIsSaving(false);
-          return;
+        console.error("handleSaveAll: Nenhum documento em edição (editingId está null). Abortando.");
+        setIsSaving(false);
+        return;
       }
       const id = editingId;
 
+      // Encontrando o item na lista com as alterações locais
+      const itemToSave = expirationList.find(item => item.idDocument === id);
+
+      if (!itemToSave) {
+          console.error(`handleSaveAll: Item com id ${id} não encontrado na lista. Abortando.`);
+          setIsSaving(false);
+          return;
+      }
+
       const payload = {
-        expirationDateAmount: amountEdit,
-        expirationDateUnit: "MONTHS",
-        doesBlock: doesBlockEdit,
+        // Usando o valor atualizado do item na lista
+        expirationDateAmount: itemToSave.expirationDateAmount, 
+        expirationDateUnit: itemToSave.expirationDateUnit, // Usando a unidade do item
+        doesBlock: itemToSave.doesBlock, // Usando o valor atualizado do item
       };
 
-      await axios.post(
-        `${ip}/document/branch/document-matrix/expiration/update/${id}`,
-        payload,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-          params: { replicate: false },
-        }
-      );
-
-      await fetchExpirations();
+      const url = `${ip}/document/branch/document-matrix/expiration/update/${id}`;
+      const params = { replicate: false };
+      
+      console.log(`handleSaveAll: Chamando POST ${url}`);
+      console.log("handleSaveAll: Parâmetros:", params);
+      console.log("handleSaveAll: Payload de envio:", payload);
+      
+      await axios.post(url, payload, {
+        headers: { Authorization: `Bearer ${token}` },
+        params: params,
+      });
+      
+      console.log("handleSaveAll: Requisição POST concluída com sucesso.");
+      
+      // Revalida a lista após o salvamento
+      await fetchExpirations(); 
+      
       setEditingId(null);
       setIsEditing(false);
+      console.log("handleSaveAll: Edição finalizada.");
+
     } catch (err: any) {
-      console.error("Erro ao salvar todas as validades:", err);
-      if (err.response) console.error("Detalhes do erro:", err.response.data);
+      console.error("handleSaveAll: Erro ao salvar a validade do documento:", err);
+      if (err.response) {
+        console.error("handleSaveAll: Detalhes do erro da resposta:", err.response.data);
+      }
     } finally {
       setIsSaving(false);
+      console.log("handleSaveAll: Processo de salvamento finalizado.");
     }
   };
 

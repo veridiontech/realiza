@@ -168,7 +168,7 @@ export function ConfigPanel() {
     const [isLoadingActivities, setIsLoadingActivities] = useState(false);
     const [activitySearchTerm, setActivitySearchTerm] = useState("");
     const [newActivityTitle, setNewActivityTitle] = useState("");
-    const [newActivityRisk, setNewActivityRisk] = useState("LOW");
+    // REMOVIDO NO PEDIDO ANTERIOR: const [newActivityRisk, setNewActivityRisk] = useState("LOW");
     const [isCreatingActivity, setIsCreatingActivity] = useState(false);
     const [, setMatrixEntries] = useState<DocumentMatrixEntry[]>([]);
     const [, setProfilesRepoItems] = useState<
@@ -184,6 +184,49 @@ export function ConfigPanel() {
     const [newProfileDescription, setNewProfileDescription] = useState("");
     const [admin, setAdmin] = useState(false);
     const [isCreatingProfile, setIsCreatingProfile] = useState(false);
+    
+    // CORRIGIDO: Este bloco estava duplicado no final do arquivo, causando erros de escopo.
+    const [permissions, setPermissions] = useState<Permissions>({
+        dashboard: {
+            general: false,
+            provider: false,
+            document: false,
+            documentDetail: false,
+        },
+        document: {
+            view: {
+                laboral: false,
+                workplaceSafety: false,
+                registrationAndCertificates: false,
+                general: false,
+                health: false,
+                environment: false,
+            },
+            upload: {
+                laboral: false,
+                workplaceSafety: false,
+                registrationAndCertificates: false,
+                general: false,
+                health: false,
+                environment: false,
+            },
+            exempt: {
+                laboral: false,
+                workplaceSafety: false,
+                registrationAndCertificates: false,
+                general: false,
+                health: false,
+                environment: false,
+            },
+        },
+        contract: {
+            finish: false,
+            suspend: false,
+            create: false,
+        },
+        reception: false,
+    });
+    
     const token = localStorage.getItem("tokenClient");
     const authHeader = { headers: { Authorization: `Bearer ${token}` } };
     const riskTranslations: Record<string, string> = {
@@ -225,48 +268,7 @@ export function ConfigPanel() {
 
     const [editingActivity, setEditingActivity] = useState<Activity | null>(null);
     const [editingActivityTitle, setEditingActivityTitle] = useState("");
-    const [editingActivityRisk, setEditingActivityRisk] = useState("");
-
-    const [permissions, setPermissions] = useState<Permissions>({
-        dashboard: {
-            general: false,
-            provider: false,
-            document: false,
-            documentDetail: false,
-        },
-        document: {
-            view: {
-                laboral: false,
-                workplaceSafety: false,
-                registrationAndCertificates: false,
-                general: false,
-                health: false,
-                environment: false,
-            },
-            upload: {
-                laboral: false,
-                workplaceSafety: false,
-                registrationAndCertificates: false,
-                general: false,
-                health: false,
-                environment: false,
-            },
-            exempt: {
-                laboral: false,
-                workplaceSafety: false,
-                registrationAndCertificates: false,
-                general: false,
-                health: false,
-                environment: false,
-            },
-        },
-        contract: {
-            finish: false,
-            suspend: false,
-            create: false,
-        },
-        reception: false,
-    });
+    // REMOVIDO NO PEDIDO ANTERIOR: const [editingActivityRisk, setEditingActivityRisk] = useState("");
 
     function handleSelectMatrixEntry(entry: DocumentMatrixEntry) {
         setSelectedMatrixEntry(entry);
@@ -338,7 +340,7 @@ export function ConfigPanel() {
         console.log("✏️ Editar atividade:", activity);
         setEditingActivity(activity);
         setEditingActivityTitle(activity.title);
-        setEditingActivityRisk(activity.risk);
+        // REMOVIDO NO PEDIDO ANTERIOR: setEditingActivityRisk(activity.risk);
     }
 
 
@@ -346,7 +348,7 @@ export function ConfigPanel() {
         console.log('↩️ Cancelando edição de atividade.');
         setEditingActivity(null);
         setEditingActivityTitle("");
-        setEditingActivityRisk("");
+        // REMOVIDO NO PEDIDO ANTERIOR: setEditingActivityRisk("");
     }
 
     async function handleUpdateActivity() {
@@ -361,7 +363,8 @@ export function ConfigPanel() {
             const url = `${ip}/contract/activity-repo/${editingActivity.id}`;
             const payload = {
                 title: editingActivityTitle,
-                risk: editingActivityRisk,
+                // VALOR DE RISCO FIXO ENVIADO PARA O BACKEND
+                risk: 'LOW', 
             };
             console.log(`📤 Enviando requisição PUT para: ${url}`);
             console.log('Payload da requisição:', payload);
@@ -640,21 +643,21 @@ export function ConfigPanel() {
 
 
     async function handleCreateActivity() {
-        if (!newActivityTitle || !newActivityRisk) {
+        if (!newActivityTitle) {
             toast.error(
-                "Por favor, preencha o título e selecione o risco para a nova atividade."
+                "Por favor, preencha o título para a nova atividade."
             );
             return;
         }
         setIsCreatingActivity(true);
         try {
             const url = `${ip}/contract/activity-repo`;
-            const payload = { title: newActivityTitle, risk: newActivityRisk };
+            // VALOR DE RISCO FIXO ENVIADO PARA O BACKEND
+            const payload = { title: newActivityTitle, risk: 'LOW' };
             const response = await axios.post(url, payload, authHeader);
             toast.success("Atividade criada com sucesso!");
             console.log('✅ Atividade criada:', response.data);
             setNewActivityTitle("");
-            setNewActivityRisk("LOW");
             getActivities();
         } catch (err) {
             console.error("❌ Erro ao criar atividade:", err);
@@ -1674,10 +1677,8 @@ export function ConfigPanel() {
                                                 className="p-3 border rounded-md flex justify-between items-center"
                                             >
                                                 <div>
-                                                    <strong>{activity.title}</strong> (Risco:{" "}
-                                                    {riskTranslations[(activity.risk || '').toUpperCase()] ||
-                                                        activity.risk}
-                                                    )
+                                                    {/* Exibição do risco removida no pedido anterior */}
+                                                    <strong>{activity.title}</strong>
                                                 </div>
                                                 <div className="flex gap-2">
                                                     <button onClick={() => handleEditActivity(activity)} className="text-blue-600" title="Editar atividade">
@@ -1706,18 +1707,7 @@ export function ConfigPanel() {
                                 onChange={(e) => editingActivity ? setEditingActivityTitle(e.target.value) : setNewActivityTitle(e.target.value)}
                                 disabled={isCreatingActivity}
                             />
-                            <select
-                                className="w-full p-2 border rounded"
-                                value={editingActivity ? editingActivityRisk : newActivityRisk}
-                                onChange={(e) => editingActivity ? setEditingActivityRisk(e.target.value) : setNewActivityRisk(e.target.value)}
-                                disabled={isCreatingActivity}
-                            >
-                                {Object.entries(riskTranslations).map(([key, label]) => (
-                                    <option key={key} value={key}>
-                                        {label}
-                                    </option>
-                                ))}
-                            </select>
+                            {/* Select de risco removido no pedido anterior */}
                             <div className="flex gap-2">
                                 {editingActivity ? (
                                     <>
