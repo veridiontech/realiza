@@ -60,7 +60,7 @@ export function FormCreateUserRealiza() {
   const [isLoading, setIsLoading] = useState(false);
   const [phoneValue, setPhoneValue] = useState("");
   const [cpfValue, setCpfValue] = useState("");
-  const [image, setImage] = useState<File | null>(null);
+  const [, setImage] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
   const {
@@ -92,6 +92,7 @@ export function FormCreateUserRealiza() {
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
+    console.log("LOG: Arquivo selecionado:", file ? file.name : "Nenhum");
     if (file) {
       setImage(file);
       const reader = new FileReader();
@@ -101,6 +102,7 @@ export function FormCreateUserRealiza() {
   };
 
   const handleRemovePhoto = () => {
+    console.log("LOG: Removendo foto.");
     setImage(null);
     setPreviewUrl(null);
     const fileInput = document.getElementById("photo-upload") as HTMLInputElement;
@@ -118,27 +120,31 @@ export function FormCreateUserRealiza() {
   }, [firstName, surname, email]);
 
   const createUser = async (data: CreateUserRealizaSchema) => {
+    console.log("LOG: Início da submissão do formulário (JSON).");
+    console.log("LOG: Dados do formulário:", data);
     setIsLoading(true);
     try {
       const token = localStorage.getItem("tokenClient");
-      
-      const formData = new FormData();
+      const payload = {
+        firstName: data.firstName,
+        surname: data.surname,
+        email: data.email,
+        cpf: data.cpf,
+        cellPhone: data.cellPhone,
+        position: data.position,
+        role: data.role,
+        enterprise: data.enterprise,
+      };
 
-      Object.keys(data).forEach(key => {
-        formData.append(key, data[key as keyof CreateUserRealizaSchema]);
-      });
+      console.log("LOG: Enviando requisição POST (JSON) para:", `${ip}/user/manager/new-user`);
 
-      if (image) {
-          formData.append("profilePicture", image);
-      }
-
-      await axios.post(`${ip}/user/manager/new-user`, formData, {
+      await axios.post(`${ip}/user/manager/new-user`, payload, {
         headers: { 
           Authorization: `Bearer ${token}`,
-          'Content-Type': 'multipart/form-data',
         },
       });
 
+      console.log("LOG: Sucesso na criação do usuário.");
       toast.success("Sucesso ao criar novo usuário Realiza");
       reset();
       setCpfValue("");
@@ -151,8 +157,13 @@ export function FormCreateUserRealiza() {
       }
     } catch (err: any) {
       toast.error("Erro ao criar um novo usuário, tente novamente");
-      console.error("Erro:", err);
+      console.error("LOG: Erro detalhado na requisição:", err.message);
+      if (err.response) {
+        console.error("LOG: Status do erro:", err.response.status);
+        console.error("LOG: Dados do erro (Server response):", err.response.data);
+      }
     } finally {
+      console.log("LOG: Finalizando submissão. isLoading = false.");
       setIsLoading(false);
     }
   };
@@ -160,7 +171,6 @@ export function FormCreateUserRealiza() {
   return (
     <form onSubmit={handleSubmit(createUser)} className="flex flex-col gap-6">
       <div className="flex flex-col lg:flex-row gap-6">
-
         {/* COLUNA ESQUERDA: FORMULÁRIO */}
         <div className="w-full lg:w-[70%] border rounded-md p-6 shadow-md bg-white">
           <h2 className="text-lg font-semibold text-gray-800 mb-4">Informações Pessoais</h2>
@@ -234,7 +244,7 @@ export function FormCreateUserRealiza() {
           </div>
         </div>
 
-        {/* LATERAL DIREITA */}
+        {/* LATERAL DIREITA: Mantendo a UI de foto, mas a lógica de envio foi desabilitada */}
         <div className="w-full lg:w-[30%] bg-[#34495E] p-6 rounded-md flex flex-col gap-6 text-white">
           <h3 className="font-semibold text-base">Selecione uma foto:</h3>
 

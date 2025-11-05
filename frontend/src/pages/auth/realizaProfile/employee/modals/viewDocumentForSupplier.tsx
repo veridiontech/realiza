@@ -106,7 +106,9 @@ export function DocumentViewer({
     try {
       const token = localStorage.getItem("tokenClient");
       if (!token) {
-        setOldPdfError("Autenticação necessária. Por favor, faça login novamente.");
+        setOldPdfError(
+          "Autenticação necessária. Por favor, faça login novamente."
+        );
         return;
       }
 
@@ -122,15 +124,23 @@ export function DocumentViewer({
         setOldPdfUrl(url);
         setShowOldDocumentViewer(true);
       } else {
-        setOldPdfError("Nenhum documento encontrado para este log de auditoria. Resposta da API vazia.");
+        setOldPdfError(
+          "Nenhum documento encontrado para este log de auditoria. Resposta da API vazia."
+        );
       }
     } catch (err) {
-      console.log("id: " , auditLogId);
+      console.log("id: ", auditLogId);
       console.error("Erro completo ao buscar documento por auditLogId:", err);
       if (axios.isAxiosError(err)) {
-        setOldPdfError(`Erro ao carregar a versão do documento: ${err.response?.data?.message || err.message}.`);
+        setOldPdfError(
+          `Erro ao carregar a versão do documento: ${
+            err.response?.data?.message || err.message
+          }.`
+        );
       } else {
-        setOldPdfError("Erro desconhecido ao carregar a versão do documento. Tente novamente.");
+        setOldPdfError(
+          "Erro desconhecido ao carregar a versão do documento. Tente novamente."
+        );
       }
     } finally {
       setLoadingOldPdf(false);
@@ -187,42 +197,80 @@ export function DocumentViewer({
   ];
 
   const changeStatus = useCallback(
-    async (status: "APROVADO" | "REPROVADO", justification = "") => {
-      if (status === "REPROVADO" && justification.length > 1000) {
-        setJustificationError("Máximo de 1000 caracteres na justificativa.");
-        return;
-      }
-      setJustificationError(null);
-      setLoadingStatus(true);
-      setShowApprovalConfirmation(false);
+  async (status: "APROVADO" | "REPROVADO", justification = "") => {
+    if (status === "REPROVADO" && justification.length > 1000) {
+      setJustificationError("Máximo de 1000 caracteres na justificativa.");
+      return;
+    }
+    setJustificationError(null);
+    setLoadingStatus(true);
+    setShowApprovalConfirmation(false);
 
-      try {
-        const token = localStorage.getItem("tokenClient");
-        const requestBody = { status, justification };
-        
-        await axios.post(
-          `${ip}/document/${documentId}/change-status`,
-          requestBody,
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
-        
-        toast.success(
-          `Documento ${
-            status === "APROVADO" ? "aprovado" : "reprovado"
-          } com sucesso!`
-        );
-        onStatusChange?.(documentId, status);
-        await fetchLogs();
-        onClose();
-      } catch (error) {
-        console.error("Erro na requisição changeStatus:", error);
-        toast.error("Erro ao atualizar o status do documento.");
-      } finally {
-        setLoadingStatus(false);
-      }
-    },
-    [documentId, onClose, onStatusChange, fetchLogs]
-  );
+    try {
+      const token = localStorage.getItem("tokenClient");
+      const requestBody = { status, justification };
+
+      // LOG DO PAYLOAD ANTES DE ENVIAR
+      console.log("[changeStatus] Preparando requisição:", {
+        endpoint: `${ip}/document/${documentId}/change-status`,
+        headers: {
+          Authorization: `Bearer ${token ? "***TOKEN_PRESENTE***" : "SEM_TOKEN"}`,
+        },
+        body: requestBody,
+        meta: {
+          documentId,
+          acao: status,
+          temJustificativa: justification?.trim()?.length > 0,
+          justificativaLen: justification?.length || 0,
+        },
+      });
+
+      const response = await axios.post(
+        `${ip}/document/${documentId}/change-status`,
+        requestBody,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+          responseType: "text",
+          validateStatus: (status) => status >= 200 && status < 300,
+        }
+      );
+
+      // LOG DE SUCESSO
+      console.log("[changeStatus] Sucesso na atualização do status:", {
+        statusHttp: response.status,
+        dataResposta: response.data,
+      });
+
+      toast.success(
+        `Documento ${
+          status === "APROVADO" ? "aprovado" : "reprovado"
+        } com sucesso!`
+      );
+
+      // Ações pós-sucesso
+      onStatusChange?.(documentId, status);
+      await fetchLogs();
+      onClose();
+    } catch (error: any) {
+      // LOG DE ERRO DETALHADO
+      console.error("[changeStatus] Erro na requisição:", {
+        message: error?.message,
+        statusHttp: error?.response?.status,
+        dataResposta: error?.response?.data,
+        endpoint: `${ip}/document/${documentId}/change-status`,
+        bodyEnviado: { status, justification },
+      });
+
+      toast.error(
+        "Erro ao atualizar o status do documento. Consulte o console para mais detalhes."
+      );
+    } finally {
+      setLoadingStatus(false);
+    }
+  },
+  [documentId, onClose, onStatusChange, fetchLogs]
+);
+
 
   useEffect(() => {
     if (!isOpen || !documentId) return;
@@ -241,7 +289,7 @@ export function DocumentViewer({
     >
       <div
         className={`relative ${
-          isJustificationPanelOpen ? "max-w-7xl" : "max-w-6xl" 
+          isJustificationPanelOpen ? "max-w-7xl" : "max-w-6xl"
         } w-full h-[98vh] bg-white p-6 shadow-lg flex`}
         onClick={(e) => e.stopPropagation()}
       >
@@ -252,7 +300,11 @@ export function DocumentViewer({
           ✖
         </button>
 
-        <div className={`flex-1 flex flex-col ${isJustificationPanelOpen ? "pr-6" : ""}`}>
+        <div
+          className={`flex-1 flex flex-col ${
+            isJustificationPanelOpen ? "pr-6" : ""
+          }`}
+        >
           <h2 className="mb-4 text-center text-xl font-bold">
             Visualizar Documento
           </h2>

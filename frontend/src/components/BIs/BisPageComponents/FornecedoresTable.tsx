@@ -205,7 +205,7 @@ export default function DashboardFornecedoresTable({
   clientId,
   filters = {},
 }: Props) {
-  const USE_MOCK_DATA = true;
+  const USE_MOCK_DATA = false;
   const mockApiData: ApiItem[] = [
     {
       corporateName: "Tech Solutions Ltda",

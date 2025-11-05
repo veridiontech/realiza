@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { Pagination } from "@/components/ui/pagination";
 import { Table } from "@/components/ui/tableVanila";
 import axios from "axios";
 import { Puff } from "react-loader-spinner";
@@ -14,8 +13,8 @@ import { AddNewBranch } from "./modals/add-new-branch";
 
 export function Branch() {
   const [branches, setBranches] = useState<propsBranch[]>([]);
-  const [totalPages, setTotalPages] = useState(1);
-  const [currentPage, setCurrentPage] = useState(1);
+  const [, setTotalPages] = useState(1);
+  const [, setCurrentPage] = useState(1);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { client } = useClient();
@@ -60,7 +59,7 @@ export function Branch() {
     try {
       const tokenFromStorage = localStorage.getItem("tokenClient");
       const response = await axios.get(
-        `${ip}/branch/filtered-client?idSearch=${client?.idClient}`,
+        `${ip}/branch/filtered-client?idSearch=${client?.idClient}&size=9999`,
         {
           headers: { Authorization: `Bearer ${tokenFromStorage}` },
         }
@@ -84,11 +83,6 @@ export function Branch() {
     }
   }, [client?.idClient]);
 
-  const handlePageChange = (page: number) => {
-    if (page >= 1 && page <= totalPages) {
-      setCurrentPage(page);
-    }
-  };
 
   return (
     <div className="px-4 pt-0 md:px-10 md:pt-4">
@@ -166,11 +160,6 @@ export function Branch() {
           </>
         )}
 
-        <Pagination
-          currentPage={currentPage}
-          totalPages={totalPages}
-          onPageChange={handlePageChange}
-        />
       </div>
     </div>
   );

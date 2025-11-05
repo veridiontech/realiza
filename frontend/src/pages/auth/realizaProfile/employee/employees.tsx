@@ -35,7 +35,8 @@ export const EmployeesTable = (): JSX.Element => {
     try {
       const tokenFromStorage = localStorage.getItem("tokenClient");
       const res = await axios.get(
-        `${ip}/supplier/filtered-client?idSearch=${selectedBranch?.idBranch}`,
+        // Adicionado: &size=9999
+        `${ip}/supplier/filtered-client?idSearch=${selectedBranch?.idBranch}&size=9999`,
         { headers: { Authorization: `Bearer ${tokenFromStorage}` } }
       );
       setSuppliersList(res.data.content);
@@ -58,22 +59,57 @@ export const EmployeesTable = (): JSX.Element => {
   };
 
   const getSubcontractor = async () => {
+    // Log 1: Verifica se a função foi chamada e se selectedSupplier existe
+    console.log("getSubcontractor chamado. selectedSupplier:", selectedSupplier);
+    
     if (!selectedSupplier) {
+      // Log 2: Caso não haja selectedSupplier
+      console.log("selectedSupplier é nulo. Não dispara a requisição de subcontratados.");
       setGetSubcontractorList([]);
       return;
     }
+    
     setLoading(true);
+      
     try {
       const tokenFromStorage = localStorage.getItem("tokenClient");
-      const res = await axios.get(
-        `${ip}/subcontractor/filtered-supplier?idSearch=${selectedSupplier}`,
-        { headers: { Authorization: `Bearer ${tokenFromStorage}` } }
-      );
-      setGetSubcontractorList(res.data.content);
+      // Adicionado: &size=9999
+      const url = `${ip}/subcontractor/filtered-supplier?idSearch=${selectedSupplier}&size=9999`;
+      
+      // Log 3: Loga a URL e o token (parcialmente) para debug
+      console.log("URL da Requisição de Subcontratados:", url);
+      console.log("Token Presente:", !!tokenFromStorage);
+      
+      const res = await axios.get(url, { 
+        headers: { Authorization: `Bearer ${tokenFromStorage}` } 
+      });
+      
+      // Log 4: Loga o status e os dados da resposta
+      console.log("Resposta da API de Subcontratados - Status:", res.status);
+      console.log("Resposta da API de Subcontratados - Data:", res.data);
+      console.log("Conteúdo da lista (res.data.content):", res.data.content);
+      
+      if (res.data && Array.isArray(res.data.content)) {
+        setGetSubcontractorList(res.data.content);
+        // Log 5: Sucesso ao carregar a lista
+        console.log(`Subcontratados carregados com sucesso: ${res.data.content.length} itens.`);
+      } else {
+        // Log 6: Se o formato dos dados não for o esperado (não tem 'content' ou não é array)
+        console.warn("Formato de dados inesperado para subcontratados. Resposta:", res.data);
+        setGetSubcontractorList([]);
+      }
+
     } catch (err) {
-      console.log("erro ao buscar subcontratados:", err);
+      // Log 7: Captura e loga o erro da requisição
+      console.error("ERRO ao buscar subcontratados:", err);
+      if (axios.isAxiosError(err) && err.response) {
+        console.error("Detalhes do Erro (Status/Data):", err.response.status, err.response.data);
+      }
+      setGetSubcontractorList([]); // Limpa a lista em caso de erro
+
     } finally {
       setLoading(false);
+      console.log("Finalizando requisição de subcontratados.");
     }
   };
 
@@ -85,16 +121,24 @@ export const EmployeesTable = (): JSX.Element => {
   }, [selectedBranch?.idBranch]);
 
   useEffect(() => {
+    // Log 8: Disparado ao selecionar ou mudar o Fornecedor
+    console.log("useEffect [selectedSupplier] disparado. Novo selectedSupplier:", selectedSupplier);
+    
     if (selectedSupplier) {
       uniqueSupplier();
       getSubcontractor();
       // reset seleção de subcontratado quando trocar fornecedor
       setSelectedSubcontractor(null);
       setSelectedSubcontractorName("");
+    } else {
+      // Limpa a lista se não houver fornecedor selecionado
+      setGetSubcontractorList([]);
     }
   }, [selectedSupplier]);
 
   // ------ Helpers
+  // ... restante do código ...
+
   const targetSupplierId = isSupplierResponsible ? (supplier?.idProvider ?? null) : selectedSupplier;
   const targetSupplierName = isSupplierResponsible
     ? supplier?.corporateName
@@ -106,6 +150,7 @@ export const EmployeesTable = (): JSX.Element => {
       // Se quiser, recarregue a lista do fornecedor (ex.: emitir evento para TableEmployee)
     } else {
       // Na aba de subcontratado recarrega a lista de subcontratados
+      console.log("Disparando getSubcontractor para refresh.");
       getSubcontractor();
     }
   };
@@ -114,6 +159,7 @@ export const EmployeesTable = (): JSX.Element => {
     <div className="m-4 flex justify-center">
       <div className="flex flex-col">
         <div className="dark:bg-primary relative bottom-[8vw] flex h-[30vh] w-[95vw] flex-col rounded-lg bg-white p-10 shadow-md">
+          {/* ... cabeçalho ... */}
           <div className="mb-6 flex items-center justify-between rounded-md bg-realizaBlue p-5">
             <div className="flex items-center gap-1">
               <Users2Icon className="text-[#FFCE50]" />
@@ -154,6 +200,7 @@ export const EmployeesTable = (): JSX.Element => {
               <div className="text-center text-red-500">{error}</div>
             ) : selectedTab === "fornecedor" ? (
               <div>
+                {/* ... lógica de Fornecedor ... */}
                 {isSupplierResponsible ? (
                   <div>
                     <h2 className="mb-4 text-xl">{supplier?.corporateName}</h2>
@@ -176,7 +223,13 @@ export const EmployeesTable = (): JSX.Element => {
                         className="rounded-lg border p-2 text-[12px]"
                       >
                         <option value="">Selecione um fornecedor</option>
-                        {suppliersList.map((s) => (
+                        {suppliersList
+                            // Ordenação alfabética dos fornecedores
+                            .slice() 
+                            .sort((a, b) => 
+                                a.corporateName.localeCompare(b.corporateName)
+                            )
+                            .map((s) => (
                           <option key={s.idProvider} value={s.idProvider}>
                             {s.corporateName}
                           </option>
@@ -222,7 +275,13 @@ export const EmployeesTable = (): JSX.Element => {
                     disabled={!selectedSupplier}
                   >
                     <option value="">Selecione um subcontratado</option>
-                    {getSubcontractorList.map((sub: any) => (
+                    {getSubcontractorList
+                        // Ordenação alfabética dos subcontratados
+                        .slice()
+                        .sort((a: any, b: any) => 
+                            a.corporateName.localeCompare(b.corporateName)
+                        )
+                        .map((sub: any) => (
                       <option key={sub.idProvider} value={sub.idProvider}>
                         {sub.corporateName}
                       </option>

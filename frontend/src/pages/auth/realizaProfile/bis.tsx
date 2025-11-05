@@ -420,7 +420,7 @@ export const MonittoringBis = () => {
   const clientId = client?.idClient;
   const token = localStorage.getItem("tokenClient");
 
-  const USE_MOCK_DATA = true;
+  const USE_MOCK_DATA = false;
 
   const [dateRange, setDateRange] = useState<[Date | null, Date | null]>([
     null,

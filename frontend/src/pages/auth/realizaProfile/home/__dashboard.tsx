@@ -145,7 +145,7 @@ export function Dashboard() {
     conformity: number;
     activeContractQuantity: number;
     activeEmployeeQuantity: number;
-    supplierQuantity: number;
+    activeSupplierQuantity: number;
     allocatedEmployeeQuantity: number;
   } | null>(null);
 
@@ -266,22 +266,25 @@ export function Dashboard() {
   };
 
   const getUsersFromBranch = async () => {
+    console.log(`[LOG] Iniciando busca de usuários para a filial: ${selectedBranch?.idBranch}`); // LOG ADICIONADO
     setIsLoading(true); 
     try {
       const tokenFromStorage = localStorage.getItem("tokenClient");
+      const url = `${ip}/user/client/filtered-client?idSearch=${selectedBranch?.idBranch}&size=999999`;
+      console.log(`[LOG] Chamando API para buscar usuários: ${url}`); // LOG ADICIONADO
       const res = await axios.get(
-        `${ip}/user/client/filtered-client?idSearch=${selectedBranch?.idBranch}&size=999999`, 
+        url, 
         {
           headers: { Authorization: `Bearer ${tokenFromStorage}` },
         }
       );
       const content: User[] = res.data.content;
-      console.log("usuários da branch:", content);
+      console.log("[LOG] Usuários recebidos:", content); // LOG ADICIONADO
       setUsers(content);
       setFilteredUsers(content);
       setSearchTerm("");
     } catch (err) {
-      console.error("erro ao buscar usuários:", err);
+      console.error("[ERRO] ao buscar usuários:", err); // LOG ADICIONADO
       setUsers([]);
       setFilteredUsers([]);
     } finally {
@@ -439,29 +442,35 @@ export function Dashboard() {
     fetchContractsByBranchIds(selectedBranchIds);
   }, [selectedBranchIds]);
 
+  // LOGS ADICIONADOS AQUI
   useEffect(() => {
     const fetchConformity = async () => {
+      console.log(`[LOG] Iniciando busca de dados de dashboard (Conformidade, Contratos, Funcionários) para a filial: ${selectedBranch?.idBranch}`);
       try {
         const token = localStorage.getItem("tokenClient");
+        const url = `${ip}/dashboard/home/${selectedBranch?.idBranch}`;
+        console.log(`[LOG] Chamando API de Dashboard: ${url}`);
         const res = await axios.get(
-          `${ip}/dashboard/home/${selectedBranch?.idBranch}`,
+          url,
           {
             headers: {
               Authorization: `Bearer ${token}`,
             },
           }
         );
+        console.log("[LOG] Dados de dashboard recebidos:", res.data);
         setData(res.data);
       } catch (err) {
-        console.error("Erro ao buscar conformidade:", err);
+        console.error("[ERRO] ao buscar dados de dashboard:", err);
         setData({
           conformity: 0,
           activeContractQuantity: 0,
           activeEmployeeQuantity: 0,
-          supplierQuantity: 0,
+          activeSupplierQuantity: 0,
           allocatedEmployeeQuantity: 0,
         });
       } finally {
+        console.log("[LOG] Busca de dados de dashboard finalizada.");
       }
     };
 
@@ -565,7 +574,11 @@ export function Dashboard() {
           <div className="flex flex-col gap-10">
             <EnterpriseResume />
             <div className="flex items-center gap-10">
-              <div className="h-[60vh] w-[70vw] rounded-lg border bg-white p-8 shadow-sm">
+              {/* CORREÇÃO APLICADA: 
+                - REMOVEMOS 'h-[60vh]' para que o card se ajuste ao conteúdo.
+                - ADICIONAMOS 'overflow-hidden' para garantir que o conteúdo não vaze pelas bordas do card.
+              */}
+              <div className="w-[70vw] rounded-lg border bg-white p-8 shadow-sm overflow-hidden"> 
                 <div className="flex flex-col gap-4">
                   <div>
                     <nav className="flex items-center justify-between">
@@ -902,6 +915,7 @@ export function Dashboard() {
                   </div>
                   {selectedTab === "filiais" && (
                     <div>
+                      {/* BranchesTable com ajustes de altura internos. */}
                       <BranchesTable />
                     </div>
                   )}
@@ -986,11 +1000,10 @@ export function Dashboard() {
                         <div className="mt-4 max-h-[300px] overflow-y-auto rounded-lg">
                           <table className="w-full border-collapse border border-gray-300">
                             <thead>
-                              {/* ALTERAÇÃO: Cabeçalho opaco e com z-10 */}
                               <tr className="sticky top-0 bg-gray-200 z-10">
-                                <th className="px-4 py-2 text-start">Nome</th> {/* Removido border */}
-                                <th className="px-4 py-2 text-start">CPF</th> {/* Removido border e garantido text-start */}
-                                <th className="px-4 py-2 text-center">Ações</th> {/* Removido border e garantido text-center */}
+                                <th className="px-4 py-2 text-start">Nome</th>
+                                <th className="px-4 py-2 text-start">CPF</th>
+                                <th className="px-4 py-2 text-center">Ações</th>
                               </tr>
                             </thead>
                             <tbody>
@@ -1006,12 +1019,12 @@ export function Dashboard() {
                               ) : filteredUsers.length > 0 ? (
                                 filteredUsers.map((user: User) => (
                                   <tr key={user.idUser}>
-                                    <td className="px-4 py-2 text-start"> {/* Adicionado text-start para consistência */}
+                                    <td className="px-4 py-2 text-start">
                                       <li className="list-none text-realizaBlue">
                                         {user.firstName} {user.surname}
                                       </li>
                                     </td>
-                                    <td className="px-4 py-2 text-start">{user.cpf}</td> {/* Adicionado text-start para consistência */}
+                                    <td className="px-4 py-2 text-start">{user.cpf}</td>
                                     <td className="px-4 py-2 text-center">
                                       <Link
                                         to={`/sistema/detailsUsers/${user.idUser}`}
@@ -1051,10 +1064,14 @@ export function Dashboard() {
             </div>
           </div>
           <div className="mt-9 flex w-full">
+            {/* Contratos Ativos */}
             <ActiveContracts count={data?.activeContractQuantity ?? 0} />
-            <Employees count={data?.activeEmployeeQuantity ?? 0} />
-            <Suppliers count={data?.supplierQuantity ?? 0} />
-            <AllocatedEmployees count={data?.allocatedEmployeeQuantity ?? 0} />
+            {/* Colaboradores Não Alocados */}
+            <Employees count={data?.activeEmployeeQuantity ?? 0} /> 
+            {/* Fornecedores */}
+            <Suppliers count={data?.activeSupplierQuantity ?? 0} /> 
+            {/* Colaboradores Alocados */}
+            <AllocatedEmployees count={data?.allocatedEmployeeQuantity ?? 0} /> 
           </div>
           <div className="mt-5 w-full text-right">
             <Link to={`/sistema/dashboard-details/${user?.idUser}`}>
