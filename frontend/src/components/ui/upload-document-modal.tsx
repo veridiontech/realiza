@@ -40,15 +40,14 @@ export const UploadDocumentModal = ({ isOpen, onClose }: { isOpen: boolean, onCl
         },
       });
 
-      const { fileData, fileContentType } = response.data;
+      const { signedUrl } = response.data;
 
-      if (!fileData || !fileContentType) {
+      if (!signedUrl) {
         toast.error("Arquivo não encontrado.");
         return;
       }
 
-      const fileUrl = `data:${fileContentType};base64,${fileData}`;
-      setPreviewUrl(fileUrl);
+      setPreviewUrl(signedUrl);
     } catch (error) {
       console.error("Erro ao visualizar documento:", error);
       toast.error("Erro ao visualizar documento.");
