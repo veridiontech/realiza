@@ -18,8 +18,14 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
 import java.util.List;
 import java.util.Optional;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.core.io.Resource;
 
 @RestController
 @RequiredArgsConstructor
@@ -142,5 +148,40 @@ public class DocumentProviderSupplierControllerImpl implements DocumentProviderS
         crudDocumentSupplier.removeRequiredDocument(documentId);
 
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/{id}/proxy")
+    @ResponseStatus(HttpStatus.OK)
+    public ResponseEntity<Resource> getDocumentProxy(@PathVariable String id) {
+        try {
+            // Buscar o documento e obter a signedUrl
+            Optional<DocumentResponseDto> documentOpt = crudDocumentSupplier.findOne(id);
+            
+            if (documentOpt.isEmpty() || documentOpt.get().getSignedUrl() == null) {
+                return ResponseEntity.notFound().build();
+            }
+            
+            String signedUrl = documentOpt.get().getSignedUrl();
+            
+            // Fazer download do PDF do Google Cloud Storage
+            URL url = new URL(signedUrl);
+            InputStream inputStream = url.openStream();
+            InputStreamResource resource = new InputStreamResource(inputStream);
+            
+            // Configurar headers para forçar visualização inline
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_PDF);
+            headers.add(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"document.pdf\"");
+            headers.add(HttpHeaders.CACHE_CONTROL, "no-cache, no-store, must-revalidate");
+            headers.add(HttpHeaders.PRAGMA, "no-cache");
+            headers.add(HttpHeaders.EXPIRES, "0");
+            
+            return ResponseEntity.ok()
+                    .headers(headers)
+                    .body(resource);
+                    
+        } catch (IOException e) {
+            return ResponseEntity.internalServerError().build();
+        }
     }
 }
