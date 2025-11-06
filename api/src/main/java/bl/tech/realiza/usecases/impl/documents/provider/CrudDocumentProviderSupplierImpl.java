@@ -83,17 +83,31 @@ public class CrudDocumentProviderSupplierImpl implements CrudDocumentProviderSup
 
     @Override
     public Optional<DocumentResponseDto> findOne(String id) {
+        System.out.println("[DEBUG findOne] Iniciando busca do documento com ID: " + id);
+        
         DocumentProviderSupplier documentSupplier = documentSupplierRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Document supplier not found"));
+        
+        System.out.println("[DEBUG findOne] Documento encontrado: " + documentSupplier.getTitle());
+        System.out.println("[DEBUG findOne] Número de FileDocuments: " + documentSupplier.getDocument().size());
 
         String signedUrl = null;
         FileDocument fileDocument = documentSupplier.getDocument().stream()
                 .max(Comparator.comparing(FileDocument::getCreationDate))
                 .orElse(null);
+        
+        System.out.println("[DEBUG findOne] FileDocument mais recente: " + (fileDocument != null ? "Encontrado" : "NULL"));
+        
         if (fileDocument != null) {
+            System.out.println("[DEBUG findOne] URL do FileDocument: " + fileDocument.getUrl());
             if (fileDocument.getUrl() != null) {
                 signedUrl = googleCloudService.generateSignedUrl(fileDocument.getUrl(), 15);
+                System.out.println("[DEBUG findOne] SignedUrl gerado: " + (signedUrl != null ? "SIM (comprimento: " + signedUrl.length() + ")" : "NULL"));
+            } else {
+                System.out.println("[DEBUG findOne] PROBLEMA: fileDocument.getUrl() é NULL");
             }
+        } else {
+            System.out.println("[DEBUG findOne] PROBLEMA: Nenhum FileDocument encontrado para este documento");
         }
 
         DocumentResponseDto documentSupplierResponse = DocumentResponseDto.builder()
