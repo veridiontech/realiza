@@ -80,8 +80,17 @@ export function DocumentViewer({
       console.log("[DocumentViewer] signedUrl extraído:", url);
 
       if (url) {
-        console.log("[DocumentViewer] setPdfUrl chamado com:", url);
-        setPdfUrl(url);
+        console.log("[DocumentViewer] Fazendo fetch do PDF como blob...");
+        // Fetch do PDF como blob para forçar visualização inline
+        const pdfResponse = await fetch(url);
+        const pdfBlob = await pdfResponse.blob();
+        console.log("[DocumentViewer] Blob recebido:", pdfBlob.type, pdfBlob.size);
+        
+        // Criar Object URL local
+        const objectUrl = URL.createObjectURL(pdfBlob);
+        console.log("[DocumentViewer] Object URL criado:", objectUrl);
+        
+        setPdfUrl(objectUrl);
       } else {
         console.error("[DocumentViewer] signedUrl está vazio ou null");
         setError("Nenhum arquivo encontrado.");
