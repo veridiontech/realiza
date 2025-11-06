@@ -79,22 +79,12 @@ export function DocumentViewer({
       const url = res.data.signedUrl;
       console.log("[DocumentViewer] signedUrl extraído:", url);
 
-      if (url) {
-        console.log("[DocumentViewer] Fazendo fetch do PDF como blob...");
-        // Fetch do PDF como blob para forçar visualização inline
-        const pdfResponse = await fetch(url);
-        const pdfBlob = await pdfResponse.blob();
-        console.log("[DocumentViewer] Blob recebido:", pdfBlob.type, pdfBlob.size);
-        
-        // Criar Object URL local
-        const objectUrl = URL.createObjectURL(pdfBlob);
-        console.log("[DocumentViewer] Object URL criado:", objectUrl);
-        
-        setPdfUrl(objectUrl);
-      } else {
-        console.error("[DocumentViewer] signedUrl está vazio ou null");
-        setError("Nenhum arquivo encontrado.");
-      }
+      // Usar endpoint proxy do backend para evitar problemas de CORS
+      const proxyUrl = `${ip}/document/supplier/${documentId}/proxy`;
+      console.log("[DocumentViewer] Usando endpoint proxy:", proxyUrl);
+      
+      setPdfUrl(proxyUrl);
+
     } catch (err) {
       console.error("[DocumentViewer] Erro na requisição:", err);
       if (axios.isAxiosError(err)) {

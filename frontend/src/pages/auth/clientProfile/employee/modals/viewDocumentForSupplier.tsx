@@ -69,13 +69,9 @@ export function DocumentViewer({
         headers: { Authorization: `Bearer ${token}` },
       });
 
-      const url = res.data.signedUrl;
-
-      if (url) {
-        setPdfUrl(url);
-      } else {
-        setError("Nenhum arquivo encontrado.");
-      }
+      // Usar endpoint proxy do backend para evitar problemas de CORS
+      const proxyUrl = `${ip}/document/supplier/${documentId}/proxy`;
+      setPdfUrl(proxyUrl);
     } catch (err) {
       console.error(err);
       setError("Erro ao buscar o documento.");
