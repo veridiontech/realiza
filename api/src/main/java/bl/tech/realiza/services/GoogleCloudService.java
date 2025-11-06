@@ -45,7 +45,10 @@ public class GoogleCloudService {
                 blobInfo,
                 minutesToExpire,
                 TimeUnit.MINUTES,
-                Storage.SignUrlOption.withV4Signature()
+                Storage.SignUrlOption.withV4Signature(),
+                Storage.SignUrlOption.withQueryParams(
+                        java.util.Map.of("response-content-disposition", "inline")
+                )
         );
 
         return signedUrl.toString();
