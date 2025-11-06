@@ -62,25 +62,43 @@ export function DocumentViewer({
   };
 
   const fetchFileData = async () => {
+    console.log("[DocumentViewer] fetchFileData iniciado", { documentId, ip });
     setLoadingPdf(true);
     try {
       const token = localStorage.getItem("tokenClient");
-      const res = await axios.get(`${ip}/document/supplier/${documentId}`, {
+      console.log("[DocumentViewer] Token obtido:", token ? "TOKEN_PRESENTE" : "SEM_TOKEN");
+      
+      const endpoint = `${ip}/document/supplier/${documentId}`;
+      console.log("[DocumentViewer] Fazendo requisição para:", endpoint);
+      
+      const res = await axios.get(endpoint, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
+      console.log("[DocumentViewer] Resposta recebida:", res.data);
       const url = res.data.signedUrl;
+      console.log("[DocumentViewer] signedUrl extraído:", url);
 
       if (url) {
+        console.log("[DocumentViewer] setPdfUrl chamado com:", url);
         setPdfUrl(url);
       } else {
+        console.error("[DocumentViewer] signedUrl está vazio ou null");
         setError("Nenhum arquivo encontrado.");
       }
     } catch (err) {
-      console.error(err);
+      console.error("[DocumentViewer] Erro na requisição:", err);
+      if (axios.isAxiosError(err)) {
+        console.error("[DocumentViewer] Detalhes do erro:", {
+          status: err.response?.status,
+          data: err.response?.data,
+          message: err.message
+        });
+      }
       setError("Erro ao buscar o documento.");
     } finally {
       setLoadingPdf(false);
+      console.log("[DocumentViewer] fetchFileData finalizado");
     }
   };
 
