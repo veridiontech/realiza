@@ -64,11 +64,6 @@ export function DocumentViewer({
   const fetchFileData = async () => {
     setLoadingPdf(true);
     try {
-      const token = localStorage.getItem("tokenClient");
-      const res = await axios.get(`${ip}/document/supplier/${documentId}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
       // Usar endpoint proxy do backend para evitar problemas de CORS
       const proxyUrl = `${ip}/document/supplier/${documentId}/proxy`;
       setPdfUrl(proxyUrl);
