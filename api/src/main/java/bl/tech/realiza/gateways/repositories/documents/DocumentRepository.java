@@ -15,6 +15,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 public interface DocumentRepository extends JpaRepository<Document, String>, JpaSpecificationExecutor<Document> {
+    Optional<Document> findTopByDocumentMatrixAndVersionDateBeforeOrderByVersionDateDesc(DocumentMatrix documentMatrix, LocalDateTime versionDate);
     Page<Document> findAllByStatus(Document.Status status, Pageable pageable);
     Page<Document> findAllByStatusAndLastCheckAfter(Document.Status status, LocalDateTime lastCheck, Pageable pageable);
 
