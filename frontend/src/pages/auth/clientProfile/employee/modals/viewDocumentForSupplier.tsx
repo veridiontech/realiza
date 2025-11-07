@@ -64,9 +64,23 @@ export function DocumentViewer({
   const fetchFileData = async () => {
     setLoadingPdf(true);
     try {
-      // Usar endpoint proxy do backend para evitar problemas de CORS
+      const token = localStorage.getItem("tokenClient");
+      
+      // Fazer fetch do endpoint proxy com token JWT e criar blob URL
       const proxyUrl = `${ip}/document/supplier/${documentId}/proxy`;
-      setPdfUrl(proxyUrl);
+      
+      const proxyRes = await fetch(proxyUrl, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      
+      if (!proxyRes.ok) {
+        throw new Error(`HTTP ${proxyRes.status}: ${proxyRes.statusText}`);
+      }
+      
+      const blob = await proxyRes.blob();
+      const blobUrl = URL.createObjectURL(blob);
+      
+      setPdfUrl(blobUrl);
     } catch (err) {
       console.error(err);
       setError("Erro ao buscar o documento.");

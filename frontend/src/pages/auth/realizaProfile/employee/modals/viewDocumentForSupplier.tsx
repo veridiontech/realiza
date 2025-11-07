@@ -79,11 +79,23 @@ export function DocumentViewer({
       const url = res.data.signedUrl;
       console.log("[DocumentViewer] signedUrl extraído:", url);
 
-      // Usar endpoint proxy do backend para evitar problemas de CORS
+      // Fazer fetch do endpoint proxy com token JWT e criar blob URL
       const proxyUrl = `${ip}/document/supplier/${documentId}/proxy`;
-      console.log("[DocumentViewer] Usando endpoint proxy:", proxyUrl);
+      console.log("[DocumentViewer] Fazendo fetch do endpoint proxy:", proxyUrl);
       
-      setPdfUrl(proxyUrl);
+      const proxyRes = await fetch(proxyUrl, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      
+      if (!proxyRes.ok) {
+        throw new Error(`HTTP ${proxyRes.status}: ${proxyRes.statusText}`);
+      }
+      
+      const blob = await proxyRes.blob();
+      const blobUrl = URL.createObjectURL(blob);
+      console.log("[DocumentViewer] Blob URL criado:", blobUrl);
+      
+      setPdfUrl(blobUrl);
 
     } catch (err) {
       console.error("[DocumentViewer] Erro na requisição:", err);
