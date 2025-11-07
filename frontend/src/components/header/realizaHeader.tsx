@@ -112,6 +112,7 @@ export function Header() {
       const res = await axios.get(`${ip}/client/${id}`, {
         headers: { Authorization: `Bearer ${tokenFromStorage}` },
       });
+      localStorage.setItem("idClient", id);
       setClient(res.data);
     } catch (err) {
       console.error("Erro ao selecionar cliente", err);
