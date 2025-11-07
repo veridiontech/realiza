@@ -58,8 +58,6 @@ import java.util.stream.Collectors;
 
 import static bl.tech.realiza.domains.documents.Document.Status.*;
 import static bl.tech.realiza.domains.enums.AuditLogActionsEnum.*;
-import static bl.tech.realiza.domains.enums.AuditLogActionsEnum.APPROVE;
-import static bl.tech.realiza.domains.enums.AuditLogActionsEnum.REJECT;
 import static bl.tech.realiza.domains.enums.AuditLogTypeEnum.*;
 
 @Service
@@ -198,6 +196,18 @@ public class CrudDocumentImpl implements CrudDocument {
         document.setLastCheck(LocalDateTime.now());
         documentRepository.save(document);
 
+        if (document instanceof DocumentBranch) {
+            if (documentStatusChangeRequestDto.getBranchIds() != null && !documentStatusChangeRequestDto.getBranchIds().isEmpty()) {
+                List<DocumentBranch> documentBranches = documentBranchRepository.findAllById(documentStatusChangeRequestDto.getBranchIds());
+                documentBranches.forEach(db -> {
+                    db.setStatus(documentStatusChangeRequestDto.getStatus());
+                    db.setJustification(documentStatusChangeRequestDto.getJustification());
+                    db.setLastCheck(LocalDateTime.now());
+                    documentBranchRepository.save(db);
+                });
+            }
+        }
+
         AuditLogActionsEnum action;
         switch (documentStatusChangeRequestDto.getStatus()) {
             case REPROVADO -> action = REJECT;
@@ -300,432 +310,111 @@ public class CrudDocumentImpl implements CrudDocument {
             // Tenta resolver o ID como DocumentBranch
             DocumentBranch documentBranch = documentBranchRepository.findById(documentId).orElse(null);
             if (documentBranch != null) {
-                // Se for um DocumentBranch, tenta encontrar o Document mais recente
-                document = documentRepository.findTopByDocumentMatrixAndVersionDateBeforeOrderByVersionDateDesc(
-                        documentBranch.getDocumentMatrix(),
-                        documentBranch.getVersionDate()
-                ).orElseThrow(() -> new NotFoundException("Document not found for DocumentBranch ID"));
-            } else {
-                throw new NotFoundException("Document or DocumentBranch not found with ID: " + documentId);
+                document = documentBranch;
             }
+        }
+
+        if (document == null) {
+            throw new NotFoundException("Document not found");
         }
 
         Contract contract = contractRepository.findById(contractId)
                 .orElseThrow(() -> new NotFoundException("Contract not found"));
 
-        ContractDocument contractDocumentInList = document.getContractDocuments().stream()
-                .filter(cd -> cd.getContract().equals(contract))
-                .findFirst()
-                .orElseThrow(() -> new NotFoundException("Contract and Document link not found"));
-        ContractDocument contractDocument = contractDocumentRepository.findById(contractDocumentInList.getId())
-                .orElseThrow(() -> new NotFoundException("Contract and Document link not found"));
+        document.setStatus(ISENCAO_PENDENTE);
+        documentRepository.save(document);
 
-        contractDocument.setStatus(ISENCAO_PENDENTE);
-        contractDocumentRepository.save(contractDocument);
+        crudNotification.saveExemptionRequestNotificationForAnalystUsers(document, contract, description);
 
-        if (JwtService.getAuthenticatedUserId() != null) {
-            User userResponsible = userRepository.findById(JwtService.getAuthenticatedUserId())
-                    .orElse(null);
-            crudItemManagementImpl.saveDocumentSolicitation(ItemManagementDocumentRequestDto.builder()
-                    .idRequester(userResponsible != null ? userResponsible.getIdUser() : null)
-                    .solicitationType(ItemManagement.SolicitationType.EXEMPTION)
-                    .description(description)
-                    .documentId(contractDocument.getDocument().getIdDocumentation())
-                    .contractId(contractDocument.getContract().getIdContract())
-                    .build());
-            if (userResponsible != null) {
-                String owner = "";
-                if (document instanceof DocumentEmployee documentEmployee) {
-                    owner = documentEmployee.getEmployee() != null
-                            ? documentEmployee.getEmployee().getFullName()
-                            : "Not Identified";
-                } else if (document instanceof DocumentProviderSupplier documentProviderSupplier) {
-                    owner = documentProviderSupplier.getProviderSupplier() != null
-                            ? (documentProviderSupplier.getProviderSupplier().getCorporateName() != null
-                            ? documentProviderSupplier.getProviderSupplier().getCorporateName()
-                            : (documentProviderSupplier.getProviderSupplier().getTradeName() != null
-                            ? documentProviderSupplier.getProviderSupplier().getTradeName()
-                            : "Not Identified"))
-                            : "Not Identified";
-                } else if (document instanceof DocumentProviderSubcontractor documentProviderSubcontractor) {
-                    owner = documentProviderSubcontractor.getProviderSubcontractor() != null
-                            ? (documentProviderSubcontractor.getProviderSubcontractor().getCorporateName() != null
-                            ? documentProviderSubcontractor.getProviderSubcontractor().getCorporateName()
-                            : (documentProviderSubcontractor.getProviderSubcontractor().getTradeName() != null
-                            ? documentProviderSubcontractor.getProviderSubcontractor().getTradeName()
-                            : "Not Identified"))
-                            : "Not Identified";
-                }
-                auditLogServiceImpl.createAuditLog(
-                        document.getIdDocumentation(),
-                        DOCUMENT,
-                        userResponsible.getFullName() + " solicitou isenção do documento "
-                                + document.getTitle() + " de " + owner,
-                        null,
-                        null,
-                        EXEMPT,
-                        userResponsible.getIdUser());
-            }
-        }
-
-        return "Solicitation created";
+        return "Exemption request sent successfully";
     }
 
     @Override
-    public List<DocumentPendingResponseDto> findNonConformingDocumentByEnterpriseId(String enterpriseId) {
-        List<DocumentPendingResponseDto> responseDto = new ArrayList<>();
-        Provider provider = providerRepository.findById(enterpriseId)
-                .orElseThrow(() -> new NotFoundException("Provider not found"));
+    public List<DocumentPendingResponseDto> getPendingDocuments(String userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException("User not found"));
 
-        if (provider instanceof ProviderSupplier) {
-            List<DocumentProviderSupplier> enterpriseDocuments = documentProviderSupplierRepository.findAllByProviderSupplier_IdProviderAndConformingIsFalse(provider.getIdProvider());
-            for (DocumentProviderSupplier documentProviderSupplier : enterpriseDocuments) {
-                String signedUrl = null;
-                FileDocument fileDocument = documentProviderSupplier.getDocument().stream()
-                        .max(Comparator.comparing(FileDocument::getCreationDate))
-                        .orElse(null);
-                if (fileDocument != null) {
-                    if (fileDocument.getUrl() != null) {
-                        signedUrl = googleCloudService.generateSignedUrl(fileDocument.getUrl(), 15);
-                    }
-                }
+        List<Document> pendingDocuments = new ArrayList<>();
 
-                List<Contract> contracts = documentProviderSupplier.getContractDocuments().stream()
-                        .filter(contractDocument ->
-                                        contractDocument.getStatus().equals(PENDENTE)
-                                || contractDocument.getStatus().equals(REPROVADO)
-                                || contractDocument.getStatus().equals(VENCIDO))
-                        .map(ContractDocument::getContract)
-                        .filter(contract -> contract.getStatus().equals(ContractStatusEnum.ACTIVE))
-                        .toList();
-
-                List<String> contractReferences = contracts.stream()
-                        .map(Contract::getContractReference)
-                        .toList();
-
-                responseDto.add(DocumentPendingResponseDto.builder()
-                        .id(documentProviderSupplier.getIdDocumentation())
-                        .status(documentProviderSupplier.getStatus())
-                        .title(documentProviderSupplier.getTitle())
-                        .contractReferences(contractReferences)
-                        .signedUrl(signedUrl)
-                        .build());
-            }
-            List<DocumentEmployee> employeeDocuments = documentEmployeeRepository.findAllByEmployee_Supplier_IdProvider(provider.getIdProvider());
-            for (DocumentEmployee documentEmployee : employeeDocuments) {
-                String signedUrl = null;
-                FileDocument fileDocument = documentEmployee.getDocument().stream()
-                        .max(Comparator.comparing(FileDocument::getCreationDate))
-                        .orElse(null);
-                if (fileDocument != null) {
-                    if (fileDocument.getUrl() != null) {
-                        signedUrl = googleCloudService.generateSignedUrl(fileDocument.getUrl(), 15);
-                    }
-                }
-
-                List<Contract> contracts = documentEmployee.getContractDocuments().stream()
-                        .filter(contractDocument ->
-                                contractDocument.getStatus().equals(PENDENTE)
-                                        || contractDocument.getStatus().equals(REPROVADO)
-                                        || contractDocument.getStatus().equals(VENCIDO))
-                        .map(ContractDocument::getContract)
-                        .filter(contract -> contract.getStatus().equals(ContractStatusEnum.ACTIVE))
-                        .toList();
-
-                List<String> contractReferences = contracts.stream()
-                        .map(Contract::getContractReference)
-                        .toList();
-
-                responseDto.add(DocumentPendingResponseDto.builder()
-                        .id(documentEmployee.getIdDocumentation())
-                        .status(documentEmployee.getStatus())
-                        .title(documentEmployee.getTitle())
-                        .owner(documentEmployee.getEmployee().getFullName())
-                        .contractReferences(contractReferences)
-                        .signedUrl(signedUrl)
-                        .build());
-            }
-        } else if (provider instanceof ProviderSubcontractor) {
-            List<DocumentProviderSubcontractor> enterpriseDocuments = documentProviderSubcontractorRepository.findAllByProviderSubcontractor_IdProviderAndConformingIsFalse(provider.getIdProvider());
-            for (DocumentProviderSubcontractor documentProviderSubcontractor : enterpriseDocuments) {
-                String signedUrl = null;
-                FileDocument fileDocument = documentProviderSubcontractor.getDocument().stream()
-                        .max(Comparator.comparing(FileDocument::getCreationDate))
-                        .orElse(null);
-                if (fileDocument != null) {
-                    if (fileDocument.getUrl() != null) {
-                        signedUrl = googleCloudService.generateSignedUrl(fileDocument.getUrl(), 15);
-                    }
-                }
-
-                responseDto.add(DocumentPendingResponseDto.builder()
-                        .id(documentProviderSubcontractor.getIdDocumentation())
-                        .status(documentProviderSubcontractor.getStatus())
-                        .title(documentProviderSubcontractor.getTitle())
-                        .owner(documentProviderSubcontractor.getProviderSubcontractor().getCorporateName())
-                        .signedUrl(signedUrl)
-                        .build());
-            }
-            List<DocumentEmployee> employeeDocuments = documentEmployeeRepository.findAllByEmployee_Subcontract_IdProvider(provider.getIdProvider());
-            for (DocumentEmployee documentEmployee : employeeDocuments) {
-                String signedUrl = null;
-                FileDocument fileDocument = documentEmployee.getDocument().stream()
-                        .max(Comparator.comparing(FileDocument::getCreationDate))
-                        .orElse(null);
-                if (fileDocument != null) {
-                    if (fileDocument.getUrl() != null) {
-                        signedUrl = googleCloudService.generateSignedUrl(fileDocument.getUrl(), 15);
-                    }
-                }
-
-                responseDto.add(DocumentPendingResponseDto.builder()
-                        .id(documentEmployee.getIdDocumentation())
-                        .status(documentEmployee.getStatus())
-                        .title(documentEmployee.getTitle())
-                        .owner(documentEmployee.getEmployee().getFullName())
-                        .signedUrl(signedUrl)
-                        .build());
+        if (user.getProvider() != null) {
+            Provider provider = user.getProvider();
+            if (provider instanceof ProviderSupplier) {
+                pendingDocuments.addAll(documentRepository.findAllByProviderAndStatus(provider.getIdProvider(), PENDENTE));
+            } else if (provider instanceof ProviderSubcontractor) {
+                pendingDocuments.addAll(documentRepository.findAllByProviderAndStatus(provider.getIdProvider(), PENDENTE));
             }
         }
-        return responseDto;
+
+        return pendingDocuments.stream()
+                .map(doc -> new DocumentPendingResponseDto(doc.getIdDocumentation(), doc.getTitle()))
+                .collect(Collectors.toList());
     }
 
     @Override
-    public String findVersionByAuditLog(String auditLogId) {
-        AuditLogDocument auditLog = auditLogDocumentRepository.findById(auditLogId)
-                .orElseThrow(() -> new NotFoundException("Audit Log not found"));
-
-        if (auditLog.getHasDoc()) {
-            FileDocument fileDocument = fileRepository.findById(auditLog.getFileId())
-                    .orElseThrow(() -> new NotFoundException("File not found"));
-            return googleCloudService.generateSignedUrl(fileDocument.getUrl(), 15);
-        } else {
-            return "Document doesn't has an old file attached to it!";
-        }
+    public Page<Document> getAllDocumentsByStatus(DocumentStatusEnum status, Pageable pageable) {
+        return documentRepository.findAllByStatus(status, pageable);
     }
 
     @Override
-    public void deleteOldReprovedDocuments() {
-        List<String> fileIds = new ArrayList<>();
-        List<AuditLogDocument> updateAuditLogs = new ArrayList<>();
-        List<AuditLogDocument> auditLogs = auditLogDocumentRepository.findAllByDocumentIdIsNotNull();
-        for (AuditLogDocument auditLog : auditLogs) {
-            fileIds.add(auditLog.getFileId());
-            updateAuditLogs.add(auditLog);
-        }
-        List<FileDocument> fileDocuments = fileRepository.findAllById(fileIds);
-        for (FileDocument fileDocument : fileDocuments) {
-            if (ChronoUnit.MONTHS.between(fileDocument.getCreationDate(), LocalDate.now()) >= 1
-                && fileDocument.getStatus().equals(DocumentStatusEnum.REPROVADO)) {
-                if (fileDocument.getUrl() != null) try {
-                    googleCloudService.deleteFile(fileDocument.getUrl());
-                    List<AuditLogDocument> logs = updateAuditLogs.stream()
-                            .filter(auditLogDocument ->
-                                    auditLogDocument.getFileId().equals(fileDocument.getId()))
-                            .collect(Collectors.toList());
-                    logs.forEach(auditLogDocument -> auditLogDocument.setFileId(null));
-                    auditLogDocumentRepository.saveAll(logs);
-                    fileRepository.delete(fileDocument);
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
+    public Page<Document> getAllDocumentsByFilter(String search, String status, Pageable pageable) {
+        Document.Status docStatus = null;
+        if (status != null && !status.isEmpty()) {
+            try {
+                docStatus = Document.Status.valueOf(status.toUpperCase());
+            } catch (IllegalArgumentException e) {
+                // Tratar status inválido, se necessário
             }
         }
+        return documentRepository.findAllByFilter(search, docStatus, pageable);
     }
 
     @Override
-    @Transactional
-    public void documentValidityCheck(DocumentValidityEnum documentValidityEnum) {
-        Pageable pageable = PageRequest.of(0,
-                50,
-                Sort.by(Sort.Order.asc("creationDate"),
-                        Sort.Order.asc("idDocumentation")));
-        Page<Document> documents = documentRepository.findAllByValidityAndContractStatus(documentValidityEnum, ContractStatusEnum.ACTIVE, pageable);
-        while (documents.hasContent()) {
-            List<Document> filteredDocuments = documents.stream()
-                    .filter(document -> !(document instanceof DocumentEmployee documentEmployee
-                            && documentEmployee.getEmployee().getContractEmployees().isEmpty()))
-                    .toList();
-            List<Document> documentBatch = new ArrayList<>(50);
-            List<Document> updateDocumentValidityDoneBatch = new ArrayList<>(50);
-            List<ContractDocument> contractDocumentBatch = new ArrayList<>(50);
-            for (Document document : filteredDocuments) {
-                if (!document.getDocumentMatrix().getIsValidityFixed()
-                    || (document.getDocumentMatrix().getFixedValidityAt() != null
-                        && document.getDocumentMatrix().getFixedValidityAt().getMonth() == LocalDate.now().getMonth()
-                        && document.getDocumentMatrix().getFixedValidityAt().getDayOfMonth() == LocalDate.now().getDayOfMonth())) {
-                    if (document.getValidity().equals(DocumentValidityEnum.INDEFINITE)) {
-                        continue;
-                    } else {
-                        String newTitle = switch (document.getValidity()) {
-                            case WEEKLY  -> document.getWeeklyTitle();
-                            case MONTHLY -> document.getMonthlyTitle();
-                            case ANNUAL  -> document.getAnnualTitle();
-                            default -> throw new IllegalStateException("Unexpected value: " + document.getValidity());
-                        };
-                        Document newDocument = null;
-                        if (document instanceof DocumentEmployee documentEmployee) {
-                            newDocument = DocumentEmployee.builder()
-                                    .title(newTitle)
-                                    .type(document.getType())
-                                    .expirationDate(document.getExpirationDate())
-                                    .expirationDateUnit(document.getExpirationDateUnit())
-                                    .validity(documentValidityEnum)
-                                    .doesBlock(document.getDoesBlock())
-                                    .required(document.getRequired())
-                                    .documentMatrix(document.getDocumentMatrix())
-                                    .employee(documentEmployee.getEmployee())
-                                    .build();
-                        } else if (document instanceof DocumentProviderSupplier documentProviderSupplier) {
-                            newDocument = DocumentProviderSupplier.builder()
-                                    .title(newTitle)
-                                    .type(document.getType())
-                                    .expirationDate(document.getExpirationDate())
-                                    .expirationDateUnit(document.getExpirationDateUnit())
-                                    .validity(documentValidityEnum)
-                                    .doesBlock(document.getDoesBlock())
-                                    .required(document.getRequired())
-                                    .documentMatrix(document.getDocumentMatrix())
-                                    .providerSupplier(documentProviderSupplier.getProviderSupplier())
-                                    .build();
-                        } else if (document instanceof DocumentProviderSubcontractor documentProviderSubcontractor) {
-                            newDocument = DocumentProviderSubcontractor.builder()
-                                    .title(newTitle)
-                                    .type(document.getType())
-                                    .expirationDate(document.getExpirationDate())
-                                    .expirationDateUnit(document.getExpirationDateUnit())
-                                    .validity(documentValidityEnum)
-                                    .doesBlock(document.getDoesBlock())
-                                    .required(document.getRequired())
-                                    .documentMatrix(document.getDocumentMatrix())
-                                    .providerSubcontractor(documentProviderSubcontractor.getProviderSubcontractor())
-                                    .build();
-                        }
-                        document.setIsValidityDone(true);
-                        updateDocumentValidityDoneBatch.add(document);
-                        documentBatch.add(newDocument);
-                        List<Contract> contracts = document.getContractDocuments().stream()
-                                .map(ContractDocument::getContract)
-                                .filter(contract -> contract.getStatus().equals(ContractStatusEnum.ACTIVE))
-                                .toList();
-                        for (Contract contract : contracts) {
-                            contractDocumentBatch.add(ContractDocument.builder()
-                                    .document(newDocument)
-                                    .contract(contract)
-                                    .build());
-                        }
-                    }
-                }
-                if (updateDocumentValidityDoneBatch.size() >= 50
-                        || documentBatch.size() >= 50
-                        || contractDocumentBatch.size() >= 50) {
-                    documentRepository.saveAll(updateDocumentValidityDoneBatch);
-                    documentRepository.saveAll(documentBatch);
-                    contractDocumentRepository.saveAll(contractDocumentBatch);
-                    updateDocumentValidityDoneBatch.clear();
-                    documentBatch.clear();
-                    contractDocumentBatch.clear();
-                }
-            }
-            if (!updateDocumentValidityDoneBatch.isEmpty()) {
-                documentRepository.saveAll(updateDocumentValidityDoneBatch);
-                updateDocumentValidityDoneBatch.clear();
-            }
-            if (!documentBatch.isEmpty()) {
-                documentRepository.saveAll(documentBatch);
-                documentBatch.clear();
-            }
-            if (!contractDocumentBatch.isEmpty()) {
-                contractDocumentRepository.saveAll(contractDocumentBatch);
-                contractDocumentBatch.clear();
-            }
+    public void createDocumentFromItemManagement(ItemManagementDocumentRequestDto itemManagementDocumentRequestDto) {
+        ItemManagement itemManagement = crudItemManagementImpl.getById(itemManagementDocumentRequestDto.getItemManagementId());
 
-            if (documents.hasNext()) {
-                documents = documentRepository.findAllByValidityAndContractStatus(documentValidityEnum, ContractStatusEnum.ACTIVE, documents.nextPageable());
-            } else {
-                break;
-            }
-        }
-    }
+        DocumentMatrix documentMatrix = itemManagement.getDocumentMatrix();
 
-    @Override
-    public void deleteOverwrittenDocuments() {
-        Pageable pageable = PageRequest.of(0, 50);
-        Page<FileDocument> files = fileRepository.findAllByCanBeOverwritten(true, pageable);
-        List<FileDocument> fileBatch = new ArrayList<>(50);
-        while (files.hasContent()) {
-            for (FileDocument fileDocument : files) {
-                if (fileDocument.getCanBeOverwritten()) {
-                    try {
-                        googleCloudService.deleteFile(fileDocument.getUrl());
-                    } catch (Exception e) {
-                        throw new RuntimeException(e);
-                    }
-                    fileDocument.setUrl(null);
-                    fileDocument.setDeleted(true);
-                    fileBatch.add(fileDocument);
+        if (documentMatrix != null) {
+            if (itemManagement.getProvider() instanceof ProviderSupplier) {
+                DocumentProviderSupplier document = new DocumentProviderSupplier();
+                document.setProviderSupplier((ProviderSupplier) itemManagement.getProvider());
+                document.setDocumentMatrix(documentMatrix);
+                document.setTitle(documentMatrix.getName());
+                document.setRequired(documentMatrix.getRequired());
+                document.setDoesBlock(documentMatrix.getDoesBlock());
+                document.setValidity(documentMatrix.getValidity());
+                document.setExpirationAmount(documentMatrix.getExpirationAmount());
+                document.setExpirationDayUnitEnum(documentMatrix.getExpirationDayUnit());
+                document.setVersionDate(LocalDateTime.now());
 
-                    if (fileBatch.size() >= 50) {
-                        fileRepository.saveAll(fileBatch);
-                        fileBatch.clear();
-                    }
-                }
-                if (!fileBatch.isEmpty()) {
-                    fileRepository.saveAll(fileBatch);
-                    fileBatch.clear();
-                }
-            }
+                FileDocument fileDocument = new FileDocument();
+                fileDocument.setFileName(itemManagementDocumentRequestDto.getFileName());
+                fileDocument.setOriginalFileName(itemManagementDocumentRequestDto.getOriginalFileName());
+                fileDocument.setDocument(document);
+                fileRepository.save(fileDocument);
 
-            if (files.hasNext()) {
-                files = fileRepository.findAllByCanBeOverwritten(true, files.nextPageable());
-            } else {
-                break;
-            }
-        }
-    }
+                document.setDocument(Collections.singletonList(fileDocument));
+                documentProviderSupplierRepository.save(document);
+            } else if (itemManagement.getProvider() instanceof ProviderSubcontractor) {
+                DocumentProviderSubcontractor document = new DocumentProviderSubcontractor();
+                document.setProviderSubcontractor((ProviderSubcontractor) itemManagement.getProvider());
+                document.setDocumentMatrix(documentMatrix);
+                document.setTitle(documentMatrix.getName());
+                document.setRequired(documentMatrix.getRequired());
+                document.setDoesBlock(documentMatrix.getDoesBlock());
+                document.setValidity(documentMatrix.getValidity());
+                document.setExpirationAmount(documentMatrix.getExpirationAmount());
+                document.setExpirationDayUnitEnum(documentMatrix.getExpirationDayUnit());
+                document.setVersionDate(LocalDateTime.now());
 
-    @Override
-    public void deleteEndLifeDocument() {
-        Pageable pageable = PageRequest.of(0, 50);
-        LocalDateTime endLifeTime = LocalDateTime.now().minusYears(5);
-        Date cutOffDate = Date.from(endLifeTime.atZone(ZoneId.systemDefault()).toInstant());
-        List<ContractStatusEnum> statuses = new ArrayList<>();
-        statuses.add(ContractStatusEnum.FINISHED);
-        statuses.add(ContractStatusEnum.SUSPENDED);
-        Page<FileDocument> files = fileRepository.findAllUploadedBeforeThanAndNotDeletedAndContractStatuses(
-                endLifeTime,
-                statuses,
-                pageable);
-        while (files.hasContent()) {
-            List<FileDocument> fileBatch = new ArrayList<>(50);
-            for (FileDocument file : files.getContent()) {
-                if (file.getDocument().getContractDocuments().stream().noneMatch(contractDocument -> statuses.contains(contractDocument.getContract().getStatus())
-                        && contractDocument.getContract().getEndDate() != null
-                        && contractDocument.getContract().getEndDate().before(cutOffDate))) {
-                    try {
-                        googleCloudService.deleteFile(file.getUrl());
-                    } catch (IOException e) {
-                        throw new RuntimeException(e);
-                    }
-                    file.setUrl(null);
-                    file.setDeleted(true);
-                    fileBatch.add(file);
-                    if (fileBatch.size() >= 50) {
-                        fileRepository.saveAll(fileBatch);
-                        fileBatch.clear();
-                    }
-                }
-            }
-            if (!fileBatch.isEmpty()) {
-                fileRepository.saveAll(fileBatch);
-                fileBatch.clear();
-            }
+                FileDocument fileDocument = new FileDocument();
+                fileDocument.setFileName(itemManagementDocumentRequestDto.getFileName());
+                fileDocument.setOriginalFileName(itemManagementDocumentRequestDto.getOriginalFileName());
+                fileDocument.setDocument(document);
+                fileRepository.save(fileDocument);
 
-            if (files.hasNext()) {
-                files = fileRepository.findAllUploadedBeforeThanAndNotDeletedAndContractStatuses(
-                        endLifeTime,
-                        statuses,
-                        files.nextPageable());
+                document.setDocument(Collections.singletonList(fileDocument));
+                documentProviderSubcontractorRepository.save(document);
             }
         }
     }
