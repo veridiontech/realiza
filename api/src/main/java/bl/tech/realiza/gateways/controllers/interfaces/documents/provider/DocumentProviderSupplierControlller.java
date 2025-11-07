@@ -2,6 +2,7 @@ package bl.tech.realiza.gateways.controllers.interfaces.documents.provider;
 
 import bl.tech.realiza.gateways.requests.documents.provider.DocumentProviderSupplierRequestDto;
 import bl.tech.realiza.gateways.responses.documents.DocumentResponseDto;
+import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
@@ -22,4 +23,5 @@ public interface DocumentProviderSupplierControlller {
     ResponseEntity<String> updateSupplierDocuments(String id, List<String> documentList);
     ResponseEntity<String> addRequiredDocument(String idEnterprise, String documentMatrixId);
     ResponseEntity<Void> removeRequiredDocument(String documentId);
+    ResponseEntity<Resource> getDocumentProxy(String id);
 }

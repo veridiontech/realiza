@@ -152,6 +152,7 @@ public class DocumentProviderSupplierControllerImpl implements DocumentProviderS
 
     @GetMapping("/{id}/proxy")
     @ResponseStatus(HttpStatus.OK)
+    @Override
     public ResponseEntity<Resource> getDocumentProxy(@PathVariable String id) {
         try {
             // Buscar o documento e obter a signedUrl
