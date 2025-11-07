@@ -6,7 +6,8 @@ import { BoxActivities } from "../new-documents-page/box-activitie";
 import { Search } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { toast } from "sonner";
-import { Blocks } from "react-loader-spinner";
+import { Blocks, Oval } from "react-loader-spinner";
+import { Button } from "@/components/ui/button";
 
 interface DocumentData {
   idDocument: string;
@@ -17,15 +18,17 @@ interface DocumentData {
 export function ActivitiesBox() {
   const [activitieSelected, setActivitieSelected] = useState<any>(null);
   const [activities, setActivities] = useState<any[]>([]);
-  // Mantido para compatibilidade e controle interno dos selecionados
   const [, setDocumentsByActivitie] = useState<DocumentData[]>([]);
-  // NOVO ESTADO: Armazena todos os documentos da filial (selecionados ou não pela atividade)
-  const [allDocumentsByBranch, setAllDocumentsByBranch] = useState<DocumentData[]>([]); 
+  const [originalDocuments, setOriginalDocuments] = useState<DocumentData[]>([]);
+  const [allDocumentsByBranch, setAllDocumentsByBranch] = useState<DocumentData[]>([]);
   const { selectedBranch, branch } = useBranch();
-  const [loadingDocumentId, setLoadingDocumentId] = useState<string | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [showReplicateConfirmation, setShowReplicateConfirmation] = useState(false);
-  const [pendingOperation, setPendingOperation] = useState<any>(null);
+  const [pendingOperation, setPendingOperation] = useState<{
+    docsToAdd: DocumentData[];
+    docsToRemove: DocumentData[];
+  } | null>(null);
   const [selectedBranches, setSelectedBranches] = useState<string[]>([]);
   const [replicate, setReplicate] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
@@ -34,7 +37,6 @@ export function ActivitiesBox() {
     const tokenFromStorage = localStorage.getItem("tokenClient");
     setIsLoading(true);
     try {
-      console.log(`LOG - Buscando atividades para a filial: ${selectedBranch?.idBranch}`);
       const resSelected = await axios.get(
         `${ip}/contract/activity/find-by-branch/${selectedBranch?.idBranch}`,
         {
@@ -42,9 +44,8 @@ export function ActivitiesBox() {
         }
       );
       setActivities(resSelected.data);
-      console.log("LOG - Atividades buscadas com sucesso.");
     } catch (err) {
-      console.error("LOG - Erro ao buscar atividades:", err);
+      console.error("Erro ao buscar atividades:", err);
     } finally {
       setIsLoading(false);
     }
@@ -53,6 +54,7 @@ export function ActivitiesBox() {
   const getAllDocuments = async () => {
     if (!selectedBranch?.idBranch) {
       setAllDocumentsByBranch([]);
+      setOriginalDocuments([]);
       return;
     }
 
@@ -61,70 +63,51 @@ export function ActivitiesBox() {
     const branchId = selectedBranch.idBranch;
     const activityId = activitieSelected?.idActivity;
 
-    // 1. Busca os documentos *selecionados* pela atividade (para manter a flag 'selected' precisa)
     let selectedDocs: DocumentData[] = [];
     if (activityId) {
       try {
-        console.log(
-          `LOG - Buscando documentos SELECIONADOS para a atividade: ${activityId}`
-        );
         const resSelected = await axios.get<DocumentData[]>(
           `${ip}/document/branch/document-matrix/all-and-selected-by-activity/${activityId}`,
           {
             headers: { Authorization: `Bearer ${tokenFromStorage}` },
           }
         );
-        // Apenas documentos que vieram como 'selected: true'
-        selectedDocs = resSelected.data.filter(doc => doc.selected === true);
-        setDocumentsByActivitie(selectedDocs); 
+        selectedDocs = resSelected.data.filter((doc) => doc.selected === true);
+        setDocumentsByActivitie(selectedDocs);
       } catch (err) {
-        console.error("LOG - Erro ao buscar documentos selecionados da atividade:", err);
+        console.error(
+          "Erro ao buscar documentos selecionados da atividade:",
+          err
+        );
       }
     } else {
-        setDocumentsByActivitie([]);
+      setDocumentsByActivitie([]);
     }
 
-    // 2. Busca *todos* os documentos da filial (endpoint da Imagem 1)
     try {
-      const params = {
-        // documentTypeName: undefined, // Omitido conforme solicitado
-        isSelected: true // Parâmetro isSelected=true conforme solicitado
-      };
+      const params = { isSelected: true };
       const url = `${ip}/document/branch/document-matrix/${branchId}`;
 
-      console.log(
-        `LOG - Buscando TODOS os documentos da filial: ${branchId}. URL: ${url}, Parâmetros:`, 
-        params
-      );
+      const resAll = await axios.get<DocumentData[]>(url, {
+        params: params,
+        headers: { Authorization: `Bearer ${tokenFromStorage}` },
+      });
 
-      const resAll = await axios.get<DocumentData[]>(
-        url, 
-        {
-          params: params,
-          headers: { Authorization: `Bearer ${tokenFromStorage}` },
-        }
-      );
-      
       let allDocs: DocumentData[] = resAll.data || [];
-      
-      // Cria um Set de IDs dos documentos selecionados pela atividade para comparação rápida
-      const selectedIds = new Set(selectedDocs.map(d => d.idDocument));
-      
-      // Mescla as duas listas: usa a lista de todos e sobrescreve a flag 'selected' 
-      // se o documento estiver na lista de documentos selecionados pela atividade.
-      const mergedDocs = allDocs.map(doc => ({
+      const selectedIds = new Set(selectedDocs.map((d) => d.idDocument));
+
+      const mergedDocs = allDocs.map((doc) => ({
         ...doc,
-        // Garante que o documento tenha 'selected: true' se estiver alocado à atividade
-        selected: selectedIds.has(doc.idDocument) || doc.selected === true
+        selected: selectedIds.has(doc.idDocument) || doc.selected === true,
       }));
-      
+
       setAllDocumentsByBranch(mergedDocs);
+      setOriginalDocuments(mergedDocs);
       setSearchTerm("");
-      console.log(`LOG - ${mergedDocs.length} documentos da filial mesclados e prontos para exibição.`);
-      
     } catch (err) {
-      console.error("LOG - Erro ao buscar todos os documentos da filial:", err);
+      console.error("Erro ao buscar todos os documentos da filial:", err);
       setAllDocumentsByBranch([]);
+      setOriginalDocuments([]);
     } finally {
       setIsLoading(false);
     }
@@ -138,7 +121,6 @@ export function ActivitiesBox() {
   ) => {
     const tokenFromStorage = localStorage.getItem("tokenClient");
     try {
-      console.log(`LOG - Removendo documento ${idDocumentBranch} da atividade ${idActivity}. Replicar: ${replicate}. Filiais: ${branches.join(", ")}`);
       await axios.post(
         `${ip}/contract/activity/remove-document-from-activity/${idActivity}?idDocumentBranch=${idDocumentBranch}&replicate=${replicate}`,
         branches,
@@ -148,9 +130,8 @@ export function ActivitiesBox() {
           },
         }
       );
-      console.log("LOG - Remoção concluída com sucesso.");
     } catch (err: any) {
-      console.error("LOG - Erro ao remover documento:", err);
+      console.error("Erro ao remover documento:", err);
       throw err;
     }
   };
@@ -163,7 +144,6 @@ export function ActivitiesBox() {
   ) => {
     const tokenFromStorage = localStorage.getItem("tokenClient");
     try {
-      console.log(`LOG - Adicionando documento ${idDocumentBranch} na atividade ${idActivity}. Replicar: ${replicate}. Filiais: ${branches.join(", ")}`);
       await axios.post(
         `${ip}/contract/activity/add-document-to-activity/${idActivity}?idDocumentBranch=${idDocumentBranch}&replicate=${replicate}`,
         branches,
@@ -173,83 +153,114 @@ export function ActivitiesBox() {
           },
         }
       );
-      console.log("LOG - Adição concluída com sucesso.");
     } catch (err: any) {
-      console.error("LOG - Erro ao adicionar documento:", err);
+      console.error("Erro ao adicionar documento:", err);
       throw err;
     }
   };
 
-  const handleSelectDocument = async (document: DocumentData, idDocument: string) => {
-    const idActivity = activitieSelected?.idActivity;
-    if (!idActivity) return;
+  const handleSelectDocument = (documentId: string) => {
+    if (!activitieSelected?.idActivity) return;
 
-    setLoadingDocumentId(idDocument);
+    setAllDocumentsByBranch((prevDocs) =>
+      prevDocs.map((doc) =>
+        doc.idDocument === documentId
+          ? { ...doc, selected: !doc.selected }
+          : doc
+      )
+    );
+  };
 
-    const operationType = document.selected === true ? "remove" : "add";
+  const changedDocuments = useMemo(() => {
+    if (!originalDocuments.length) {
+      return { docsToAdd: [], docsToRemove: [], hasChanges: false };
+    }
 
-    setPendingOperation({
-      type: operationType,
-      idActivity: idActivity,
-      idDocumentBranch: idDocument,
-      document: document,
+    const originalMap = new Map(
+      originalDocuments.map((doc) => [doc.idDocument, doc.selected])
+    );
+    const docsToAdd: DocumentData[] = [];
+    const docsToRemove: DocumentData[] = [];
+
+    allDocumentsByBranch.forEach((currentDoc) => {
+      const originalSelected = originalMap.get(currentDoc.idDocument);
+      if (originalSelected === undefined) return;
+
+      if (currentDoc.selected && !originalSelected) {
+        docsToAdd.push(currentDoc);
+      } else if (!currentDoc.selected && originalSelected) {
+        docsToRemove.push(currentDoc);
+      }
     });
 
+    return {
+      docsToAdd,
+      docsToRemove,
+      hasChanges: docsToAdd.length > 0 || docsToRemove.length > 0,
+    };
+  }, [allDocumentsByBranch, originalDocuments]);
+
+  const handleOpenConfirmationModal = () => {
+    const { docsToAdd, docsToRemove } = changedDocuments;
+    if (docsToAdd.length === 0 && docsToRemove.length === 0) {
+      toast.info("Nenhuma alteração foi feita.");
+      return;
+    }
+
+    setPendingOperation({ docsToAdd, docsToRemove });
     setShowReplicateConfirmation(true);
-    console.log(`LOG - Tentativa de ${operationType} documento: ${idDocument}. Aguardando confirmação de replicação.`);
   };
 
   const handleConfirmReplication = async (confirmed: boolean) => {
     setShowReplicateConfirmation(false);
-    if (!pendingOperation) return;
+    if (!pendingOperation || !activitieSelected?.idActivity) return;
 
-    const { type, idActivity, idDocumentBranch, document } = pendingOperation;
+    const { docsToAdd, docsToRemove } = pendingOperation;
+    const idActivity = activitieSelected.idActivity;
+    const branches = selectedBranches;
+    const replicate = confirmed;
 
-    console.log(`LOG - Confirmação: ${type} para o documento: ${idDocumentBranch}. Replicar: ${confirmed}.`);
+    setIsSaving(true);
+
+    const addPromises = docsToAdd.map((doc) =>
+      addDocumentByActivitie(
+        idActivity,
+        doc.idDocument,
+        branches,
+        replicate
+      ).catch((err) => ({ error: err, docId: doc.idDocument, type: "add" }))
+    );
+
+    const removePromises = docsToRemove.map((doc) =>
+      removeDocumentByActivitie(
+        idActivity,
+        doc.idDocument,
+        branches,
+        replicate
+      ).catch((err) => ({ error: err, docId: doc.idDocument, type: "remove" }))
+    );
 
     try {
-      if (type === "remove") {
-        await removeDocumentByActivitie(
-          idActivity,
-          idDocumentBranch,
-          selectedBranches,
-          confirmed
+      const results = await Promise.all([...addPromises, ...removePromises]);
+
+      const errors = results.filter((res) => res && res.error);
+
+      if (errors.length > 0) {
+        toast.error(
+          `Houveram ${errors.length} erros ao salvar. Verifique o console.`
         );
-        // Atualiza o estado visual removendo a seleção na lista COMPLETA
-        setAllDocumentsByBranch((prevDocs) =>
-          prevDocs.map((doc) =>
-            doc.idDocument === idDocumentBranch ? { ...doc, selected: false } : doc
-          )
-        );
-        // Atualiza o estado de documentos selecionados
-        setDocumentsByActivitie((prevDocs) =>
-          prevDocs.filter((doc) => doc.idDocument !== idDocumentBranch)
-        );
+        console.error("Erros na operação em lote:", errors);
+        getAllDocuments();
       } else {
-        await addDocumentByActivitie(
-          idActivity,
-          idDocumentBranch,
-          selectedBranches,
-          confirmed
-        );
-        // Atualiza o estado visual adicionando a seleção na lista COMPLETA
-        setAllDocumentsByBranch((prevDocs) =>
-          prevDocs.map((doc) =>
-            doc.idDocument === idDocumentBranch ? { ...doc, selected: true } : doc
-          )
-        );
-        // Atualiza o estado de documentos selecionados
-        setDocumentsByActivitie((prevDocs) => [
-            ...prevDocs,
-            { ...document, selected: true } 
-        ]);
+        toast.success("Alterações salvas com sucesso!");
+        setOriginalDocuments(allDocumentsByBranch);
       }
-      toast.success("Operação realizada com sucesso!");
     } catch (err) {
-      console.error("LOG - Erro na operação:", err);
-      toast.error("Erro ao realizar a operação.");
+      console.error("Erro catastrófico no Promise.all:", err);
+      toast.error("Erro ao processar alterações.");
+      getAllDocuments();
     } finally {
-      setLoadingDocumentId(null);
+      setIsSaving(false);
       setPendingOperation(null);
       setReplicate(false);
       setSelectedBranches([]);
@@ -264,7 +275,6 @@ export function ActivitiesBox() {
     }
   };
 
-  // useMemo agora usa a lista completa de documentos
   const filteredDocuments = useMemo(() => {
     if (!searchTerm) {
       return allDocumentsByBranch;
@@ -278,17 +288,18 @@ export function ActivitiesBox() {
   useEffect(() => {
     if (selectedBranch?.idBranch) {
       getActivitie();
+      setActivitieSelected(null);
     }
   }, [selectedBranch?.idBranch]);
 
-  // Chama a nova função de busca de todos os documentos
   useEffect(() => {
     if (selectedBranch?.idBranch) {
       getAllDocuments();
     } else {
       setAllDocumentsByBranch([]);
+      setOriginalDocuments([]);
     }
-  }, [selectedBranch, activitieSelected]); // Recarrega sempre que a filial ou a atividade mudar
+  }, [selectedBranch, activitieSelected]);
 
   return (
     <div className="flex items-center justify-center gap-10 p-10">
@@ -331,38 +342,55 @@ export function ActivitiesBox() {
                       key={document.idDocument}
                       className="flex cursor-pointer items-center gap-2 rounded-sm p-1 hover:bg-gray-200"
                     >
-                      {loadingDocumentId === document.idDocument ? (
-                        <Blocks
-                          height="50"
-                          width="50"
-                          color="#4fa94d"
-                          visible={true}
-                        />
-                      ) : (
-                        <input
-                          type="checkbox"
-                          checked={document.selected === true}
-                          onChange={() =>
-                            handleSelectDocument(document, document.idDocument)
-                          }
-                          className="cursor-pointer"
-                        />
-                      )}
-                      <span>{document.title || "Documento sem título"}</span>
+                      <input
+                        type="checkbox"
+                        checked={document.selected === true}
+                        onChange={() =>
+                          handleSelectDocument(document.idDocument)
+                        }
+                        className="cursor-pointer"
+                        disabled={!activitieSelected || isSaving}
+                      />
+
+                      <span
+                        className={!activitieSelected ? "text-gray-400" : ""}
+                      >
+                        {document.title || "Documento sem título"}
+                      </span>
                     </div>
                   ))
                 ) : (
                   <p className="p-4 text-center text-gray-500">
                     {searchTerm
                       ? "Nenhum documento encontrado com este termo."
-                      : activitieSelected 
-                        ? "Nenhum documento alocado ou disponível para esta atividade/filial."
-                        : "Selecione uma atividade para ver os documentos."}
+                      : activitieSelected
+                      ? "Nenhum documento alocado ou disponível para esta atividade/filial."
+                      : "Selecione uma atividade para ver os documentos."}
                   </p>
                 )}
               </div>
             )}
           </ScrollArea>
+
+          <Button
+            className="w-full mt-4 bg-realizaBlue"
+            onClick={handleOpenConfirmationModal}
+            disabled={
+              !activitieSelected || !changedDocuments.hasChanges || isSaving
+            }
+          >
+            {isSaving ? (
+              <Oval
+                visible={true}
+                height="20"
+                width="20"
+                color="#fff"
+                ariaLabel="oval-loading"
+              />
+            ) : (
+              "Salvar Alterações"
+            )}
+          </Button>
         </div>
       </div>
 
@@ -431,13 +459,18 @@ export function ActivitiesBox() {
 
             <div className="flex justify-center gap-4 mt-4">
               <button
-                onClick={() => handleConfirmReplication(true)}
+                onClick={() => handleConfirmReplication(replicate)}
                 className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded"
               >
                 Confirmar
               </button>
               <button
-                onClick={() => setShowReplicateConfirmation(false)}
+                onClick={() => {
+                  setShowReplicateConfirmation(false);
+                  setPendingOperation(null);
+                  setReplicate(false);
+                  setSelectedBranches([]);
+                }}
                 className="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded"
               >
                 Cancelar
