@@ -148,80 +148,102 @@ public class CrudDocumentImpl implements CrudDocument {
             for (Document document : documents) {
                 List<AuditLogDocument> auditLogDocuments = auditLogDocumentRepository.findAllByDocumentId(document.getIdDocumentation());
                 for (AuditLogDocument auditLogDocument : auditLogDocuments) {
-                    if (ChronoUnit.MONTHS.between(auditLogDocument.getCreatedAt(),LocalDateTime.now()) >= 1) {
-                        auditLogDocument.setHasDoc(false);
+                    if (ChronoUnit.MONTHS.between(auditLogDocument.getCreatedAt(), LocalDateTime.now()) > 2) {
+                        try {
+                            googleCloudService.deleteFile(document.getFileName());
+                            documentRepository.delete(document);
+                        } catch (IOException e) {
+                            throw new RuntimeException(e);
+                        }
                     }
                 }
-                auditLogDocumentRepository.saveAll(auditLogDocuments);
             }
-            if (documents.hasNext()) {
-                documents = documentRepository.findAllByStatusAndLastCheckAfter(APROVADO, LocalDateTime.now().minusDays(1), documents.nextPageable());
-            } else {
-                break;
-            }
+            pageable = pageable.next();
+            documents = documentRepository.findAllByStatusAndLastCheckAfter(APROVADO, LocalDateTime.now().minusHours(27), pageable);
         }
     }
 
     @Override
     @Transactional
     public String changeStatus(String documentId, DocumentStatusChangeRequestDto documentStatusChangeRequestDto) {
-        Document document = documentRepository.findById(documentId).orElse(null);
+        Document document = documentRepository.findById(documentId)
+                .orElseThrow(() -> new NotFoundException("Document not found"));
 
-        if (document == null) {
-            // Tenta resolver o ID como DocumentBranch
-            DocumentBranch documentBranch = documentBranchRepository.findById(documentId).orElse(null);
-            if (documentBranch != null) {
-                // Se for um DocumentBranch, tenta encontrar o Document mais recente
-                document = documentRepository.findTopByDocumentMatrixAndVersionDateBeforeOrderByVersionDateDesc(
-                        documentBranch.getDocumentMatrix(),
-                        documentBranch.getVersionDate()
-                ).orElseThrow(() -> new NotFoundException("Document not found for DocumentBranch ID"));
-            } else {
-                throw new NotFoundException("Document or DocumentBranch not found with ID: " + documentId);
-            }
-        }
         document.setStatus(documentStatusChangeRequestDto.getStatus());
-        for (ContractDocument contractDocument : document.getContractDocuments()) {
-            contractDocument.setStatus(documentStatusChangeRequestDto.getStatus()); // Corrigido para usar o novo status
-        }
+        document.setJustification(documentStatusChangeRequestDto.getJustification());
 
-        if (document.getStatus() == APROVADO) {
-            document.setConforming(true);
-            DocumentMatrix.DayUnitEnum expirationDayUnitEnum = null;
-            Integer expirationAmount = 0;
-            String documentMatrixId = document.getDocumentMatrix().getIdDocument();
-            String branchId = null;
-            if (document instanceof DocumentProviderSupplier documentProviderSupplier) {
-                branchId = documentProviderSupplier.getProviderSupplier()
-                                .getBranches().get(documentProviderSupplier.getProviderSupplier().getBranches().size() - 1)
-                                .getIdBranch();
-            } else if (document instanceof DocumentProviderSubcontractor documentProviderSubcontractor) {
-                branchId = documentProviderSubcontractor.getProviderSubcontractor().getProviderSupplier()
-                        .getBranches().get(documentProviderSubcontractor.getProviderSubcontractor().getProviderSupplier().getBranches().size() - 1)
-                        .getIdBranch();
-            } else if (document instanceof DocumentEmployee documentEmployee) {
-                if (documentEmployee.getEmployee().getSupplier() != null) {
-                    branchId = documentEmployee.getEmployee().getSupplier()
-                            .getBranches().get(documentEmployee.getEmployee().getSupplier().getBranches().size() - 1)
-                            .getIdBranch();
-                } else if (documentEmployee.getEmployee().getSubcontract() != null) {
-                    branchId = documentEmployee.getEmployee().getSubcontract().getProviderSupplier()
-                            .getBranches().get(documentEmployee.getEmployee().getSubcontract().getProviderSupplier().getBranches().size() - 1)
-                            .getIdBranch();
+        if (documentStatusChangeRequestDto.getStatus().equals(APROVADO)) {
+            Integer expirationAmount = document.getExpirationAmount();
+            Document.ExpirationDayUnitEnum expirationDayUnitEnum = document.getExpirationDayUnitEnum();
+            LocalDateTime documentDate = document.getDocumentDate() != null ? document.getDocumentDate() : LocalDateTime.now();
+
+            if (expirationAmount == 0 || !document.getValidity().equals(DocumentValidityEnum.INDEFINITE)) {
+                document.setExpirationDate(document.getDocumentDate()
+                        .plusYears(100));
+            } else {
+                switch (expirationDayUnitEnum) {
+                    case DAYS -> document.setExpirationDate(documentDate
+                            .plusDays(expirationAmount));
+                    case WEEKS -> document.setExpirationDate(documentDate
+                            .plusWeeks(expirationAmount));
+                    case MONTHS -> document.setExpirationDate(documentDate
+                            .plusMonths(expirationAmount));
+                    case YEARS -> document.setExpirationDate(documentDate
+                            .plusYears(expirationAmount));
                 }
             }
-            List<DocumentBranch> documentBranches = documentBranchRepository.findAllByBranch_IdBranchAndDocumentMatrix_IdDocument(branchId,documentMatrixId);
-            if (documentBranches.isEmpty()) {
-                throw new NotFoundException("Document branch not found");
+        } else {
+            document.setConforming(false);
+        }
+        document.setLastCheck(LocalDateTime.now());
+        documentRepository.save(document);
+
+        AuditLogActionsEnum action;
+        switch (documentStatusChangeRequestDto.getStatus()) {
+            case REPROVADO -> action = REJECT;
+            case APROVADO -> action = APPROVE;
+            default -> throw new IllegalStateException("Status change not valid for status " + documentStatusChangeRequestDto.getStatus());
+        }
+        User user = userRepository.findById(Objects.requireNonNull(JwtService.getAuthenticatedUserId()))
+                .orElseThrow(() -> new NotFoundException("User not found"));
+        if (JwtService.getAuthenticatedUserId() != null) {
+            User userResponsible = userRepository.findById(JwtService.getAuthenticatedUserId())
+                    .orElse(null);
+            if (userResponsible != null) {
+                auditLogServiceImpl.createAuditLog(
+                        document.getIdDocumentation(),
+                        DOCUMENT,
+                        user.getFullName() + " " + action.name()
+                                + " document " + document.getTitle(),
+                        documentStatusChangeRequestDto.getJustification(),
+                        ChronoUnit.DAYS.between(document.getVersionDate(), LocalDateTime.now()) + " dias entre o upload e a validação",
+                        action,
+                        userResponsible.getIdUser());
             }
-            expirationDayUnitEnum = documentBranches.get(documentBranches.size() - 1).getExpirationDateUnit();
-            expirationAmount = documentBranches.get(documentBranches.size() - 1).getExpirationDateAmount();
-            if (expirationAmount == null) {
-                expirationAmount = document.getDocumentMatrix().getExpirationDateAmount();
-            }
-            LocalDateTime documentDate = document.getDocumentDate() != null
-                    ? document.getDocumentDate()
-                    : LocalDateTime.now();
+        }
+
+        return "Document status changed to " + documentStatusChangeRequestDto.getStatus().name();
+    }
+
+    @Override
+    @Transactional
+    public String changeDocumentBranchStatus(String documentBranchId, DocumentStatusChangeRequestDto documentStatusChangeRequestDto) {
+        DocumentBranch documentBranch = documentBranchRepository.findById(documentBranchId)
+                .orElseThrow(() -> new NotFoundException("DocumentBranch not found"));
+
+        Document document = documentRepository.findTopByDocumentMatrixAndVersionDateBeforeOrderByVersionDateDesc(
+                documentBranch.getDocumentMatrix(),
+                documentBranch.getVersionDate()
+        ).orElseThrow(() -> new NotFoundException("Document not found for DocumentBranch ID"));
+
+        document.setStatus(documentStatusChangeRequestDto.getStatus());
+        document.setJustification(documentStatusChangeRequestDto.getJustification());
+
+        if (documentStatusChangeRequestDto.getStatus().equals(APROVADO)) {
+            Integer expirationAmount = document.getExpirationAmount();
+            Document.ExpirationDayUnitEnum expirationDayUnitEnum = document.getExpirationDayUnitEnum();
+            LocalDateTime documentDate = document.getDocumentDate() != null ? document.getDocumentDate() : LocalDateTime.now();
+
             if (expirationAmount == 0 || !document.getValidity().equals(DocumentValidityEnum.INDEFINITE)) {
                 document.setExpirationDate(document.getDocumentDate()
                         .plusYears(100));

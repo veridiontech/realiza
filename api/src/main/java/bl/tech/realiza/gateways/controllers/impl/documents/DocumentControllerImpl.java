@@ -21,7 +21,7 @@ public class DocumentControllerImpl implements DocumentController {
 
     private final CrudDocument crudDocument;
 
-    @PostMapping("/{documentId}/change-status")
+    @PutMapping("/{documentId}/change-status")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @PreAuthorize("hasRole('ROLE_REALIZA_BASIC')")
     @Override
@@ -51,9 +51,10 @@ public class DocumentControllerImpl implements DocumentController {
         return ResponseEntity.ok(crudDocument.findVersionByAuditLog(auditLogId));
     }
 
-    @PostMapping("/branch/{documentBranchId}/change-status")
+    @PutMapping("/branch/{documentBranchId}/change-status")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @PreAuthorize("hasRole('ROLE_REALIZA_BASIC')")
+    @Override
     public ResponseEntity<Void> changeDocumentBranchStatus(@PathVariable String documentBranchId, @RequestBody DocumentStatusChangeRequestDto documentStatusChangeRequest) {
         crudDocument.changeDocumentBranchStatus(documentBranchId, documentStatusChangeRequest);
         return ResponseEntity.noContent().build();
