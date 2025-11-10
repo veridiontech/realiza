@@ -1014,7 +1014,13 @@ public class DashboardService {
         }
         Specification<Document> documentSpecifications = getDocumentSpecifications(filters, clientId);
         // quantidade de fornecedores
-        Long supplierQuantity = providerSupplierRepository.countByClientIdAndIsActive(clientId);
+        Long supplierQuantity;
+        List<String> branchIds = filters != null && filters.getBranchIds() != null ? filters.getBranchIds() : new ArrayList<>();
+        if (!branchIds.isEmpty()) {
+            supplierQuantity = providerSupplierRepository.countByBranchIdsAndIsActiveTrue(branchIds);
+        } else {
+            supplierQuantity = providerSupplierRepository.countByClientIdAndIsActive(clientId);
+        }
 
         // quantidade de contratos
         Long contractQuantity = contractProviderSupplierRepository.countByClientIdAndIsActive(clientId, activeContract);

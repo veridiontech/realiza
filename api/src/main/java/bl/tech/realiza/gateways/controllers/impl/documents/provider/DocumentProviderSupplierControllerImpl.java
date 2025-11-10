@@ -143,4 +143,49 @@ public class DocumentProviderSupplierControllerImpl implements DocumentProviderS
 
         return ResponseEntity.noContent().build();
     }
+
+    @GetMapping("/{id}/proxy")
+    @ResponseStatus(HttpStatus.OK)
+    @Override
+    public ResponseEntity<org.springframework.core.io.Resource> getDocumentProxy(@PathVariable String id) {
+        try {
+            // Buscar documento na base de dados usando o método existente
+            Optional<DocumentResponseDto> documentOpt = crudDocumentSupplier.findOne(id);
+            
+            if (documentOpt.isEmpty()) {
+                return ResponseEntity.notFound().build();
+            }
+            
+            DocumentResponseDto document = documentOpt.get();
+            
+            // Obter signedUrl do Google Cloud Storage
+            String signedUrl = document.getSignedUrl();
+            
+            if (signedUrl == null || signedUrl.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+            }
+            
+            // Fazer download do PDF do Google Cloud Storage
+            org.springframework.web.client.RestTemplate restTemplate = new org.springframework.web.client.RestTemplate();
+            byte[] pdfBytes = restTemplate.getForObject(signedUrl, byte[].class);
+            
+            if (pdfBytes == null) {
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+            }
+            
+            // Criar Resource a partir dos bytes
+            org.springframework.core.io.ByteArrayResource resource = new org.springframework.core.io.ByteArrayResource(pdfBytes);
+            
+            // Retornar com headers corretos para visualização inline
+            return ResponseEntity.ok()
+                    .header(org.springframework.http.HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"document.pdf\"")
+                    .header(org.springframework.http.HttpHeaders.CONTENT_TYPE, "application/pdf")
+                    .contentLength(pdfBytes.length)
+                    .body(resource);
+                    
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
 }

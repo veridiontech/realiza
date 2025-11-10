@@ -113,6 +113,7 @@ export function Header() {
         headers: { Authorization: `Bearer ${tokenFromStorage}` },
       });
       setClient(res.data);
+      localStorage.setItem("idClient", id); // LINHA ADICIONADA
     } catch (err) {
       console.error("Erro ao selecionar cliente", err);
     }

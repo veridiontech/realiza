@@ -29,6 +29,14 @@ public interface ProviderSupplierRepository extends JpaRepository<ProviderSuppli
     Long countByClientIdAndIsActive(@Param("clientId") String clientId);
 
     @Query("""
+    SELECT COUNT(DISTINCT ps)
+    FROM ProviderSupplier ps
+    JOIN ps.branches b
+    WHERE b.idBranch IN :branchIds AND ps.isActive = true
+""")
+    Long countByBranchIdsAndIsActiveTrue(@Param("branchIds") List<String> branchIds);
+
+    @Query("""
     SELECT ps
     FROM ProviderSupplier ps
     LEFT JOIN ps.contractsSupplier cs

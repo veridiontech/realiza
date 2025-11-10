@@ -65,19 +65,36 @@ export function DocumentViewer({
     setLoadingPdf(true);
     try {
       const token = localStorage.getItem("tokenClient");
-      const res = await axios.get(`${ip}/document/supplier/${documentId}`, {
-        headers: { Authorization: `Bearer ${token}` },
+      if (!token) {
+        throw new Error("Token não encontrado");
+      }
+
+      // Fazer fetch do endpoint proxy com token JWT e criar blob URL
+      const proxyUrl = `${ip}/document/supplier/${documentId}/proxy`;
+      console.log("Fetching from proxy:", proxyUrl);
+
+      const proxyRes = await fetch(proxyUrl, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        },
       });
 
-      const url = res.data.signedUrl;
-
-      if (url) {
-        setPdfUrl(url);
-      } else {
-        setError("Nenhum arquivo encontrado.");
+      if (!proxyRes.ok) {
+        throw new Error(`HTTP ${proxyRes.status}: ${proxyRes.statusText}`);
       }
+
+      // Converter resposta em blob
+      const blob = await proxyRes.blob();
+      console.log("Blob created:", blob.size, "bytes");
+
+      // Criar blob URL
+      const blobUrl = URL.createObjectURL(blob);
+      console.log("Blob URL created:", blobUrl);
+
+      // Definir URL no iframe
+      setPdfUrl(blobUrl);
     } catch (err) {
-      console.error(err);
+      console.error("Erro ao buscar documento:", err);
       setError("Erro ao buscar o documento.");
     } finally {
       setLoadingPdf(false);
