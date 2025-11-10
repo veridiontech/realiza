@@ -51,10 +51,18 @@ public interface ProviderSupplierRepository extends JpaRepository<ProviderSuppli
     AND ps.isActive = true
     AND (:branchIds IS NULL OR cs.branch.idBranch IN :branchIds)
     AND (:responsibleIds IS NULL OR cs.responsible.idUser IN :responsibleIds)
-""")
+    """)
     List<ProviderSupplier> findAllByBranchIdsAndResponsibleIdsAndContractStatusAndIsActiveIsTrue(
             @Param("branchIds") List<String> branchIds,
             @Param("responsibleIds") List<String> responsibleIds,
             @Param("contractStatus") ContractStatusEnum contractStatus
     );
+
+    @Query("""
+    SELECT COUNT(DISTINCT ps)
+    FROM ProviderSupplier ps
+    JOIN ps.branches b
+    WHERE b.idBranch IN :branchIds AND ps.isActive = true
+    """)
+    Long countByBranchIdsAndIsActiveTrue(@Param("branchIds") List<String> branchIds);
 }
