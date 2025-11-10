@@ -18,6 +18,7 @@ import { ip } from "@/utils/ip";
 import { useClient } from "@/context/Client-Provider";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { TotalDocumentsCard } from "@/components/BIs/BisPageComponents/TotalDocumentsCard";
+import { MetricCardSkeleton, PieChartSkeleton, RankingTableSkeleton } from "@/components/BIs/BisPageComponents/SkeletonLoader";
 
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
@@ -480,6 +481,8 @@ export const MonittoringBis = () => {
 
   const [historyData, setHistoryData] = useState<any[]>([]);
   const [isLoadingHistory, setIsLoadingHistory] = useState(false);
+  const [isLoadingDashboard, setIsLoadingDashboard] = useState(false);
+  const [isLoadingFilters, setIsLoadingFilters] = useState(false);
 
 
   const [draft, setDraft] = useState<FiltersState>({
@@ -720,9 +723,28 @@ export const MonittoringBis = () => {
       return;
     }
     (async () => {
+      setIsLoadingDashboard(true);
       try {
         const url = `${ip}/dashboard/${clientId}/general`;
-        const requestBody = { clientId: clientId };
+        // Enviar filtros aplicados para o backend
+        const requestBody = {
+          clientId: clientId,
+          branchIds: applied.branchIds,
+          providerIds: applied.providerIds,
+          documentTypes: applied.documentTypes,
+          responsibleIds: applied.responsibleIds,
+          activeContract: applied.activeContract,
+          statuses: applied.statuses,
+          documentTitles: applied.documentTitles,
+          providerCnpjs: applied.providerCnpjs,
+          contractIds: applied.contractIds,
+          employeeIds: applied.employeeIds,
+          employeeCpfs: applied.employeeCpfs,
+          employeeSituations: applied.employeeSituations,
+          documentDoesBlock: applied.documentDoesBlock,
+          documentValidity: applied.documentValidity,
+          documentUploadDate: applied.documentUploadDate,
+        };
         const { data } = await axios.post(url, requestBody, {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -797,9 +819,11 @@ export const MonittoringBis = () => {
           allocatedEmployeeQuantity: 0,
           employeeQuantity: 0,
         });
+      } finally {
+        setIsLoadingDashboard(false);
       }
     })();
-  }, [clientId, token, USE_MOCK_DATA]);
+  }, [clientId, token, USE_MOCK_DATA, applied]);
 
   useEffect(() => {
     if (!rawDocStatus || rawDocStatus.length === 0) {
@@ -1388,26 +1412,38 @@ export const MonittoringBis = () => {
             </div>
 
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-5">
-              <div className="rounded-lg py-6 flex justify-center">
-                <ActiveContracts count={stats.contractQuantity ?? 0} />
-              </div>
+              {isLoadingDashboard ? (
+                <>
+                  <MetricCardSkeleton />
+                  <MetricCardSkeleton />
+                  <MetricCardSkeleton />
+                  <MetricCardSkeleton />
+                  <MetricCardSkeleton />
+                </>
+              ) : (
+                <>
+                  <div className="rounded-lg py-6 flex justify-center">
+                    <ActiveContracts count={stats.contractQuantity ?? 0} />
+                  </div>
 
-              <div className="rounded-lg py-6 flex justify-center">
-                <Suppliers count={stats.supplierQuantity ?? 0} />
-              </div>
-              <div className="rounded-lg py-6 flex justify-center">
-                <TotalDocumentsCard count={totalDocuments} />
-              </div>
+                  <div className="rounded-lg py-6 flex justify-center">
+                    <Suppliers count={stats.supplierQuantity ?? 0} />
+                  </div>
+                  <div className="rounded-lg py-6 flex justify-center">
+                    <TotalDocumentsCard count={totalDocuments} />
+                  </div>
 
-              <div className="rounded-lg py-6 flex justify-center">
-                <Employees count={stats.employeeQuantity ?? 0} />
-              </div>
+                  <div className="rounded-lg py-6 flex justify-center">
+                    <Employees count={stats.employeeQuantity ?? 0} />
+                  </div>
 
-              <div className="rounded-lg py-6 flex justify-center">
-                <AllocatedEmployees
-                  count={stats.allocatedEmployeeQuantity ?? 0}
-                />
-              </div>
+                  <div className="rounded-lg py-6 flex justify-center">
+                    <AllocatedEmployees
+                      count={stats.allocatedEmployeeQuantity ?? 0}
+                    />
+                  </div>
+                </>
+              )}
             </div>
 
             <div className="overflow-x-auto mt-10 pb-10">
