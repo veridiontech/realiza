@@ -24,6 +24,7 @@ export function ActivitiesBox() {
   const { selectedBranch, branch } = useBranch();
   const [isSaving, setIsSaving] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isLoadingDocuments, setIsLoadingDocuments] = useState(false);
   const [showReplicateConfirmation, setShowReplicateConfirmation] = useState(false);
   const [pendingOperation, setPendingOperation] = useState<{
     docsToAdd: DocumentData[];
@@ -52,36 +53,32 @@ export function ActivitiesBox() {
   };
 
   const getAllDocuments = async () => {
-    if (!selectedBranch?.idBranch) {
+    if (!selectedBranch?.idBranch || !activitieSelected?.idActivity) {
       setAllDocumentsByBranch([]);
       setOriginalDocuments([]);
       return;
     }
 
-    setIsLoading(true);
+    setIsLoadingDocuments(true);
     const tokenFromStorage = localStorage.getItem("tokenClient");
     const branchId = selectedBranch.idBranch;
-    const activityId = activitieSelected?.idActivity;
+    const activityId = activitieSelected.idActivity;
 
     let selectedDocs: DocumentData[] = [];
-    if (activityId) {
-      try {
-        const resSelected = await axios.get<DocumentData[]>(
-          `${ip}/document/branch/document-matrix/all-and-selected-by-activity/${activityId}`,
-          {
-            headers: { Authorization: `Bearer ${tokenFromStorage}` },
-          }
-        );
-        selectedDocs = resSelected.data.filter((doc) => doc.selected === true);
-        setDocumentsByActivitie(selectedDocs);
-      } catch (err) {
-        console.error(
-          "Erro ao buscar documentos selecionados da atividade:",
-          err
-        );
-      }
-    } else {
-      setDocumentsByActivitie([]);
+    try {
+      const resSelected = await axios.get<DocumentData[]>(
+        `${ip}/document/branch/document-matrix/all-and-selected-by-activity/${activityId}`,
+        {
+          headers: { Authorization: `Bearer ${tokenFromStorage}` },
+        }
+      );
+      selectedDocs = resSelected.data.filter((doc) => doc.selected === true);
+      setDocumentsByActivitie(selectedDocs);
+    } catch (err) {
+      console.error(
+        "Erro ao buscar documentos selecionados da atividade:",
+        err
+      );
     }
 
     try {
@@ -109,7 +106,7 @@ export function ActivitiesBox() {
       setAllDocumentsByBranch([]);
       setOriginalDocuments([]);
     } finally {
-      setIsLoading(false);
+      setIsLoadingDocuments(false);
     }
   };
 
@@ -293,13 +290,63 @@ export function ActivitiesBox() {
   }, [selectedBranch?.idBranch]);
 
   useEffect(() => {
-    if (selectedBranch?.idBranch) {
+    if (activitieSelected?.idActivity) {
       getAllDocuments();
     } else {
       setAllDocumentsByBranch([]);
       setOriginalDocuments([]);
     }
-  }, [selectedBranch, activitieSelected]);
+  }, [activitieSelected]);
+
+  const renderDocumentBoxContent = () => {
+    if (!activitieSelected) {
+      return (
+        <div className="flex items-center justify-center h-[30vh]">
+          <p className="p-4 text-center text-gray-500">
+            Selecione uma atividade à esquerda para ver os documentos.
+          </p>
+        </div>
+      );
+    }
+
+    if (isLoadingDocuments) {
+      return (
+        <div className="flex items-center justify-center py-10 h-[30vh]">
+          <Blocks height="80" width="80" color="#4fa94d" visible={true} />
+        </div>
+      );
+    }
+
+    return (
+      <ScrollArea className="h-[30vh]">
+        {filteredDocuments.length > 0 ? (
+          filteredDocuments.map((document) => (
+            <div
+              key={document.idDocument}
+              className="flex cursor-pointer items-center gap-2 rounded-sm p-1 hover:bg-gray-200"
+            >
+              <input
+                type="checkbox"
+                checked={document.selected === true}
+                onChange={() => handleSelectDocument(document.idDocument)}
+                className="cursor-pointer"
+                disabled={!activitieSelected || isSaving}
+              />
+              <span className={!activitieSelected ? "text-gray-400" : ""}>
+                {document.title || "Documento sem título"}
+              </span>
+            </div>
+          ))
+        ) : (
+          <p className="p-4 text-center text-gray-500">
+            {searchTerm
+              ? "Nenhum documento encontrado com este termo."
+              : "Nenhum documento alocado ou disponível para esta atividade/filial."}
+          </p>
+        )}
+      </ScrollArea>
+    );
+  };
 
   return (
     <div className="flex items-center justify-center gap-10 p-10">
@@ -322,75 +369,33 @@ export function ActivitiesBox() {
               placeholder="Pesquisar documentos..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
+              disabled={!activitieSelected || isLoadingDocuments}
             />
           </div>
-          <ScrollArea className="h-[30vh]">
-            {isLoading && !allDocumentsByBranch.length ? (
-              <div className="flex items-center justify-center py-10">
-                <Blocks
-                  height="80"
-                  width="80"
-                  color="#4fa94d"
+
+          {renderDocumentBoxContent()}
+
+          {activitieSelected && !isLoadingDocuments && (
+            <Button
+              className="w-full mt-4 bg-realizaBlue"
+              onClick={handleOpenConfirmationModal}
+              disabled={
+                !activitieSelected || !changedDocuments.hasChanges || isSaving
+              }
+            >
+              {isSaving ? (
+                <Oval
                   visible={true}
+                  height="20"
+                  width="20"
+                  color="#fff"
+                  ariaLabel="oval-loading"
                 />
-              </div>
-            ) : (
-              <div>
-                {filteredDocuments.length > 0 ? (
-                  filteredDocuments.map((document) => (
-                    <div
-                      key={document.idDocument}
-                      className="flex cursor-pointer items-center gap-2 rounded-sm p-1 hover:bg-gray-200"
-                    >
-                      <input
-                        type="checkbox"
-                        checked={document.selected === true}
-                        onChange={() =>
-                          handleSelectDocument(document.idDocument)
-                        }
-                        className="cursor-pointer"
-                        disabled={!activitieSelected || isSaving}
-                      />
-
-                      <span
-                        className={!activitieSelected ? "text-gray-400" : ""}
-                      >
-                        {document.title || "Documento sem título"}
-                      </span>
-                    </div>
-                  ))
-                ) : (
-                  <p className="p-4 text-center text-gray-500">
-                    {searchTerm
-                      ? "Nenhum documento encontrado com este termo."
-                      : activitieSelected
-                      ? "Nenhum documento alocado ou disponível para esta atividade/filial."
-                      : "Selecione uma atividade para ver os documentos."}
-                  </p>
-                )}
-              </div>
-            )}
-          </ScrollArea>
-
-          <Button
-            className="w-full mt-4 bg-realizaBlue"
-            onClick={handleOpenConfirmationModal}
-            disabled={
-              !activitieSelected || !changedDocuments.hasChanges || isSaving
-            }
-          >
-            {isSaving ? (
-              <Oval
-                visible={true}
-                height="20"
-                width="20"
-                color="#fff"
-                ariaLabel="oval-loading"
-              />
-            ) : (
-              "Salvar Alterações"
-            )}
-          </Button>
+              ) : (
+                "Salvar Alterações"
+              )}
+            </Button>
+          )}
         </div>
       </div>
 
