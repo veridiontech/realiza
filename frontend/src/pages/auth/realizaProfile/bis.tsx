@@ -1326,7 +1326,7 @@ export const MonittoringBis = () => {
                   }
                 />
                 <MultiSelectDropdown
-                  label="Documento Bloqueia ?"
+                  label="Documento Bloqueia?"
                   options={docBlockOpts}
                   values={draft.documentDoesBlock.map(String)}
                   onChange={(v) =>
