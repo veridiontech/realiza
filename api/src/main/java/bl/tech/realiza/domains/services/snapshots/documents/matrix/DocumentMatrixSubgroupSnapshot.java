@@ -14,9 +14,9 @@
 //import java.util.List;
 //
 //@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
+// @Setter
+// @NoArgsConstructor
+// @AllArgsConstructor
 //@Builder
 //@NoArgsConstructor
 //@AllArgsConstructor
