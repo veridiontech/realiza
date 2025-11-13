@@ -56,8 +56,8 @@ export function TableProviders() {
           return;
         }
 
-        const response = await axios.get(`${ip}/supplier/by-client`, {
-          params: { clientId },
+        const response = await axios.get(`${ip}/supplier/filtered-client`, {
+          params: { idSearch: clientId, page: 0, size: 1000 },
           headers: { Authorization: `Bearer ${token}` },
         });
 
