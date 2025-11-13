@@ -722,7 +722,7 @@ export const MonittoringBis = () => {
     (async () => {
       try {
         const url = `${ip}/dashboard/${clientId}/general`;
-        const requestBody = { clientId: clientId };
+        const requestBody = applied;
         const { data } = await axios.post(url, requestBody, {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -799,7 +799,7 @@ export const MonittoringBis = () => {
         });
       }
     })();
-  }, [clientId, token, USE_MOCK_DATA]);
+  }, [clientId, token, USE_MOCK_DATA, applied]);
 
   useEffect(() => {
     if (!rawDocStatus || rawDocStatus.length === 0) {
