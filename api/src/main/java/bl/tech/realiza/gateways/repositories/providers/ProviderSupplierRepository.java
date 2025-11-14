@@ -57,4 +57,15 @@ public interface ProviderSupplierRepository extends JpaRepository<ProviderSuppli
             @Param("responsibleIds") List<String> responsibleIds,
             @Param("contractStatus") ContractStatusEnum contractStatus
     );
+
+    @Query("""
+    SELECT COUNT(DISTINCT ps)
+    FROM ProviderSupplier ps
+    JOIN ps.contractsSupplier cs
+    WHERE ps.isActive = true
+    AND cs.status = 'ACTIVE'
+    AND cs.finished = false
+    AND cs.branch.idBranch = :branchId
+""")
+    Long countByActiveContractsInBranch(@Param("branchId") String branchId);
 }
