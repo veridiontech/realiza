@@ -181,12 +181,15 @@ public class DocumentProviderSupplierControllerImpl implements DocumentProviderS
                     .headers(headers)
                     .body(resource);
                     
-        } catch (IOException e) {
-    System.err.println("[ERROR] Falha ao buscar documento " + id + ": " + e.getMessage());
-    e.printStackTrace();
-    return ResponseEntity.status(HttpStatus.BAD_GATEWAY).build();
-} catch (Exception e) {
-    System.err.println("[ERROR] Erro inesperado ao buscar documento " + id + ": " + e.getMessage());
-    e.printStackTrace();
-    return ResponseEntity.internalServerError().build();
+            } catch (IOException e) {
+            System.err.println("[ERROR] Falha ao buscar documento " + id + ": " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.BAD_GATEWAY).build();
+        } catch (Exception e) {
+            System.err.println("[ERROR] Erro inesperado ao buscar documento " + id + ": " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.internalServerError().build();
+        }
+    }
 }
+ }
