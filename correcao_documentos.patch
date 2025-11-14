@@ -1,0 +1,114 @@
+From 04773ae30b8609def1bd787ca180e8534ce07655 Mon Sep 17 00:00:00 2001
+From: Manus AI <manus@realiza.com>
+Date: Thu, 13 Nov 2025 21:10:17 -0500
+Subject: [PATCH] =?UTF-8?q?fix:=20corrigir=20estrutura=20do=20m=C3=A9todo?=
+ =?UTF-8?q?=20getDocumentProxy=20-=20remover=20duplica=C3=A7=C3=B5es=20e?=
+ =?UTF-8?q?=20adicionar=20annotations?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+---
+ ...ocumentProviderSupplierControllerImpl.java | 86 ++++++++-----------
+ 1 file changed, 38 insertions(+), 48 deletions(-)
+
+diff --git a/api/src/main/java/bl/tech/realiza/gateways/controllers/impl/documents/provider/DocumentProviderSupplierControllerImpl.java b/api/src/main/java/bl/tech/realiza/gateways/controllers/impl/documents/provider/DocumentProviderSupplierControllerImpl.java
+index a73f6fc9..06fbe606 100644
+--- a/api/src/main/java/bl/tech/realiza/gateways/controllers/impl/documents/provider/DocumentProviderSupplierControllerImpl.java
++++ b/api/src/main/java/bl/tech/realiza/gateways/controllers/impl/documents/provider/DocumentProviderSupplierControllerImpl.java
+@@ -149,54 +149,44 @@ public class DocumentProviderSupplierControllerImpl implements DocumentProviderS
+ 
+         return ResponseEntity.noContent().build();
+     }
+-public ResponseEntity<Resource> getDocumentProxy(@PathVariable String id) {
+-    try {
+-        // Buscar o documento - o método findOne já regenera a signedUrl automaticamente
+-        Optional<DocumentResponseDto> documentOpt = crudDocumentSupplier.findOne(id);
+-        
+-        if (documentOpt.isEmpty()) {
+-            return ResponseEntity.notFound().build();
+-        }
+-        
+-        String signedUrl = documentOpt.get().getSignedUrl();
+-        
+-        if (signedUrl == null) {
+-            // Se não há signedUrl, significa que não há arquivo carregado
+-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+-                .body(null);
+-        }
+-        
+-        // Fazer download do PDF do Google Cloud Storage usando a URL recém-gerada
+-        URL url = new URL(signedUrl);
+-        InputStream inputStream = url.openStream();
+-        InputStreamResource resource = new InputStreamResource(inputStream);
+-        
+-        // Configurar headers para forçar visualização inline
+-        HttpHeaders headers = new HttpHeaders();
+-        headers.setContentType(MediaType.APPLICATION_PDF);
+-        headers.add(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"document.pdf\"");
+-        headers.add(HttpHeaders.CACHE_CONTROL, "no-cache, no-store, must-revalidate");
+-        headers.add(HttpHeaders.PRAGMA, "no-cache");
+-        headers.add(HttpHeaders.EXPIRES, "0");
+-        
+-        return ResponseEntity.ok()
+-                .headers(headers)
+-                .body(resource);
+-                
+-    } catch (IOException e) {
+-        // Log do erro para facilitar diagnóstico
+-        System.err.println("[ERROR] Falha ao buscar documento " + id + ": " + e.getMessage());
+-        e.printStackTrace();
+-        return ResponseEntity.status(HttpStatus.BAD_GATEWAY).build();
+-    } catch (Exception e) {
+-        System.err.println("[ERROR] Erro inesperado ao buscar documento " + id + ": " + e.getMessage());
+-        e.printStackTrace();
+-        return ResponseEntity.internalServerError().build();
+-    }
+-}
+-        }
+-    }
+-}
++
++    @GetMapping("/{id}/proxy")
++    @ResponseStatus(HttpStatus.OK)
++    @Override
++    public ResponseEntity<Resource> getDocumentProxy(@PathVariable String id) {
++        try {
++            // Buscar o documento - o método findOne já regenera a signedUrl automaticamente
++            Optional<DocumentResponseDto> documentOpt = crudDocumentSupplier.findOne(id);
++            
++            if (documentOpt.isEmpty()) {
++                return ResponseEntity.notFound().build();
++            }
++            
++            String signedUrl = documentOpt.get().getSignedUrl();
++            
++            if (signedUrl == null) {
++                // Se não há signedUrl, significa que não há arquivo carregado
++                return ResponseEntity.status(HttpStatus.NOT_FOUND)
++                    .body(null);
++            }
++            
++            // Fazer download do PDF do Google Cloud Storage usando a URL recém-gerada
++            URL url = new URL(signedUrl);
++            InputStream inputStream = url.openStream();
++            InputStreamResource resource = new InputStreamResource(inputStream);
++            
++            // Configurar headers para forçar visualização inline
++            HttpHeaders headers = new HttpHeaders();
++            headers.setContentType(MediaType.APPLICATION_PDF);
++            headers.add(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"document.pdf\"");
++            headers.add(HttpHeaders.CACHE_CONTROL, "no-cache, no-store, must-revalidate");
++            headers.add(HttpHeaders.PRAGMA, "no-cache");
++            headers.add(HttpHeaders.EXPIRES, "0");
++            
++            return ResponseEntity.ok()
++                    .headers(headers)
++                    .body(resource);
++                    
+         } catch (IOException e) {
+             // Log do erro para facilitar diagnóstico
+             System.err.println("[ERROR] Falha ao buscar documento " + id + ": " + e.getMessage());
+-- 
+2.34.1
+
