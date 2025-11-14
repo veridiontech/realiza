@@ -161,8 +161,7 @@ public class DocumentProviderSupplierControllerImpl implements DocumentProviderS
             if (documentOpt.isEmpty() || documentOpt.get().getSignedUrl() == null) {
                 return ResponseEntity.notFound().build();
             }
-            
-            String signedUrl = documentOpt.get().getSignedUrl();
+                String signedUrl = documentOpt.get().getSignedUrl();
             
             // Fazer download do PDF do Google Cloud Storage
             URL url = new URL(signedUrl);
