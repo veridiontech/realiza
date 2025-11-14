@@ -194,3 +194,18 @@ public ResponseEntity<Resource> getDocumentProxy(@PathVariable String id) {
         return ResponseEntity.internalServerError().build();
     }
 }
+        }
+    }
+}
+        } catch (IOException e) {
+            // Log do erro para facilitar diagnóstico
+            System.err.println("[ERROR] Falha ao buscar documento " + id + ": " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.BAD_GATEWAY).build();
+        } catch (Exception e) {
+            System.err.println("[ERROR] Erro inesperado ao buscar documento " + id + ": " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+}
